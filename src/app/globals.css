@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
-@config "../../tailwind.config.mjs";
-
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
-  
-  --primary: #3b82f6; /* Blue */
+
+  --primary: #3b82f6;
+  /* Blue */
   --primary-foreground: #ffffff;
-  
+
   --secondary: #e2e8f0;
   --secondary-foreground: #1e293b;
-  
-  --accent: #f59e0b; /* Amber/Yellow for paint */
+
+  --accent: #f59e0b;
+  /* Amber/Yellow for paint */
   --accent-foreground: #ffffff;
-  
+
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  
+
   --card: #ffffff;
   --card-foreground: #0f172a;
 
@@ -31,22 +31,22 @@
   :root {
     --background: #0f172a;
     --foreground: #f8fafc;
-    
+
     --primary: #60a5fa;
     --primary-foreground: #0f172a;
-    
+
     --secondary: #1e293b;
     --secondary-foreground: #f8fafc;
-    
+
     --accent: #fbbf24;
     --accent-foreground: #0f172a;
-    
+
     --destructive: #f87171;
     --destructive-foreground: #0f172a;
 
     --muted: #1e293b;
     --muted-foreground: #94a3b8;
-    
+
     --card: #1e293b;
     --card-foreground: #f8fafc;
 
