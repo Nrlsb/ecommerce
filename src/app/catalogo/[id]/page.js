@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingCart, Star, Heart, Share2, PaintBucket, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { useCart } from '@/context/CartContext';
 
 // Simulated database
 const mockProducts = [

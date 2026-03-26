@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PaintBucket, Facebook, Twitter, Instagram } from 'lucide-react';
+import { PaintBucket, MapPin, Phone, Mail } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -39,15 +39,10 @@ export default function Footer() {
                     <div>
                         <h3 className="font-semibold text-lg mb-4">Contacto</h3>
                         <ul className="space-y-2 text-sm text-secondary-foreground/80">
-                            <li>Av. Los Pintores 1234, Ciudad</li>
-                            <li>+54 11 1234-5678</li>
-                            <li>contacto@colorshop.ejemplo.com</li>
+                            <li className="flex items-center gap-2"><MapPin size={16} /> Av. Los Pintores 1234, Ciudad</li>
+                            <li className="flex items-center gap-2"><Phone size={16} /> +54 11 1234-5678</li>
+                            <li className="flex items-center gap-2"><Mail size={16} /> contacto@colorshop.ejemplo.com</li>
                         </ul>
-                        <div className="flex space-x-4 mt-6">
-                            <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors"><Facebook size={20} /></a>
-                            <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors"><Twitter size={20} /></a>
-                            <a href="#" className="text-secondary-foreground/60 hover:text-primary transition-colors"><Instagram size={20} /></a>
-                        </div>
                     </div>
                 </div>
 
