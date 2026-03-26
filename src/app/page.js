@@ -95,17 +95,17 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category, idx) => (
-              <motion.Link
-                href={category.link}
-                key={idx}
-                whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
-                className="flex flex-col items-center justify-center p-8 bg-card rounded-2xl border border-border transition-all group"
-              >
-                <div className={`p-5 rounded-2xl mb-4 ${category.color} group-hover:scale-110 transition-transform duration-300`}>
-                  <category.icon className="w-10 h-10" />
-                </div>
-                <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">{category.name}</h3>
-              </motion.Link>
+              <Link href={category.link} key={idx} className="block group h-full">
+                <motion.div
+                  whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+                  className="flex flex-col items-center justify-center p-8 bg-card rounded-2xl border border-border transition-all h-full"
+                >
+                  <div className={`p-5 rounded-2xl mb-4 ${category.color} group-hover:scale-110 transition-transform duration-300`}>
+                    <category.icon className="w-10 h-10" />
+                  </div>
+                  <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">{category.name}</h3>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </div>
