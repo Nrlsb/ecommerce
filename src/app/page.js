@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Paintbrush, PaintRoller, Droplet, Palette, ArrowRight, ShieldCheck, Truck, Clock } from 'lucide-react';
+import { Paintbrush, PaintRoller, Droplet, Palette, ArrowRight, ShieldCheck, Truck, Clock, PaintBucket, ShoppingCart } from 'lucide-react';
 
 const categories = [
   { name: 'Pintura Interior', icon: PaintRoller, color: 'bg-blue-100 text-blue-600', link: '/catalogo?tipo=interior' },
