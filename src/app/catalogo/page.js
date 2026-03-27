@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Filter, ShoppingCart, PaintBucket, ChevronDown, Check } from 'lucide-react';
+import { Filter, ShoppingCart, PaintBucket, ChevronDown, Check, Search } from 'lucide-react';
 
 const mockProducts = [
     { id: 1, name: 'Látex Interior Premium 20L', brand: 'ColorMaster', category: 'interior', price: 45000, rating: 4.8 },
@@ -27,10 +27,26 @@ const categories = [
 export default function Catalogo() {
     const [activeCategory, setActiveCategory] = useState('todos');
     const [activeSort, setActiveSort] = useState('destacados');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedBrands, setSelectedBrands] = useState([]);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
+    const brands = [...new Set(mockProducts.map(p => p.brand))];
+
+    const toggleBrand = (brand) => {
+        setSelectedBrands(prev =>
+            prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+        );
+    };
+
     const filteredProducts = mockProducts
-        .filter(p => activeCategory === 'todos' || p.category === activeCategory)
+        .filter(p => {
+            const matchesCategory = activeCategory === 'todos' || p.category === activeCategory;
+            const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(p.brand);
+            return matchesCategory && matchesSearch && matchesBrand;
+        })
         .sort((a, b) => {
             if (activeSort === 'menor_precio') return a.price - b.price;
             if (activeSort === 'mayor_precio') return b.price - a.price;
@@ -77,8 +93,8 @@ export default function Catalogo() {
                                         <button
                                             onClick={() => setActiveCategory(cat.id)}
                                             className={`w-full text-left flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${activeCategory === cat.id
-                                                    ? 'bg-primary/10 text-primary font-bold'
-                                                    : 'text-foreground/70 hover:bg-secondary hover:text-foreground'
+                                                ? 'bg-primary/10 text-primary font-bold'
+                                                : 'text-foreground/70 hover:bg-secondary hover:text-foreground'
                                                 }`}
                                         >
                                             {cat.name}
@@ -87,6 +103,21 @@ export default function Catalogo() {
                                     </li>
                                 ))}
                             </ul>
+
+                            <h3 className="font-bold text-lg mt-8 mb-4">Marcas</h3>
+                            <div className="space-y-2">
+                                {brands.map((brand) => (
+                                    <label key={brand} className="flex items-center gap-2 cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedBrands.includes(brand)}
+                                            onChange={() => toggleBrand(brand)}
+                                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                                        />
+                                        <span className="text-sm text-foreground/70 group-hover:text-foreground transition-colors">{brand}</span>
+                                    </label>
+                                ))}
+                            </div>
 
                             <h3 className="font-bold text-lg mt-8 mb-4">Ordenar por</h3>
                             <select
@@ -103,6 +134,18 @@ export default function Catalogo() {
 
                     {/* Product Grid */}
                     <div className="flex-1">
+                        {/* Search Bar */}
+                        <div className="relative mb-6">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/40 w-5 h-5" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Busca por producto o marca..."
+                                className="w-full pl-12 pr-4 py-4 bg-card border border-border rounded-2xl focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
+                            />
+                        </div>
+
                         <div className="mb-6 flex justify-between items-center bg-card p-4 rounded-xl border border-border">
                             <span className="text-foreground/70 font-medium font-sm">
                                 Mostrando <strong className="text-foreground">{filteredProducts.length}</strong> productos

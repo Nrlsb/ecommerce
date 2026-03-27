@@ -3,138 +3,137 @@
 import { use, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingCart, Star, Heart, Share2, PaintBucket, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, PaintBucket, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import ProductCalculator from '@/components/products/ProductCalculator';
 
-// Simulated database
 const mockProducts = [
-    { id: 1, name: 'Látex Interior Premium 20L', brand: 'ColorMaster', category: 'interior', price: 45000, rating: 4.8, description: 'Pintura látex de máxima calidad para interiores. Excelente cubritivo, lavable y con acabado mate perfecto. Ideal para living, dormitorios y pasillos.', stock: 15 },
-    { id: 2, name: 'Esmalte Sintético Brillante 4L', brand: 'BrilloMax', category: 'esmaltes', price: 22000, rating: 4.5, description: 'Esmalte sintético de secado rápido y alto brillo. Protege y decora superficies de madera y metal, tanto en interiores como exteriores.', stock: 8 },
-    { id: 3, name: 'Impermeabilizante Frentes 20L', brand: 'ProtecExterior', category: 'exterior', price: 58000, rating: 4.9, description: 'Recubrimiento acrílico elástico para frentes y muros exteriores. Máxima protección contra la humedad, rayos UV y formación de hongos.', stock: 20 },
-    { id: 4, name: 'Rodillo Antigota 22cm Premium', brand: 'PintaFacil', category: 'accesorios', price: 8500, rating: 4.2, description: 'Rodillo de lana sintética antigota. Evita salpicaduras y logra un acabado parejo y profesional. Mango ergonómico.', stock: 50 },
-    // fallback for other ids
+    { id: 1, name: 'Látex Interior Premium 20L', brand: 'ColorMaster', category: 'interior', price: 45000, rating: 4.8, reviews: 124, description: 'Pintura látex de alta calidad para interiores. Excelente poder cubritivo y lavabilidad. Acabado mate perfecto para renovar tus ambientes con elegancia.', yield: 12 },
+    { id: 2, name: 'Esmalte Sintético Brillante 4L', brand: 'BrilloMax', category: 'esmaltes', price: 22000, rating: 4.5, reviews: 89, description: 'Esmalte de secado rápido con acabado brillante espejo. Ideal para metales y maderas tanto en interior como exterior. Protección duradera contra la intemperie.', yield: 14 },
+    { id: 3, name: 'Impermeabilizante Frentes 20L', brand: 'ProtecExterior', category: 'exterior', price: 58000, rating: 4.9, reviews: 56, description: 'Recubrimiento acrílico elástico diseñado para proteger frentes y muros exteriores. Evita filtraciones y acompaña los movimientos estructurales de las paredes.', yield: 8 },
+    { id: 4, name: 'Rodillo Antigota 22cm Premium', brand: 'PintaFacil', category: 'accesorios', price: 8500, rating: 4.2, reviews: 45, description: 'Rodillo profesional de lana sintética tejida. No salpica y proporciona un acabado liso y uniforme. Mango ergonómico para mayor comodidad durante el uso.', yield: 0 },
 ];
 
 export default function ProductDetail({ params }) {
-    const { id } = use(params);
+    const resolvedParams = use(params);
+    const productId = parseInt(resolvedParams.id);
+    const product = mockProducts.find(p => p.id === productId) || mockProducts[0];
+
     const [quantity, setQuantity] = useState(1);
-    const [activeTab, setActiveTab] = useState('descripcion');
     const { addToCart } = useCart();
-
-    const product = mockProducts.find(p => p.id === parseInt(id)) || mockProducts[0]; // fallback
-
-    const increaseQuantity = () => {
-        if (quantity < product.stock) setQuantity(q => q + 1);
-    };
-
-    const decreaseQuantity = () => {
-        if (quantity > 1) setQuantity(q => q - 1);
-    };
+    const [added, setAdded] = useState(false);
 
     const handleAddToCart = () => {
         addToCart(product, quantity);
-        alert(`¡Agregaste ${quantity}x ${product.name} al carrito!`);
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2000);
     };
 
     return (
-        <div className="min-h-screen bg-background py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Breadcrumbs & Back */}
-                <div className="mb-6 flex items-center justify-between">
-                    <Link href="/catalogo" className="inline-flex items-center text-foreground/60 hover:text-primary transition-colors text-sm font-medium">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Volver al Catálogo
-                    </Link>
-                    <div className="flex gap-4">
-                        <button className="text-foreground/60 hover:text-red-500 transition-colors">
-                            <Heart className="w-5 h-5" />
-                        </button>
-                        <button className="text-foreground/60 hover:text-primary transition-colors">
-                            <Share2 className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
+        <div className="min-h-screen bg-background pb-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Back Link */}
+                <Link href="/catalogo" className="inline-flex items-center text-foreground/60 hover:text-primary transition-colors mb-8 group">
+                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                    Volver al catálogo
+                </Link>
 
-                {/* Product Grid */}
-                <div className="bg-card rounded-3xl border border-border overflow-hidden lg:grid lg:grid-cols-2 shadow-sm">
-                    {/* Image Section */}
-                    <div className="bg-gradient-to-tr from-muted to-secondary/50 p-12 flex items-center justify-center relative min-h-[400px]">
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            <PaintBucket className="w-48 h-48 text-primary/30 drop-shadow-xl" />
-                        </motion.div>
-
-                        <div className="absolute top-4 left-4">
-                            <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold shadow-sm">Nuevo</span>
-                        </div>
-                    </div>
-
-                    {/* Info Section */}
-                    <div className="p-8 lg:p-12 flex flex-col">
-                        <p className="text-sm font-bold text-primary uppercase tracking-widest mb-1">{product.brand}</p>
-                        <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4 leading-tight">{product.name}</h1>
-
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="flex items-center text-amber-400">
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" opacity={0.5} />
-                                <span className="ml-2 text-foreground/70 text-sm font-medium">{product.rating} (24)</span>
-                            </div>
-                            <span className="text-foreground/30">|</span>
-                            <span className="text-sm font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
-                                Stock Disponible
-                            </span>
-                        </div>
-
-                        <div className="mb-8">
-                            <span className="text-4xl font-black text-foreground">${product.price.toLocaleString('es-AR')}</span>
-                            <p className="text-sm text-foreground/60 mt-1">Precio final con IVA incluido</p>
-                        </div>
-
-                        <p className="text-foreground/80 mb-8 leading-relaxed">
-                            {product.description}
-                        </p>
-
-                        <div className="mt-auto space-y-6">
-                            {/* Add to Cart Actions */}
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="flex items-center justify-between border-2 border-border rounded-2xl p-1 bg-background w-full sm:w-1/3">
-                                    <button onClick={decreaseQuantity} className="w-10 h-10 flex items-center justify-center text-foreground hover:bg-muted rounded-xl transition-colors font-bold text-xl">-</button>
-                                    <span className="font-bold text-lg select-none w-8 text-center">{quantity}</span>
-                                    <button onClick={increaseQuantity} className="w-10 h-10 flex items-center justify-center text-foreground hover:bg-muted rounded-xl transition-colors font-bold text-xl">+</button>
-                                </div>
-
-                                <button
-                                    onClick={handleAddToCart}
-                                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2 font-bold text-lg rounded-2xl py-4 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
-                                >
-                                    <ShoppingCart className="w-5 h-5" />
-                                    Agregar al Carrito
-                                </button>
-                            </div>
-
-                            {/* Perks */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-border pt-6">
-                                <div className="flex items-center gap-3">
-                                    <Truck className="w-8 h-8 text-primary/60" />
-                                    <span className="text-xs font-medium text-foreground/80 leading-tight">Envío Gratis a partir de $50.000</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <ShieldCheck className="w-8 h-8 text-primary/60" />
-                                    <span className="text-xs font-medium text-foreground/80 leading-tight">Garantía  ColorShop 30 días</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <RotateCcw className="w-8 h-8 text-primary/60" />
-                                    <span className="text-xs font-medium text-foreground/80 leading-tight">Devolución fácil y rápida</span>
-                                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                    {/* Left: Image Gallery (Mock) */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="space-y-4"
+                    >
+                        <div className="aspect-square bg-muted rounded-3xl flex items-center justify-center border border-border overflow-hidden relative group">
+                            <PaintBucket className="w-32 h-32 text-foreground/10 group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute top-4 left-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                                {product.category}
                             </div>
                         </div>
+                        <div className="grid grid-cols-4 gap-4">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="aspect-square bg-muted rounded-xl border border-border flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
+                                    <PaintBucket className="w-6 h-6 text-foreground/20" />
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+
+                    {/* Right: Product Info */}
+                    <div className="flex flex-col">
+                        <div className="mb-6">
+                            <p className="text-sm font-bold text-primary uppercase tracking-widest mb-2">{product.brand}</p>
+                            <h1 className="text-4xl font-black text-foreground mb-4 leading-tight">{product.name}</h1>
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="flex items-center gap-1 text-amber-500">
+                                    {[1, 2, 3, 4, 5].map((s) => (
+                                        <Star key={s} size={18} fill={s <= Math.floor(product.rating) ? "currentColor" : "none"} />
+                                    ))}
+                                    <span className="ml-2 font-bold text-foreground">{product.rating}</span>
+                                </div>
+                                <span className="text-foreground/40 font-medium">({product.reviews} reseñas)</span>
+                            </div>
+                            <p className="text-xl text-foreground/70 leading-relaxed mb-8">
+                                {product.description}
+                            </p>
+                        </div>
+
+                        <div className="bg-muted/30 p-8 rounded-3xl border border-border mb-8">
+                            <div className="flex items-end justify-between mb-8">
+                                <div>
+                                    <span className="text-sm text-foreground/40 font-bold uppercase block mb-1">Precio Unitario</span>
+                                    <span className="text-4xl font-black text-primary">${product.price.toLocaleString('es-AR')}</span>
+                                </div>
+                                <div className="flex items-center bg-background border border-border rounded-xl p-1">
+                                    <button
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="w-10 h-10 flex items-center justify-center hover:bg-muted rounded-lg transition-colors font-bold text-lg"
+                                    >-</button>
+                                    <span className="w-12 text-center font-bold text-lg">{quantity}</span>
+                                    <button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        className="w-10 h-10 flex items-center justify-center hover:bg-muted rounded-lg transition-colors font-bold text-lg"
+                                    >+</button>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={added}
+                                className={`w-full py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all transform active:scale-95 ${added
+                                        ? 'bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                                        : 'bg-primary text-primary-foreground hover:shadow-[0_10px_20px_rgba(var(--primary-rgb),0.3)]'
+                                    }`}
+                            >
+                                {added ? (
+                                    <>
+                                        <Check className="w-6 h-6" /> Agregado al Carrito
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShoppingCart className="w-6 h-6" /> Añadir al Carrito
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Features List */}
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            <div className="flex items-center gap-3 p-4 bg-background border border-border rounded-2xl">
+                                <Truck className="w-5 h-5 text-primary" />
+                                <span className="text-sm font-bold text-foreground/70">Envío 24hs</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-4 bg-background border border-border rounded-2xl">
+                                <ShieldCheck className="w-5 h-5 text-primary" />
+                                <span className="text-sm font-bold text-foreground/70">Garantía Oficial</span>
+                            </div>
+                        </div>
+
+                        {/* Integrated Calculator */}
+                        {product.yield > 0 && (
+                            <ProductCalculator defaultYield={product.yield} />
+                        )}
                     </div>
                 </div>
             </div>

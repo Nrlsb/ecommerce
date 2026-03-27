@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { ShoppingCart, PaintBucket, Menu, X, Search, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { totalItems } = useCart();
+    const { user, signOut } = useAuth();
 
     return (
         <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-border shadow-sm">
@@ -37,9 +39,25 @@ export default function Navbar() {
                         <button className="text-foreground/80 hover:text-primary transition-colors">
                             <Search size={20} />
                         </button>
-                        <button className="text-foreground/80 hover:text-primary transition-colors">
-                            <User size={20} />
-                        </button>
+
+                        {user ? (
+                            <div className="flex items-center gap-4">
+                                <span className="text-sm font-medium text-foreground/60 hidden lg:inline-block max-w-[150px] truncate">
+                                    {user.email}
+                                </span>
+                                <button
+                                    onClick={() => signOut()}
+                                    className="text-foreground/80 hover:text-destructive transition-colors text-sm font-bold"
+                                >
+                                    Salir
+                                </button>
+                            </div>
+                        ) : (
+                            <Link href="/login" className="text-foreground/80 hover:text-primary transition-colors">
+                                <User size={20} />
+                            </Link>
+                        )}
+
                         <Link href="/carrito" className="text-foreground/80 hover:text-primary transition-colors relative">
                             <ShoppingCart size={20} />
                             {totalItems > 0 && (
