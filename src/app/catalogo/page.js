@@ -1,37 +1,52 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Filter, ShoppingCart, PaintBucket, ChevronDown, Check, Search } from 'lucide-react';
-
-const mockProducts = [
-    { id: 1, name: 'Látex Interior Premium 20L', brand: 'ColorMaster', category: 'interior', price: 45000, rating: 4.8 },
-    { id: 2, name: 'Esmalte Sintético Brillante 4L', brand: 'BrilloMax', category: 'esmaltes', price: 22000, rating: 4.5 },
-    { id: 3, name: 'Impermeabilizante Frentes 20L', brand: 'ProtecExterior', category: 'exterior', price: 58000, rating: 4.9 },
-    { id: 4, name: 'Rodillo Antigota 22cm Premium', brand: 'PintaFacil', category: 'accesorios', price: 8500, rating: 4.2 },
-    { id: 5, name: 'Enduído Plástico Interior 10L', brand: 'ColorMaster', category: 'interior', price: 15000, rating: 4.6 },
-    { id: 6, name: 'Látex Exterior Frentes 10L', brand: 'ColorMaster', category: 'exterior', price: 32000, rating: 4.3 },
-    { id: 7, name: 'Pincel Cerda Blanca Nº 15', brand: 'PintaFacil', category: 'accesorios', price: 3200, rating: 4.0 },
-    { id: 8, name: 'Barniz Marino Doble Filtro 4L', brand: 'BrilloMax', category: 'esmaltes', price: 28000, rating: 4.7 },
-];
-
-const categories = [
-    { id: 'todos', name: 'Todos los productos' },
-    { id: 'interior', name: 'Pintura Interior' },
-    { id: 'exterior', name: 'Pintura Exterior' },
-    { id: 'esmaltes', name: 'Esmaltes y Barnices' },
-    { id: 'accesorios', name: 'Accesorios' },
-];
+import { Filter, ShoppingCart, PaintBucket, ChevronDown, Check, Search, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function Catalogo() {
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([{ id: 'todos', name: 'Todos los productos' }]);
     const [activeCategory, setActiveCategory] = useState('todos');
     const [activeSort, setActiveSort] = useState('destacados');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const brands = [...new Set(mockProducts.map(p => p.brand))];
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch Categories
+                const { data: catData } = await supabase.from('categorias').select('*');
+                if (catData) {
+                    setCategories([
+                        { id: 'todos', name: 'Todos los productos' },
+                        ...catData.map(c => ({ id: c.slug, name: c.nombre }))
+                    ]);
+                }
+
+                // Fetch Products
+                const { data: prodData } = await supabase.from('productos').select('*');
+                if (prodData) {
+                    setProducts(prodData.map(p => ({
+                        ...p,
+                        category: p.category_slug || 'interior', // Ajuste según esquema real
+                        rating: 4.5 // Mock rating ya que no está en DB
+                    })));
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const brands = [...new Set(products.map(p => p.marca || 'Genérico'))];
 
     const toggleBrand = (brand) => {
         setSelectedBrands(prev =>
@@ -39,17 +54,17 @@ export default function Catalogo() {
         );
     };
 
-    const filteredProducts = mockProducts
+    const filteredProducts = products
         .filter(p => {
             const matchesCategory = activeCategory === 'todos' || p.category === activeCategory;
-            const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                p.brand.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(p.brand);
+            const matchesSearch = p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (p.marca && p.marca.toLowerCase().includes(searchQuery.toLowerCase()));
+            const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(p.marca);
             return matchesCategory && matchesSearch && matchesBrand;
         })
         .sort((a, b) => {
-            if (activeSort === 'menor_precio') return a.price - b.price;
-            if (activeSort === 'mayor_precio') return b.price - a.price;
+            if (activeSort === 'menor_precio') return a.precio - b.precio;
+            if (activeSort === 'mayor_precio') return b.precio - a.precio;
             return b.rating - a.rating; // destacados
         });
 
@@ -148,52 +163,70 @@ export default function Catalogo() {
 
                         <div className="mb-6 flex justify-between items-center bg-card p-4 rounded-xl border border-border">
                             <span className="text-foreground/70 font-medium font-sm">
-                                Mostrando <strong className="text-foreground">{filteredProducts.length}</strong> productos
+                                {isLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <Loader2 className="w-4 h-4 animate-spin text-primary" /> Cargando productos...
+                                    </span>
+                                ) : (
+                                    <>Mostrando <strong className="text-foreground">{filteredProducts.length}</strong> productos</>
+                                )}
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredProducts.map((product, idx) => (
-                                <motion.div
-                                    key={product.id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:border-primary/30 transition-all flex flex-col group"
-                                >
-                                    <Link href={`/catalogo/${product.id}`} className="block relative group-hover:scale-105 transition-transform duration-500">
-                                        <div className="aspect-square bg-gradient-to-tr from-secondary to-muted relative flex items-center justify-center p-6">
-                                            <PaintBucket className="w-16 h-16 text-foreground/20" />
-                                        </div>
-                                    </Link>
-
-                                    <div className="p-5 flex flex-col flex-1">
-                                        <p className="text-xs text-foreground/50 font-medium mb-1 uppercase tracking-wider">{product.brand}</p>
-                                        <Link href={`/catalogo/${product.id}`} className="hover:text-primary transition-colors">
-                                            <h3 className="font-bold text-foreground text-base mb-2 line-clamp-2 leading-tight">
-                                                {product.name}
-                                            </h3>
+                        {isLoading ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {[1, 2, 3, 4, 5, 6].map((i) => (
+                                    <div key={i} className="bg-card rounded-2xl h-80 animate-pulse border border-border" />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {filteredProducts.map((product, idx) => (
+                                    <motion.div
+                                        key={product.id}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                        className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:border-primary/30 transition-all flex flex-col group"
+                                    >
+                                        <Link href={`/catalogo/${product.id}`} className="block relative group-hover:scale-105 transition-transform duration-500">
+                                            <div className="aspect-square bg-gradient-to-tr from-secondary to-muted relative flex items-center justify-center p-6 text-center">
+                                                {product.imagen_url ? (
+                                                    <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain" />
+                                                ) : (
+                                                    <PaintBucket className="w-16 h-16 text-foreground/20" />
+                                                )}
+                                            </div>
                                         </Link>
 
-                                        <div className="mt-auto pt-4 flex items-center justify-between">
-                                            <span className="font-black text-2xl text-primary">
-                                                ${product.price.toLocaleString('es-AR')}
-                                            </span>
-                                            <button className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-colors shadow-sm cursor-pointer">
-                                                <ShoppingCart className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                        <div className="p-5 flex flex-col flex-1">
+                                            <p className="text-xs text-foreground/50 font-medium mb-1 uppercase tracking-wider">{product.marca || 'Pinturería Mercurio'}</p>
+                                            <Link href={`/catalogo/${product.id}`} className="hover:text-primary transition-colors">
+                                                <h3 className="font-bold text-foreground text-base mb-2 line-clamp-2 leading-tight">
+                                                    {product.nombre}
+                                                </h3>
+                                            </Link>
 
-                            {filteredProducts.length === 0 && (
-                                <div className="col-span-full py-12 text-center text-foreground/60">
-                                    <PaintBucket className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                                    <p className="text-lg">No se encontraron productos en esta categoría.</p>
-                                </div>
-                            )}
-                        </div>
+                                            <div className="mt-auto pt-4 flex items-center justify-between">
+                                                <span className="font-black text-2xl text-primary">
+                                                    ${Number(product.precio).toLocaleString('es-AR')}
+                                                </span>
+                                                <button className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-colors shadow-sm cursor-pointer">
+                                                    <ShoppingCart className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+
+                                {filteredProducts.length === 0 && (
+                                    <div className="col-span-full py-12 text-center text-foreground/60">
+                                        <PaintBucket className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                                        <p className="text-lg">No se encontraron productos en esta categoría.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

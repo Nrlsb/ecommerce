@@ -1,33 +1,77 @@
-'use client';
-
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, PaintBucket, Check } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, PaintBucket, Check, Loader2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import ProductCalculator from '@/components/products/ProductCalculator';
-
-const mockProducts = [
-    { id: 1, name: 'Látex Interior Premium 20L', brand: 'ColorMaster', category: 'interior', price: 45000, rating: 4.8, reviews: 124, description: 'Pintura látex de alta calidad para interiores. Excelente poder cubritivo y lavabilidad. Acabado mate perfecto para renovar tus ambientes con elegancia.', yield: 12 },
-    { id: 2, name: 'Esmalte Sintético Brillante 4L', brand: 'BrilloMax', category: 'esmaltes', price: 22000, rating: 4.5, reviews: 89, description: 'Esmalte de secado rápido con acabado brillante espejo. Ideal para metales y maderas tanto en interior como exterior. Protección duradera contra la intemperie.', yield: 14 },
-    { id: 3, name: 'Impermeabilizante Frentes 20L', brand: 'ProtecExterior', category: 'exterior', price: 58000, rating: 4.9, reviews: 56, description: 'Recubrimiento acrílico elástico diseñado para proteger frentes y muros exteriores. Evita filtraciones y acompaña los movimientos estructurales de las paredes.', yield: 8 },
-    { id: 4, name: 'Rodillo Antigota 22cm Premium', brand: 'PintaFacil', category: 'accesorios', price: 8500, rating: 4.2, reviews: 45, description: 'Rodillo profesional de lana sintética tejida. No salpica y proporciona un acabado liso y uniforme. Mango ergonómico para mayor comodidad durante el uso.', yield: 0 },
-];
+import { supabase } from '@/lib/supabase';
 
 export default function ProductDetail({ params }) {
     const resolvedParams = use(params);
-    const productId = parseInt(resolvedParams.id);
-    const product = mockProducts.find(p => p.id === productId) || mockProducts[0];
+    const productId = resolvedParams.id;
 
+    const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const { addToCart } = useCart();
     const [added, setAdded] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            setIsLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('productos')
+                    .select('*')
+                    .eq('id', productId)
+                    .single();
+
+                if (data) {
+                    setProduct({
+                        ...data,
+                        rating: 4.8, // Mock
+                        reviews: 124, // Mock
+                        yield: data.rendimiento || 10 // Usar el campo de la DB
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [productId]);
 
     const handleAddToCart = () => {
-        addToCart(product, quantity);
+        if (!product) return;
+        addToCart({
+            ...product,
+            name: product.nombre, // Compatibilidad con el carrito existente
+            price: product.precio,
+            brand: product.marca
+        }, quantity);
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (!product) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+                <h2 className="text-2xl font-bold">Producto no encontrado</h2>
+                <Link href="/catalogo" className="text-primary hover:underline">Volver al catálogo</Link>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background pb-20">
@@ -46,9 +90,13 @@ export default function ProductDetail({ params }) {
                         className="space-y-4"
                     >
                         <div className="aspect-square bg-muted rounded-3xl flex items-center justify-center border border-border overflow-hidden relative group">
-                            <PaintBucket className="w-32 h-32 text-foreground/10 group-hover:scale-110 transition-transform duration-700" />
+                            {product.imagen_url ? (
+                                <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain" />
+                            ) : (
+                                <PaintBucket className="w-32 h-32 text-foreground/10 group-hover:scale-110 transition-transform duration-700" />
+                            )}
                             <div className="absolute top-4 left-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-                                {product.category}
+                                {product.category || 'Pintura'}
                             </div>
                         </div>
                         <div className="grid grid-cols-4 gap-4">
@@ -63,8 +111,8 @@ export default function ProductDetail({ params }) {
                     {/* Right: Product Info */}
                     <div className="flex flex-col">
                         <div className="mb-6">
-                            <p className="text-sm font-bold text-primary uppercase tracking-widest mb-2">{product.brand}</p>
-                            <h1 className="text-4xl font-black text-foreground mb-4 leading-tight">{product.name}</h1>
+                            <p className="text-sm font-bold text-primary uppercase tracking-widest mb-2">{product.marca || 'Pinturería Mercurio'}</p>
+                            <h1 className="text-4xl font-black text-foreground mb-4 leading-tight">{product.nombre}</h1>
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="flex items-center gap-1 text-amber-500">
                                     {[1, 2, 3, 4, 5].map((s) => (
@@ -75,7 +123,7 @@ export default function ProductDetail({ params }) {
                                 <span className="text-foreground/40 font-medium">({product.reviews} reseñas)</span>
                             </div>
                             <p className="text-xl text-foreground/70 leading-relaxed mb-8">
-                                {product.description}
+                                {product.descripcion}
                             </p>
                         </div>
 
@@ -83,7 +131,7 @@ export default function ProductDetail({ params }) {
                             <div className="flex items-end justify-between mb-8">
                                 <div>
                                     <span className="text-sm text-foreground/40 font-bold uppercase block mb-1">Precio Unitario</span>
-                                    <span className="text-4xl font-black text-primary">${product.price.toLocaleString('es-AR')}</span>
+                                    <span className="text-4xl font-black text-primary">${Number(product.precio).toLocaleString('es-AR')}</span>
                                 </div>
                                 <div className="flex items-center bg-background border border-border rounded-xl p-1">
                                     <button
@@ -102,8 +150,8 @@ export default function ProductDetail({ params }) {
                                 onClick={handleAddToCart}
                                 disabled={added}
                                 className={`w-full py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all transform active:scale-95 ${added
-                                        ? 'bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]'
-                                        : 'bg-primary text-primary-foreground hover:shadow-[0_10px_20px_rgba(var(--primary-rgb),0.3)]'
+                                    ? 'bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                                    : 'bg-primary text-primary-foreground hover:shadow-[0_10px_20px_rgba(var(--primary-rgb),0.3)]'
                                     }`}
                             >
                                 {added ? (
