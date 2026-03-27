@@ -28,7 +28,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary to-blue-900 text-primary-foreground overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary to-[#0D1B3A] text-primary-foreground overflow-hidden">
         {/* Decorative circles */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent opacity-20 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl"></div>
@@ -41,7 +41,7 @@ export default function Home() {
             className="max-w-2xl"
           >
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
-              Dale vida a tus espacios con <span className="text-accent">el color perfecto</span>
+              Dale vida a tus espacios con el <span className="text-mercurio-yellow drop-shadow-sm">toque Mercurio</span>
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 mb-10 max-w-xl">
               Encuentra la mayor variedad de pinturas, herramientas y accesorios para transformar tu hogar o empresa. Calidad garantizada en cada gota.

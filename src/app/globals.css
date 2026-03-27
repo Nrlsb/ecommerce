@@ -4,16 +4,21 @@
   --background: #ffffff;
   --foreground: #0f172a;
 
-  --primary: #3b82f6;
-  /* Blue */
+  --primary: #1E3773;
+  /* Azul Mercurio */
   --primary-foreground: #ffffff;
 
   --secondary: #e2e8f0;
   --secondary-foreground: #1e293b;
 
-  --accent: #f59e0b;
-  /* Amber/Yellow for paint */
+  --accent: #EB2891;
+  /* Rosa/Magenta Mercurio */
   --accent-foreground: #ffffff;
+
+  /* Colores de la Onda Mercurio */
+  --mercurio-yellow: #FFCD28;
+  --mercurio-green: #AACD46;
+  --mercurio-pink: #EB2891;
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
@@ -32,13 +37,13 @@
     --background: #0f172a;
     --foreground: #f8fafc;
 
-    --primary: #60a5fa;
+    --primary: #3b82f6;
     --primary-foreground: #0f172a;
 
     --secondary: #1e293b;
     --secondary-foreground: #f8fafc;
 
-    --accent: #fbbf24;
+    --accent: #EB2891;
     --accent-foreground: #0f172a;
 
     --destructive: #f87171;
@@ -70,12 +75,15 @@ body {
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-mercurio-yellow: var(--mercurio-yellow);
+  --color-mercurio-green: var(--mercurio-green);
+  --color-mercurio-pink: var(--mercurio-pink);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
+  --color-card-foreground: var(--color-card-foreground);
   --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

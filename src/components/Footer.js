@@ -9,10 +9,10 @@ export default function Footer() {
                     <div className="space-y-4">
                         <Link href="/" className="flex items-center gap-2">
                             <PaintBucket size={24} className="text-primary" />
-                            <span className="text-xl font-bold">ColorShop</span>
+                            <span className="text-xl font-bold text-primary italic">mercurio</span>
                         </Link>
                         <p className="text-sm text-secondary-foreground/80">
-                            Transformando espacios con los mejores colores y la mayor calidad del mercado.
+                            Transformando tus espacios con el asesoramiento experto de Pinturerías Mercurio.
                         </p>
                     </div>
 
@@ -39,15 +39,15 @@ export default function Footer() {
                     <div>
                         <h3 className="font-semibold text-lg mb-4">Contacto</h3>
                         <ul className="space-y-2 text-sm text-secondary-foreground/80">
-                            <li className="flex items-center gap-2"><MapPin size={16} /> Av. Los Pintores 1234, Ciudad</li>
-                            <li className="flex items-center gap-2"><Phone size={16} /> +54 11 1234-5678</li>
-                            <li className="flex items-center gap-2"><Mail size={16} /> contacto@colorshop.ejemplo.com</li>
+                            <li className="flex items-center gap-2"><MapPin size={16} /> Sucursales en Buenos Aires</li>
+                            <li className="flex items-center gap-2"><Phone size={16} /> +54 11 0000-0000</li>
+                            <li className="flex items-center gap-2"><Mail size={16} /> info@pintureriasmercurio.com.ar</li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="border-t border-border mt-12 pt-8 text-center text-sm text-secondary-foreground/60">
-                    <p>&copy; {new Date().getFullYear()} ColorShop. Todos los derechos reservados.</p>
+                    <p>&copy; {new Date().getFullYear()} Pinturerías Mercurio. Todos los derechos reservados.</p>
                 </div>
             </div>
         </footer>

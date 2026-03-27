@@ -17,13 +17,26 @@ export default function Navbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="p-2 bg-primary text-primary-foreground rounded-xl group-hover:bg-accent transition-colors">
-                            <PaintBucket size={24} />
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="relative flex flex-col items-center justify-center">
+                            <div className="p-2 bg-primary text-primary-foreground rounded-xl group-hover:bg-primary/90 transition-all shadow-md group-hover:shadow-lg group-hover:-rotate-3">
+                                <PaintBucket size={24} />
+                            </div>
+                            {/* Brand Swoosh decorative element */}
+                            <div className="absolute -bottom-1 -right-1 flex gap-0.5">
+                                <div className="w-2 h-2 rounded-full bg-mercurio-pink shadow-sm"></div>
+                                <div className="w-2 h-2 rounded-full bg-mercurio-yellow shadow-sm"></div>
+                                <div className="w-2 h-2 rounded-full bg-mercurio-green shadow-sm"></div>
+                            </div>
                         </div>
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                            ColorShop
-                        </span>
+                        <div className="flex flex-col leading-none">
+                            <span className="text-2xl font-black italic tracking-tighter text-primary">
+                                mercurio
+                            </span>
+                            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-primary/70">
+                                pinturerías
+                            </span>
+                        </div>
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -61,7 +74,7 @@ export default function Navbar() {
                         <Link href="/carrito" className="text-foreground/80 hover:text-primary transition-colors relative">
                             <ShoppingCart size={20} />
                             {totalItems > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
                                     {totalItems}
                                 </span>
                             )}
@@ -73,7 +86,7 @@ export default function Navbar() {
                         <Link href="/carrito" className="text-foreground/80 relative">
                             <ShoppingCart size={24} />
                             {totalItems > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
                                     {totalItems}
                                 </span>
                             )}
