@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Filter, ShoppingCart, PaintBucket, ChevronDown, Check, Search, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useCart } from '@/context/CartContext';
 
 export default function Catalogo() {
     const [products, setProducts] = useState([]);
@@ -15,6 +16,7 @@ export default function Catalogo() {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const { addToCart } = useCart();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -69,6 +71,15 @@ export default function Catalogo() {
             if (activeSort === 'mayor_precio') return b.precio - a.precio;
             return b.rating - a.rating; // destacados
         });
+
+    const handleAddToCart = (product) => {
+        addToCart({
+            ...product,
+            name: product.nombre,
+            price: product.precio,
+            brand: product.marca
+        }, 1);
+    };
 
     return (
         <div className="min-h-screen bg-muted/20 py-8">
@@ -213,7 +224,10 @@ export default function Catalogo() {
                                                 <span className="font-black text-2xl text-primary">
                                                     ${Number(product.precio).toLocaleString('es-AR')}
                                                 </span>
-                                                <button className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-colors shadow-sm cursor-pointer">
+                                                <button
+                                                    onClick={() => handleAddToCart(product)}
+                                                    className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-colors shadow-sm cursor-pointer"
+                                                >
                                                     <ShoppingCart className="w-5 h-5" />
                                                 </button>
                                             </div>
