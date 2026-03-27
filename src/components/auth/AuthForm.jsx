@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 
@@ -11,7 +12,14 @@ export default function AuthForm() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const { signIn, signUp } = useAuth();
+    const { signIn, signUp, user } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (user) {
+            router.push('/');
+        }
+    }, [user, router]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,6 +33,7 @@ export default function AuthForm() {
 
             if (authError) throw authError;
 
+            // La redirección ocurrirá por el useEffect al cambiar el estado 'user'
         } catch (err) {
             setError(err.message);
         } finally {
