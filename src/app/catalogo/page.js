@@ -31,13 +31,16 @@ export default function Catalogo() {
                     ]);
                 }
 
-                // Fetch Products
-                const { data: prodData } = await supabase.from('productos').select('*');
+                // Fetch Products with Categories
+                const { data: prodData } = await supabase
+                    .from('productos')
+                    .select('*, categorias(slug)');
+
                 if (prodData) {
                     setProducts(prodData.map(p => ({
                         ...p,
-                        category: p.category_slug || 'interior', // Ajuste según esquema real
-                        rating: 4.5 // Mock rating ya que no está en DB
+                        category: p.categorias?.slug || 'interior',
+                        rating: 4.5
                     })));
                 }
             } catch (error) {

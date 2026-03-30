@@ -6,6 +6,7 @@ CREATE TABLE categorias (
   nombre VARCHAR(100) NOT NULL,
   slug VARCHAR(100) UNIQUE NOT NULL,
   descripcion TEXT,
+  codigo_externo VARCHAR(50) UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
@@ -19,6 +20,12 @@ CREATE TABLE productos (
   precio DECIMAL(10, 2) NOT NULL,
   stock INTEGER DEFAULT 0,
   imagen_url TEXT,
+  codigo_externo VARCHAR(50) UNIQUE,
+  descripcion_corta TEXT,
+  peso DECIMAL(10, 2),
+  precio_con_descuento DECIMAL(10, 2),
+  descuento_porcentual DECIMAL(10, 2),
+  fecha_imagen VARCHAR(20),
   destacado BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
