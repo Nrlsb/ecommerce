@@ -3,11 +3,31 @@ import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
+    console.log('Iniciando sincronización de productos...');
     const response = await fetch('http://119.8.78.68:9078/rest/MERWS01B');
     if (!response.ok) {
       throw new Error('Error al obtener productos de la API externa');
     }
     const products = await response.json();
+    console.log(`Se obtuvieron ${products.length} productos de la API externa.`);
+
+    // Utilidad para limpiar números con comas
+    const parseNumber = (val) => {
+      if (val === null || val === undefined) return 0;
+      if (typeof val === 'number') return val;
+      const str = val.toString().replace(',', '.');
+      const num = parseFloat(str);
+      return isNaN(num) ? 0 : num;
+    };
+
+    // Utilidad para procesar en lotes
+    const chunkArray = (array, size) => {
+      const chunks = [];
+      for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+      }
+      return chunks;
+    };
 
     // 1. Obtener todas las categorías únicas del JSON externo
     const uniqueCategoryCodes = [...new Set(products.map(p => p.Categoria).filter(Boolean))];
@@ -20,12 +40,17 @@ export async function GET() {
         codigo_externo: code
       }));
 
-      const { error: catUpsertError } = await supabase
-        .from('categorias')
-        .upsert(categoriesToUpsert, { onConflict: 'codigo_externo' });
+      const catChunks = chunkArray(categoriesToUpsert, 100);
+      console.log(`Sincronizando ${categoriesToUpsert.length} categorías en ${catChunks.length} lotes...`);
 
-      if (catUpsertError) {
-        console.error('Error al sincronizar categorías previas:', catUpsertError);
+      for (const chunk of catChunks) {
+        const { error: catUpsertError } = await supabase
+          .from('categorias')
+          .upsert(chunk, { onConflict: 'codigo_externo' });
+
+        if (catUpsertError) {
+          console.error('Error al sincronizar lote de categorías:', catUpsertError);
+        }
       }
     }
 
@@ -45,25 +70,36 @@ export async function GET() {
     const productsToUpsert = products.map(item => ({
       nombre: item["Descripcion Corta"] || item.Descripcion,
       descripcion: item.Descripcion,
-      precio: item.Precio,
+      precio: parseNumber(item.Precio),
       stock: item.Stock,
       imagen_url: item.Imagen,
       marca: item.Marca,
       codigo_externo: item.Producto,
       categoria_id: categoryMap[item.Categoria] || null,
       descripcion_corta: item["Descripcion Corta"],
-      peso: item.Peso || 0,
-      precio_con_descuento: item["Precio desc"] || item.Precio,
+      peso: parseNumber(item.Peso),
+      precio_con_descuento: parseNumber(item["Precio desc"] || item.Precio),
       descuento_porcentual: item.Descuento || 0,
       fecha_imagen: item.FechaImagen
     }));
 
     // 5. UPSERT por lotes de productos
-    const { data: upsertData, error: upsertError } = await supabase
-      .from('productos')
-      .upsert(productsToUpsert, { onConflict: 'codigo_externo' });
+    const productChunks = chunkArray(productsToUpsert, 100);
+    console.log(`Sincronizando ${productsToUpsert.length} productos en ${productChunks.length} lotes...`);
 
-    if (upsertError) throw upsertError;
+    let processedCount = 0;
+    for (const [index, chunk] of productChunks.entries()) {
+      const { error: upsertError } = await supabase
+        .from('productos')
+        .upsert(chunk, { onConflict: 'codigo_externo' });
+
+      if (upsertError) {
+        console.error(`Error en lote de productos ${index + 1}:`, upsertError);
+        throw upsertError;
+      }
+      processedCount += chunk.length;
+      console.log(`Lote ${index + 1}/${productChunks.length} completado (${processedCount} productos)`);
+    }
 
     return NextResponse.json({
       message: 'Sincronización completada',
@@ -71,6 +107,7 @@ export async function GET() {
     });
 
   } catch (error) {
+    console.error('Error fatal en sincronización:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
