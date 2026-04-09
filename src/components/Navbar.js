@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ShoppingCart, PaintBucket, Menu, X, Search, User } from 'lucide-react';
+import { ShoppingCart, PaintBucket, Menu, X, Search, User, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -10,7 +10,8 @@ import { useAuth } from '@/context/AuthContext';
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { totalItems } = useCart();
-    const { user, signOut } = useAuth();
+    const { user, profile, signOut } = useAuth();
+    const isAdmin = profile?.rol === 'admin';
 
     return (
         <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-border shadow-sm">
@@ -45,6 +46,12 @@ export default function Navbar() {
                         <Link href="/ofertas" className="text-foreground/80 hover:text-primary transition-colors font-medium">Ofertas</Link>
                         <Link href="/marcas" className="text-foreground/80 hover:text-primary transition-colors font-medium">Marcas</Link>
                         <Link href="/contacto" className="text-foreground/80 hover:text-primary transition-colors font-medium">Contacto</Link>
+                        {isAdmin && (
+                            <Link href="/admin" className="text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1">
+                                <ShieldCheck size={18} />
+                                Admin
+                            </Link>
+                        )}
                     </div>
 
                     {/* Icons Context */}
@@ -123,6 +130,11 @@ export default function Navbar() {
                             <Link href="/contacto" className="px-3 py-3 rounded-md text-base font-medium text-foreground hover:bg-secondary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                                 Contacto
                             </Link>
+                            {isAdmin && (
+                                <Link href="/admin" className="px-3 py-3 rounded-md text-base font-bold text-primary hover:bg-secondary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                                    Panel Admin
+                                </Link>
+                            )}
                         </div>
                     </motion.div>
                 )}

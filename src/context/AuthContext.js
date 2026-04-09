@@ -7,21 +7,46 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const fetchProfile = async (userId) => {
+        try {
+            const { data, error } = await supabase
+                .from('perfiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) throw error;
+            setProfile(data);
+        } catch (error) {
+            console.error('Error fetching profile:', error.message);
+            setProfile(null);
+        }
+    };
+
     useEffect(() => {
-        // Verificar sesión actual al cargar
         const getSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            setUser(session?.user ?? null);
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+            if (currentUser) {
+                await fetchProfile(currentUser.id);
+            }
             setLoading(false);
         };
 
         getSession();
 
-        // Escuchar cambios en el estado de autenticación
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+            if (currentUser) {
+                await fetchProfile(currentUser.id);
+            } else {
+                setProfile(null);
+            }
             setLoading(false);
         });
 
@@ -30,10 +55,13 @@ export const AuthProvider = ({ children }) => {
 
     const signUp = (email, password) => supabase.auth.signUp({ email, password });
     const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password });
-    const signOut = () => supabase.auth.signOut();
+    const signOut = async () => {
+        await supabase.auth.signOut();
+        setProfile(null);
+    };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
+        <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut }}>
             {children}
         </AuthContext.Provider>
     );
