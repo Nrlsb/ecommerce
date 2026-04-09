@@ -10,50 +10,38 @@ export async function GET() {
         }
         const categoriesData = await response.json();
 
-        const results = [];
+        const categoriesToUpsert = categoriesData.map(item => {
+            const nombre = item.Descripcion || `Categoría ${item.Categoria}`;
+            const slug = item.Descripcion
+                ? item.Descripcion.toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-0]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '')
+                : `cat-${item.Categoria.toLowerCase()}`;
 
-        for (const item of categoriesData) {
-            try {
-                // Preparamos los datos de la categoría
-                const nombre = item.Descripcion || `Categoría ${item.Categoria}`;
-                const slug = item.Descripcion
-                    ? item.Descripcion.toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .replace(/[^a-z0-0]/g, '-')
-                        .replace(/-+/g, '-')
-                        .replace(/^-|-$/g, '')
-                    : `cat-${item.Categoria.toLowerCase()}`;
+            return {
+                nombre: nombre,
+                slug: slug,
+                codigo_externo: item.Categoria,
+                descripcion: item.Descripcion || ''
+            };
+        });
 
-                const categoryData = {
-                    nombre: nombre,
-                    slug: slug,
-                    codigo_externo: item.Categoria,
-                    descripcion: item.Descripcion || ''
-                };
+        // Upsert por lote
+        const { data, error } = await supabase
+            .from('categorias')
+            .upsert(categoriesToUpsert, { onConflict: 'codigo_externo' })
+            .select();
 
-                // Upsert por codigo_externo
-                const { data, error } = await supabase
-                    .from('categorias')
-                    .upsert(categoryData, { onConflict: 'codigo_externo' })
-                    .select();
-
-                if (error) {
-                    console.error(`Error sincronizando categoría ${item.Categoria}:`, error);
-                    results.push({ categoria: item.Categoria, status: 'error', message: error.message });
-                } else {
-                    results.push({ categoria: item.Categoria, status: 'success' });
-                }
-            } catch (innerError) {
-                console.error(`Error procesando categoría ${item.Categoria}:`, innerError);
-                results.push({ categoria: item.Categoria, status: 'error', message: innerError.message });
-            }
+        if (error) {
+            throw error;
         }
 
         return NextResponse.json({
             message: 'Sincronización de categorías completada',
-            processed: categoriesData.length,
-            details: results
+            processed: categoriesToUpsert.length
         });
 
     } catch (error) {
