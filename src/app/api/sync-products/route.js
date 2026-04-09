@@ -66,22 +66,31 @@ export async function GET() {
       categoryMap[c.codigo_externo] = c.id;
     });
 
-    // 4. Preparar productos para upsert por lotes
-    const productsToUpsert = products.map(item => ({
-      nombre: item["Descripcion Corta"] || item.Descripcion,
-      descripcion: item.Descripcion,
-      precio: parseNumber(item.Precio),
-      stock: item.Stock,
-      imagen_url: item.Imagen,
-      marca: item.Marca,
-      codigo_externo: item.Producto,
-      categoria_id: categoryMap[item.Categoria] || null,
-      descripcion_corta: item["Descripcion Corta"],
-      peso: parseNumber(item.Peso),
-      precio_con_descuento: parseNumber(item["Precio desc"] || item.Precio),
-      descuento_porcentual: item.Descuento || 0,
-      fecha_imagen: item.FechaImagen
-    }));
+    // 4. Preparar productos para upsert por lotes (con deduplicación)
+    const productsMap = new Map();
+
+    products.forEach(item => {
+      const codigo = item.Producto;
+      if (!codigo) return;
+
+      productsMap.set(codigo, {
+        nombre: item["Descripcion Corta"] || item.Descripcion,
+        descripcion: item.Descripcion,
+        precio: parseNumber(item.Precio),
+        stock: item.Stock,
+        imagen_url: item.Imagen,
+        marca: item.Marca,
+        codigo_externo: codigo,
+        categoria_id: categoryMap[item.Categoria] || null,
+        descripcion_corta: item["Descripcion Corta"],
+        peso: parseNumber(item.Peso),
+        precio_con_descuento: parseNumber(item["Precio desc"] || item.Precio),
+        descuento_porcentual: item.Descuento || 0,
+        fecha_imagen: item.FechaImagen
+      });
+    });
+
+    const productsToUpsert = Array.from(productsMap.values());
 
     // 5. UPSERT por lotes de productos
     const productChunks = chunkArray(productsToUpsert, 100);
