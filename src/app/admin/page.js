@@ -2,14 +2,51 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { LayoutDashboard, Package, Users, ShoppingBag, Settings, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LayoutDashboard, Package, Users, ShoppingBag, Settings, ArrowLeft, RefreshCw, Tags, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
     const { user, profile, loading } = useAuth();
     const router = useRouter();
+
+    const [syncingProducts, setSyncingProducts] = useState(false);
+    const [syncingCategories, setSyncingCategories] = useState(false);
+    const [status, setStatus] = useState({ message: '', type: '' }); // 'success' | 'error'
+
+    const handleSync = async (type) => {
+        const isProducts = type === 'products';
+        const setSyncing = isProducts ? setSyncingProducts : setSyncingCategories;
+        const endpoint = isProducts ? '/api/sync-products' : '/api/sync-categories';
+        const label = isProducts ? 'productos' : 'categorías';
+
+        setSyncing(true);
+        setStatus({ message: '', type: '' });
+
+        try {
+            const res = await fetch(endpoint);
+            const data = await res.json();
+
+            if (res.ok) {
+                setStatus({
+                    message: `Sincronización de ${label} completada: ${data.processed || 0} procesados.`,
+                    type: 'success'
+                });
+            } else {
+                throw new Error(data.error || `Error al sincronizar ${label}`);
+            }
+        } catch (err) {
+            setStatus({
+                message: `Error: ${err.message}`,
+                type: 'error'
+            });
+        } finally {
+            setSyncing(false);
+            // Limpiar mensaje después de 5 segundos
+            setTimeout(() => setStatus({ message: '', type: '' }), 5000);
+        }
+    };
 
     useEffect(() => {
         if (!loading && (!user || profile?.rol !== 'admin')) {
@@ -46,6 +83,23 @@ export default function AdminDashboard() {
                         </h1>
                         <p className="text-foreground/60">Gestiona productos, pedidos y clientes desde aquí.</p>
                     </div>
+
+                    <AnimatePresence>
+                        {status.message && (
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${status.type === 'success'
+                                    ? 'bg-green-500/10 border-green-500/20 text-green-500'
+                                    : 'bg-red-500/10 border-red-500/20 text-red-500'
+                                    }`}
+                            >
+                                {status.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                                <span className="text-sm font-medium">{status.message}</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Stats Grid */}
@@ -85,6 +139,34 @@ export default function AdminDashboard() {
                                 <p className="font-bold group-hover:text-primary transition-colors">Ver lista de productos</p>
                                 <p className="text-sm text-foreground/60 line-clamp-1">Edita stock, precios y destacados.</p>
                             </button>
+
+                            <div className="grid grid-cols-2 gap-4 pt-2">
+                                <button
+                                    onClick={() => handleSync('products')}
+                                    disabled={syncingProducts}
+                                    className="flex flex-col items-center justify-center p-4 rounded-xl border border-border hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {syncingProducts ? (
+                                        <Loader2 className="animate-spin text-blue-500 mb-2" size={20} />
+                                    ) : (
+                                        <RefreshCw className="text-blue-500 mb-2 group-hover:rotate-180 transition-transform duration-500" size={20} />
+                                    )}
+                                    <p className="text-xs font-bold text-center">Sincronizar Productos</p>
+                                </button>
+
+                                <button
+                                    onClick={() => handleSync('categories')}
+                                    disabled={syncingCategories}
+                                    className="flex flex-col items-center justify-center p-4 rounded-xl border border-border hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {syncingCategories ? (
+                                        <Loader2 className="animate-spin text-purple-500 mb-2" size={20} />
+                                    ) : (
+                                        <Tags className="text-purple-500 mb-2 group-hover:scale-110 transition-transform" size={20} />
+                                    )}
+                                    <p className="text-xs font-bold text-center">Sincronizar Categorías</p>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
