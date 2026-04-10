@@ -11,11 +11,15 @@ const chunkArray = (array, size) => {
 };
 
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         console.log('Iniciando sincronización de categorías...');
         // Fetch de categorías desde la API externa (usamos MERWS01D en mayúsculas para consistencia)
-        const response = await fetch('http://119.8.78.68:9078/rest/MERWS01D');
+        const response = await fetch('http://119.8.78.68:9078/rest/MERWS01D', {
+            cache: 'no-store'
+        });
         if (!response.ok) {
             throw new Error('Error al obtener categorías de la API externa');
         }

@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     console.log('Iniciando sincronización de productos...');
-    const response = await fetch('http://119.8.78.68:9078/rest/MERWS01B');
+    const response = await fetch('http://119.8.78.68:9078/rest/MERWS01B', {
+      cache: 'no-store'
+    });
     if (!response.ok) {
       throw new Error('Error al obtener productos de la API externa');
     }
