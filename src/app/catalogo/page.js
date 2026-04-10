@@ -15,14 +15,17 @@ export default function Catalogo() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const PAGE_SIZE = 20;
     const { addToCart } = useCart();
 
+    // Fetch Categories once
     useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
+        const fetchCategories = async () => {
             try {
-                // Fetch Categories
                 const { data: catData } = await supabase.from('categorias').select('*');
                 if (catData) {
                     setCategories([
@@ -30,50 +33,117 @@ export default function Catalogo() {
                         ...catData.map(c => ({ id: c.slug, name: c.nombre }))
                     ]);
                 }
-
-                // Fetch Products with Categories
-                const { data: prodData } = await supabase
-                    .from('productos')
-                    .select('*, categorias(slug)');
-
-                if (prodData) {
-                    setProducts(prodData.map(p => ({
-                        ...p,
-                        category: p.categorias?.slug || 'interior',
-                        rating: 4.5
-                    })));
-                }
             } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setIsLoading(false);
+                console.error('Error fetching categories:', error);
             }
         };
-
-        fetchData();
+        fetchCategories();
     }, []);
 
-    const brands = [...new Set(products.map(p => p.marca || 'Genérico'))];
+    // Fetch Products with filters and pagination
+    const fetchProducts = async (currentPage, isNewSearch = false) => {
+        if (isLoading) return;
+        setIsLoading(true);
+        if (isNewSearch) setIsInitialLoading(true);
+
+        try {
+            const start = currentPage * PAGE_SIZE;
+            const end = start + PAGE_SIZE - 1;
+
+            const selectString = activeCategory === 'todos'
+                ? '*, categorias(slug)'
+                : '*, categorias!inner(slug)';
+
+            let query = supabase
+                .from('productos')
+                .select(selectString, { count: 'exact' });
+
+            // Apply filters
+            if (activeCategory !== 'todos') {
+                query = query.eq('categorias.slug', activeCategory);
+            }
+
+            if (searchQuery) {
+                query = query.ilike('nombre', `%${searchQuery}%`);
+            }
+
+            if (selectedBrands.length > 0) {
+                query = query.in('marca', selectedBrands);
+            }
+
+            // Apply sorting
+            if (activeSort === 'menor_precio') {
+                query = query.order('precio', { ascending: true });
+            } else if (activeSort === 'mayor_precio') {
+                query = query.order('precio', { ascending: false });
+            } else {
+                query = query.order('id', { ascending: false }); // destacados/default
+            }
+
+            // Apply pagination
+            query = query.range(start, end);
+
+            const { data, count, error } = await query;
+
+            if (error) throw error;
+
+            if (data) {
+                const formattedProducts = data.map(p => ({
+                    ...p,
+                    category: p.categorias?.slug || 'interior',
+                    rating: 4.5
+                }));
+
+                if (isNewSearch) {
+                    setProducts(formattedProducts);
+                } else {
+                    setProducts(prev => [...prev, ...formattedProducts]);
+                }
+
+                setHasMore(count > start + formattedProducts.length);
+            }
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        } finally {
+            setIsLoading(false);
+            setIsInitialLoading(false);
+        }
+    };
+
+    // Reset and fetch when filters change
+    useEffect(() => {
+        setPage(0);
+        setHasMore(true);
+        fetchProducts(0, true);
+    }, [activeCategory, activeSort, searchQuery, selectedBrands]);
+
+    const handleLoadMore = () => {
+        if (!isLoading && hasMore) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchProducts(nextPage);
+        }
+    };
+
+    const brands = [
+        'Pinturería Mercurio',
+        'Alba',
+        'Sherwin Williams',
+        'Colorín',
+        'Tersuave',
+        'Plavicon',
+        'Casablanca'
+    ]; // Hardcoded or fetch from DB if needed. For now let's keep it simple or try to get from all products if they were all loaded.
+    // Since we don't have all products, we might need a separate query for brands or just use a predefined list.
+    // The previous code did: const brands = [...new Set(products.map(p => p.marca || 'Genérico'))];
+    // But now products are paginated. I'll use a fixed list for now or just stick to the ones found in current loaded products for simplicity in this step.
+    const currentLoadedBrands = [...new Set(products.map(p => p.marca || 'Pinturería Mercurio'))];
 
     const toggleBrand = (brand) => {
         setSelectedBrands(prev =>
             prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
         );
     };
-
-    const filteredProducts = products
-        .filter(p => {
-            const matchesCategory = activeCategory === 'todos' || p.category === activeCategory;
-            const matchesSearch = p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (p.marca && p.marca.toLowerCase().includes(searchQuery.toLowerCase()));
-            const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(p.marca);
-            return matchesCategory && matchesSearch && matchesBrand;
-        })
-        .sort((a, b) => {
-            if (activeSort === 'menor_precio') return a.precio - b.precio;
-            if (activeSort === 'mayor_precio') return b.precio - a.precio;
-            return b.rating - a.rating; // destacados
-        });
 
     const handleAddToCart = (product) => {
         addToCart({
@@ -137,7 +207,7 @@ export default function Catalogo() {
 
                             <h3 className="font-bold text-lg mt-8 mb-4">Marcas</h3>
                             <div className="space-y-2">
-                                {brands.map((brand) => (
+                                {currentLoadedBrands.map((brand) => (
                                     <label key={brand} className="flex items-center gap-2 cursor-pointer group">
                                         <input
                                             type="checkbox"
@@ -179,72 +249,93 @@ export default function Catalogo() {
 
                         <div className="mb-6 flex justify-between items-center bg-card p-4 rounded-xl border border-border">
                             <span className="text-foreground/70 font-medium font-sm">
-                                {isLoading ? (
+                                {isInitialLoading ? (
                                     <span className="flex items-center gap-2">
                                         <Loader2 className="w-4 h-4 animate-spin text-primary" /> Cargando productos...
                                     </span>
                                 ) : (
-                                    <>Mostrando <strong className="text-foreground">{filteredProducts.length}</strong> productos</>
+                                    <>Encontrados <strong className="text-foreground">{products.length}</strong> productos</>
                                 )}
                             </span>
                         </div>
 
-                        {isLoading ? (
+                        {isInitialLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[1, 2, 3, 4, 5, 6].map((i) => (
                                     <div key={i} className="bg-card rounded-2xl h-80 animate-pulse border border-border" />
                                 ))}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredProducts.map((product, idx) => (
-                                    <motion.div
-                                        key={product.id}
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: idx * 0.05 }}
-                                        className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:border-primary/30 transition-all flex flex-col group"
-                                    >
-                                        <Link href={`/catalogo/${product.id}`} className="block relative group-hover:scale-105 transition-transform duration-500">
-                                            <div className="aspect-square bg-gradient-to-tr from-secondary to-muted relative flex items-center justify-center p-6 text-center">
-                                                {product.imagen_url ? (
-                                                    <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain" />
-                                                ) : (
-                                                    <PaintBucket className="w-16 h-16 text-foreground/20" />
-                                                )}
-                                            </div>
-                                        </Link>
-
-                                        <div className="p-5 flex flex-col flex-1">
-                                            <p className="text-xs text-foreground/50 font-medium mb-1 uppercase tracking-wider">{product.marca || 'Pinturería Mercurio'}</p>
-                                            <Link href={`/catalogo/${product.id}`} className="hover:text-primary transition-colors">
-                                                <h3 className="font-bold text-foreground text-base mb-2 line-clamp-2 leading-tight">
-                                                    {product.nombre}
-                                                </h3>
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {products.map((product, idx) => (
+                                        <motion.div
+                                            key={product.id}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: (idx % PAGE_SIZE) * 0.05 }}
+                                            className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl hover:border-primary/30 transition-all flex flex-col group"
+                                        >
+                                            <Link href={`/catalogo/${product.id}`} className="block relative group-hover:scale-105 transition-transform duration-500">
+                                                <div className="aspect-square bg-gradient-to-tr from-secondary to-muted relative flex items-center justify-center p-6 text-center">
+                                                    {product.imagen_url ? (
+                                                        <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain" />
+                                                    ) : (
+                                                        <PaintBucket className="w-16 h-16 text-foreground/20" />
+                                                    )}
+                                                </div>
                                             </Link>
 
-                                            <div className="mt-auto pt-4 flex items-center justify-between">
-                                                <span className="font-black text-2xl text-primary">
-                                                    ${Number(product.precio).toLocaleString('es-AR')}
-                                                </span>
-                                                <button
-                                                    onClick={() => handleAddToCart(product)}
-                                                    className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-colors shadow-sm cursor-pointer"
-                                                >
-                                                    <ShoppingCart className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
+                                            <div className="p-5 flex flex-col flex-1">
+                                                <p className="text-xs text-foreground/50 font-medium mb-1 uppercase tracking-wider">{product.marca || 'Pinturería Mercurio'}</p>
+                                                <Link href={`/catalogo/${product.id}`} className="hover:text-primary transition-colors">
+                                                    <h3 className="font-bold text-foreground text-base mb-2 line-clamp-2 leading-tight">
+                                                        {product.nombre}
+                                                    </h3>
+                                                </Link>
 
-                                {filteredProducts.length === 0 && (
-                                    <div className="col-span-full py-12 text-center text-foreground/60">
-                                        <PaintBucket className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                                        <p className="text-lg">No se encontraron productos en esta categoría.</p>
+                                                <div className="mt-auto pt-4 flex items-center justify-between">
+                                                    <span className="font-black text-2xl text-primary">
+                                                        ${Number(product.precio).toLocaleString('es-AR')}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleAddToCart(product)}
+                                                        className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-colors shadow-sm cursor-pointer"
+                                                    >
+                                                        <ShoppingCart className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+
+                                    {products.length === 0 && (
+                                        <div className="col-span-full py-12 text-center text-foreground/60">
+                                            <PaintBucket className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                                            <p className="text-lg">No se encontraron productos con estos filtros.</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {hasMore && (
+                                    <div className="mt-12 flex justify-center">
+                                        <button
+                                            onClick={handleLoadMore}
+                                            disabled={isLoading}
+                                            className="px-8 py-3 bg-primary text-primary-foreground rounded-xl font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                                    Cargando...
+                                                </>
+                                            ) : (
+                                                'Cargar más productos'
+                                            )}
+                                        </button>
                                     </div>
                                 )}
-                            </div>
+                            </>
                         )}
                     </div>
                 </div>
