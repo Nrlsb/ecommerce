@@ -33,19 +33,32 @@ export async function GET() {
       return chunks;
     };
 
-    // 1. Obtener todas las categorías únicas del JSON externo
-    const uniqueCategoryCodes = [...new Set(products.map(p => p.Categoria).filter(Boolean))];
+    // 1. Obtener todas las categorías únicas del JSON externo (soporta códigos de 3 y 6 dígitos)
+    const uniqueCategoryCodes = new Set();
+    products.forEach(p => {
+      const code = String(p.Categoria || '');
+      if (!code) return;
+
+      if (code.length === 6) {
+        uniqueCategoryCodes.add(code.substring(0, 3));
+        uniqueCategoryCodes.add(code.substring(3, 6));
+      } else {
+        uniqueCategoryCodes.add(code);
+      }
+    });
+
+    const finalCategoryCodes = [...uniqueCategoryCodes];
 
     // 2. Asegurar que todas las categorías existan en Supabase (Upsert por lotes)
-    if (uniqueCategoryCodes.length > 0) {
-      const categoriesToUpsert = uniqueCategoryCodes.map(code => ({
+    if (finalCategoryCodes.length > 0) {
+      const categoriesToUpsert = finalCategoryCodes.map(code => ({
         nombre: `Categoría ${code}`,
         slug: `cat-${code.toLowerCase()}`,
         codigo_externo: code
       }));
 
       const catChunks = chunkArray(categoriesToUpsert, 100);
-      console.log(`Sincronizando ${categoriesToUpsert.length} categorías en ${catChunks.length} lotes...`);
+      console.log(`Sincronizando ${categoriesToUpsert.length} categorías únicas extraídas en ${catChunks.length} lotes...`);
 
       for (const chunk of catChunks) {
         const { error: catUpsertError } = await supabase
@@ -77,6 +90,17 @@ export async function GET() {
       const codigo = item.Producto;
       if (!codigo) return;
 
+      const catCode = String(item.Categoria || '');
+      let categoriaId = null;
+      let subcategoriaId = null;
+
+      if (catCode.length === 6) {
+        categoriaId = categoryMap[catCode.substring(0, 3)] || null;
+        subcategoriaId = categoryMap[catCode.substring(3, 6)] || null;
+      } else if (catCode) {
+        categoriaId = categoryMap[catCode] || null;
+      }
+
       productsMap.set(codigo, {
         nombre: item["Descripcion Corta"] || item.Descripcion,
         descripcion: item.Descripcion,
@@ -85,7 +109,8 @@ export async function GET() {
         imagen_url: item.Imagen,
         marca: item.Marca,
         codigo_externo: codigo,
-        categoria_id: categoryMap[item.Categoria] || null,
+        categoria_id: categoriaId,
+        subcategoria_id: subcategoriaId,
         descripcion_corta: item["Descripcion Corta"],
         peso: parseNumber(item.Peso),
         precio_con_descuento: parseNumber(item["Precio desc"] || item.Precio),

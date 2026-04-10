@@ -14,6 +14,7 @@ CREATE TABLE categorias (
 CREATE TABLE productos (
   id SERIAL PRIMARY KEY,
   categoria_id INTEGER REFERENCES categorias(id),
+  subcategoria_id INTEGER REFERENCES categorias(id),
   nombre VARCHAR(200) NOT NULL,
   marca VARCHAR(100),
   descripcion TEXT,
