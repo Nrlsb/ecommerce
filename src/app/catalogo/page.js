@@ -19,6 +19,7 @@ export default function Catalogo() {
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const PAGE_SIZE = 20;
@@ -46,6 +47,7 @@ export default function Catalogo() {
     const fetchProducts = async (currentPage, isNewSearch = false) => {
         if (isLoading) return;
         setIsLoading(true);
+        setError(null);
         if (isNewSearch) setIsInitialLoading(true);
 
         try {
@@ -106,6 +108,7 @@ export default function Catalogo() {
             }
         } catch (error) {
             console.error('Error fetching products:', error);
+            setError('No pudimos cargar los productos en este momento. Por favor, intenta de nuevo.');
         } finally {
             setIsLoading(false);
             setIsInitialLoading(false);
@@ -251,7 +254,11 @@ export default function Catalogo() {
 
                         <div className="mb-6 flex justify-between items-center bg-card p-4 rounded-xl border border-border">
                             <span className="text-foreground/70 font-medium font-sm">
-                                {isInitialLoading ? (
+                                {error ? (
+                                    <span className="text-destructive font-medium font-sm flex items-center gap-2">
+                                        <Filter className="w-4 h-4" /> {error}
+                                    </span>
+                                ) : isInitialLoading ? (
                                     <span className="flex items-center gap-2">
                                         <Loader2 className="w-4 h-4 animate-spin text-primary" /> Cargando productos...
                                     </span>
