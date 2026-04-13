@@ -49,25 +49,40 @@ export async function GET() {
 
     const finalCategoryCodes = [...uniqueCategoryCodes];
 
-    // 2. Asegurar que todas las categorías existan en Supabase (Upsert por lotes)
+    // 2. Asegurar que todas las categorías existan en Supabase (Solo insertar si no existen)
     if (finalCategoryCodes.length > 0) {
-      const categoriesToUpsert = finalCategoryCodes.map(code => ({
-        nombre: `Categoría ${code}`,
-        slug: `cat-${code.toLowerCase()}`,
-        codigo_externo: code
-      }));
+      // Primero obtenemos las categorías que ya existen
+      const { data: existingCats } = await supabase
+        .from('categorias')
+        .select('codigo_externo')
+        .in('codigo_externo', finalCategoryCodes);
 
-      const catChunks = chunkArray(categoriesToUpsert, 100);
-      console.log(`Sincronizando ${categoriesToUpsert.length} categorías únicas extraídas en ${catChunks.length} lotes...`);
+      const existingCodes = new Set(existingCats?.map(c => c.codigo_externo) || []);
 
-      for (const chunk of catChunks) {
-        const { error: catUpsertError } = await supabase
-          .from('categorias')
-          .upsert(chunk, { onConflict: 'codigo_externo' });
+      // Filtramos para quedarnos solo con las que NO existen
+      const newCategoryCodes = finalCategoryCodes.filter(code => !existingCodes.has(code));
 
-        if (catUpsertError) {
-          console.error('Error al sincronizar lote de categorías:', catUpsertError);
+      if (newCategoryCodes.length > 0) {
+        const categoriesToInsert = newCategoryCodes.map(code => ({
+          nombre: `Categoría ${code}`,
+          slug: `cat-${code.toLowerCase()}`,
+          codigo_externo: code
+        }));
+
+        const catChunks = chunkArray(categoriesToInsert, 100);
+        console.log(`Insertando ${categoriesToInsert.length} nuevas categorías detectadas en ${catChunks.length} lotes...`);
+
+        for (const chunk of catChunks) {
+          const { error: catInsertError } = await supabase
+            .from('categorias')
+            .insert(chunk);
+
+          if (catInsertError) {
+            console.error('Error al insertar lote de categorías:', catInsertError);
+          }
         }
+      } else {
+        console.log('No se detectaron categorías nuevas para insertar.');
       }
     }
 
