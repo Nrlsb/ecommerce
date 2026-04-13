@@ -55,8 +55,8 @@ export default function Catalogo() {
             const end = start + PAGE_SIZE - 1;
 
             const selectString = activeCategory === 'todos'
-                ? '*, categorias(slug)'
-                : '*, categorias!inner(slug)';
+                ? '*, categorias:categoria_id(slug)'
+                : '*, categorias:categoria_id!inner(slug)';
 
             let query = supabase
                 .from('productos')
