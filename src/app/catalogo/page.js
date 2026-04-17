@@ -1,6 +1,7 @@
 'use client';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -87,6 +88,10 @@ export default function Catalogo() {
             // Apply pagination
             query = query.range(start, end);
 
+            // Evitar cache del navegador añadiendo un timestamp a los headers de la petición (Vía Supabase)
+            // O simplemente añadir un filtro que no afecte el resultado pero cambie la URL
+            query = query.or(`id.gt.0,id.eq.0`); // Filtro inocuo para cambiar la firma de la petición postgrest si fuera necesario
+            
             const { data, count, error } = await query;
 
             if (error) throw error;

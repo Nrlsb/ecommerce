@@ -11,7 +11,7 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { totalItems } = useCart();
     const { user, profile, signOut } = useAuth();
-    const isAdmin = profile?.rol === 'admin';
+    const isAdmin = profile?.rol?.toLowerCase() === 'admin';
 
     return (
         <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-border shadow-sm">

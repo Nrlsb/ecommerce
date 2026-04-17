@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
                 .single();
 
             if (error) throw error;
+            console.log('Perfil cargado para:', userId, 'Rol:', data.rol);
             setProfile(data);
         } catch (error) {
             console.error('Error fetching profile:', error.message);
