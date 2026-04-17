@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ShoppingCart, PaintBucket, Menu, X, Search, User, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
+    const router = useRouter();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { totalItems } = useCart();
     const { user, profile, signOut } = useAuth();
@@ -66,7 +68,10 @@ export default function Navbar() {
                                     {user.email}
                                 </span>
                                 <button
-                                    onClick={() => signOut()}
+                                    onClick={async () => {
+                                        await signOut();
+                                        router.push('/');
+                                    }}
                                     className="text-foreground/80 hover:text-destructive transition-colors text-sm font-bold"
                                 >
                                     Salir

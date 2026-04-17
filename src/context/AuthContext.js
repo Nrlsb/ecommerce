@@ -57,8 +57,15 @@ export const AuthProvider = ({ children }) => {
     const signUp = (email, password) => supabase.auth.signUp({ email, password });
     const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password });
     const signOut = async () => {
-        await supabase.auth.signOut();
-        setProfile(null);
+        try {
+            console.log('Iniciando cierre de sesión...');
+            await supabase.auth.signOut();
+            setProfile(null);
+            setUser(null);
+            console.log('Sesión cerrada correctamente');
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error.message);
+        }
     };
 
     return (
