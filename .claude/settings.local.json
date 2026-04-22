@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(grep -E '\\\\.\\(js|tsx\\)$')",
+      "Bash(find . -name \"*.js\" -type f -exec bash -c 'mv \"$1\" \"${1%.js}.tsx\"' _ {} \\\\;)"
     ]
   }
 }
