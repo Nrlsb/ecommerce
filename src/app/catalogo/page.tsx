@@ -146,7 +146,8 @@ export default function Catalogo() {
       name: product.nombre,
       price: product.precio,
       brand: product.marca,
-    }, 1);
+      quantity: 1,
+    });
   };
 
   const toggleBrand = (brand: string) => {
