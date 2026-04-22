@@ -4,8 +4,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface AuthContextType {
-    user: any;
-    profile: any;
+    user: { id: string; email: string } | null;
+    profile: { id: string; rol: string } | null;
     loading: boolean;
     signUp: (email: string, password: string) => Promise<any>;
     signIn: (email: string, password: string) => Promise<any>;
@@ -21,12 +21,12 @@ const AuthContext = createContext<AuthContextType>({
     signOut: async () => {},
 });
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [profile, setProfile] = useState(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const [user, setUser] = useState<any>(null);
+    const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchProfile = async (userId) => {
+    const fetchProfile = async (userId: string) => {
         try {
             const { data, error } = await supabase
                 .from('perfiles')
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
             console.log('Perfil cargado para:', userId, 'Rol:', data.rol);
             setProfile(data);
         } catch (error) {
-            console.error('Error fetching profile:', error.message);
+            console.error('Error fetching profile:', error instanceof Error ? error.message : String(error));
             setProfile(null);
         }
     };
@@ -70,8 +70,8 @@ export const AuthProvider = ({ children }) => {
         return () => subscription.unsubscribe();
     }, []);
 
-    const signUp = (email, password) => supabase.auth.signUp({ email, password });
-    const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password });
+    const signUp = (email: string, password: string) => supabase.auth.signUp({ email, password });
+    const signIn = (email: string, password: string) => supabase.auth.signInWithPassword({ email, password });
     const signOut = async () => {
         try {
             console.log('Iniciando cierre de sesión...');
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             console.log('Sesión cerrada correctamente');
         } catch (error) {
-            console.error('Error al cerrar sesión:', error.message);
+            console.error('Error al cerrar sesión:', error instanceof Error ? error.message : String(error));
         }
     };
 

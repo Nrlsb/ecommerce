@@ -32,7 +32,7 @@ export default function CarritoPage() {
                 alert('Error: ' + data.error);
             }
         } catch (e) {
-            alert('Error de conexión');
+            alert('Error de conexión: ' + (e instanceof Error ? e.message : String(e)));
         } finally {
             setIsProcessing(false);
         }
@@ -63,7 +63,7 @@ export default function CarritoPage() {
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Productos en el Carrito */}
                     <div className="flex-1 space-y-4">
-                        {items.map((item) => (
+                        {items.map((item: any) => (
                             <div key={item.id} className="bg-card border border-border p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 shadow-sm">
                                 <div className="w-full sm:w-24 h-24 bg-gradient-to-tr from-secondary to-muted rounded-xl flex items-center justify-center flex-shrink-0">
                                     <span className="text-foreground/30 font-bold uppercase text-xs">{item.brand}</span>

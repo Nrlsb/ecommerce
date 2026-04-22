@@ -16,7 +16,7 @@ export async function GET() {
     console.log(`Se obtuvieron ${products.length} productos de la API externa.`);
 
     // Utilidad para limpiar números con comas
-    const parseNumber = (val) => {
+    const parseNumber = (val: any): number => {
       if (val === null || val === undefined) return 0;
       if (typeof val === 'number') return val;
       const str = val.toString().replace(',', '.');
@@ -25,8 +25,8 @@ export async function GET() {
     };
 
     // Utilidad para procesar en lotes
-    const chunkArray = (array, size) => {
-      const chunks = [];
+    const chunkArray = <T,>(array: T[], size: number): T[][] => {
+      const chunks: T[][] = [];
       for (let i = 0; i < array.length; i += size) {
         chunks.push(array.slice(i, i + size));
       }
@@ -34,8 +34,8 @@ export async function GET() {
     };
 
     // 1. Obtener todas las categorías únicas del JSON externo (soporta códigos de 3 y 6 dígitos)
-    const uniqueCategoryCodes = new Set();
-    products.forEach(p => {
+    const uniqueCategoryCodes = new Set<string>();
+    products.forEach((p: any) => {
       const code = String(p.Categoria || '');
       if (!code) return;
 
@@ -93,15 +93,15 @@ export async function GET() {
 
     if (catListError) throw catListError;
 
-    const categoryMap = {};
-    catList.forEach(c => {
+    const categoryMap: Record<string, string> = {};
+    catList.forEach((c: any) => {
       categoryMap[c.codigo_externo] = c.id;
     });
 
     // 4. Preparar productos para upsert por lotes (con deduplicación)
-    const productsMap = new Map();
+    const productsMap = new Map<string, any>();
 
-    products.forEach(item => {
+    products.forEach((item: any) => {
       const codigo = item.Producto;
       if (!codigo) return;
 
@@ -161,6 +161,6 @@ export async function GET() {
 
   } catch (error) {
     console.error('Error fatal en sincronización:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

@@ -8,11 +8,11 @@ import { useCart } from '@/context/CartContext';
 import ProductCalculator from '@/components/products/ProductCalculator';
 import { supabase } from '@/lib/supabase';
 
-export default function ProductDetail({ params }) {
+export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);
     const productId = resolvedParams.id;
 
-    const [product, setProduct] = useState(null);
+    const [product, setProduct] = useState<any>(null);
     const [quantity, setQuantity] = useState(1);
     const { addToCart } = useCart();
     const [added, setAdded] = useState(false);
@@ -28,6 +28,8 @@ export default function ProductDetail({ params }) {
                     .eq('id', productId)
                     .single();
 
+                if (error) throw error;
+
                 if (data) {
                     setProduct({
                         ...data,
@@ -37,7 +39,7 @@ export default function ProductDetail({ params }) {
                     });
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error:', error instanceof Error ? error.message : String(error));
             } finally {
                 setIsLoading(false);
             }

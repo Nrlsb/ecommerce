@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 // Utilidad para procesar en lotes
-const chunkArray = (array, size) => {
-    const chunks = [];
+const chunkArray = <T,>(array: T[], size: number): T[][] => {
+    const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += size) {
         chunks.push(array.slice(i, i + size));
     }
@@ -27,9 +27,9 @@ export async function GET() {
         console.log(`Se obtuvieron ${categoriesData.length} categorías de la API externa.`);
 
         // Usamos un Map para deduplicar por codigo_externo (Categoria)
-        const categoriesMap = new Map();
+        const categoriesMap = new Map<string, any>();
 
-        categoriesData.forEach(item => {
+        categoriesData.forEach((item: any) => {
             const codigoExterno = String(item.Categoria || '');
             if (!codigoExterno) return;
 
@@ -82,7 +82,7 @@ export async function GET() {
 
     } catch (error) {
         console.error('Error general en sync-categories:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
     }
 }
 

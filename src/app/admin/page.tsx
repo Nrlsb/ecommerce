@@ -15,7 +15,7 @@ export default function AdminDashboard() {
     const [syncingCategories, setSyncingCategories] = useState(false);
     const [status, setStatus] = useState({ message: '', type: '' }); // 'success' | 'error'
 
-    const handleSync = async (type) => {
+    const handleSync = async (type: 'products' | 'categories') => {
         const isProducts = type === 'products';
         const setSyncing = isProducts ? setSyncingProducts : setSyncingCategories;
         const endpoint = isProducts ? '/api/sync-products' : '/api/sync-categories';
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
             }
         } catch (err) {
             setStatus({
-                message: `Error: ${err.message}`,
+                message: `Error: ${err instanceof Error ? err.message : String(err)}`,
                 type: 'error'
             });
         } finally {

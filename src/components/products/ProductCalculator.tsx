@@ -1,16 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, FC } from 'react';
 import { Calculator, Info, RotateCcw } from 'lucide-react';
 
-export default function ProductCalculator({ defaultYield = 10 }) {
-    const [width, setWidth] = useState('');
-    const [height, setHeight] = useState('');
-    const [doors, setDoors] = useState(0);
-    const [windows, setWindows] = useState(0);
-    const [layers, setLayers] = useState(2);
-    const [litersNeeded, setLitersNeeded] = useState(0);
+interface ProductCalculatorProps {
+    defaultYield?: number;
+}
+
+const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10 }) => {
+    const [width, setWidth] = useState<string>('');
+    const [height, setHeight] = useState<string>('');
+    const [doors, setDoors] = useState<number>(0);
+    const [windows, setWindows] = useState<number>(0);
+    const [layers, setLayers] = useState<number>(2);
+    const [litersNeeded, setLitersNeeded] = useState<number>(0);
 
     const calculate = () => {
         if (width && height) {
@@ -18,7 +21,7 @@ export default function ProductCalculator({ defaultYield = 10 }) {
             const openingsArea = (doors * 2) + (windows * 1.5);
             const netArea = Math.max(0, wallArea - openingsArea);
             const totalNeeded = (netArea / defaultYield) * layers;
-            setLitersNeeded(totalNeeded.toFixed(1));
+            setLitersNeeded(parseFloat(totalNeeded.toFixed(1)));
         } else {
             setLitersNeeded(0);
         }
@@ -26,7 +29,7 @@ export default function ProductCalculator({ defaultYield = 10 }) {
 
     useEffect(() => {
         calculate();
-    }, [width, height, layers, doors, windows]);
+    }, [width, height, layers, doors, windows, defaultYield]);
 
     const reset = () => {
         setWidth('');
@@ -134,4 +137,6 @@ export default function ProductCalculator({ defaultYield = 10 }) {
             </div>
         </div>
     );
-}
+};
+
+export default ProductCalculator;

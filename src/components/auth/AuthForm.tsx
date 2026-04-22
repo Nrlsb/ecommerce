@@ -11,7 +11,7 @@ export default function AuthForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const { signIn, signUp, user } = useAuth();
     const router = useRouter();
 
@@ -21,7 +21,7 @@ export default function AuthForm() {
         }
     }, [user, router]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
@@ -35,7 +35,7 @@ export default function AuthForm() {
 
             // La redirección ocurrirá por el useEffect al cambiar el estado 'user'
         } catch (err) {
-            setError(err.message);
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
