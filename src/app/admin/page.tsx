@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Package, Users, ShoppingBag, Settings, ArrowLeft, RefreshCw, Tags, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { LayoutDashboard, Package, Users, ShoppingBag, Settings, ArrowLeft, RefreshCw, Tags, CheckCircle2, AlertCircle, Loader2, FileDown } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -13,7 +13,8 @@ export default function AdminDashboard() {
 
     const [syncingProducts, setSyncingProducts] = useState(false);
     const [syncingCategories, setSyncingCategories] = useState(false);
-    const [status, setStatus] = useState({ message: '', type: '' }); // 'success' | 'error'
+    const [exporting, setExporting] = useState(false);
+    const [status, setStatus] = useState({ message: '', type: '' }); // 'success' | 'error' | 'info'
 
     const handleSync = async (type: 'products' | 'categories') => {
         const isProducts = type === 'products';
@@ -44,6 +45,40 @@ export default function AdminDashboard() {
         } finally {
             setSyncing(false);
             // Limpiar mensaje después de 5 segundos
+            setTimeout(() => setStatus({ message: '', type: '' }), 5000);
+        }
+    };
+
+    const handleExport = async () => {
+        setExporting(true);
+        setStatus({ message: 'Generando archivo Excel...', type: 'info' });
+
+        try {
+            const res = await fetch('/api/admin/export-products');
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Error al generar el Excel');
+            }
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `productos_${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            setStatus({ message: 'Excel descargado con éxito', type: 'success' });
+        } catch (err) {
+            setStatus({
+                message: `Error: ${err instanceof Error ? err.message : String(err)}`,
+                type: 'error'
+            });
+        } finally {
+            setExporting(false);
             setTimeout(() => setStatus({ message: '', type: '' }), 5000);
         }
     };
@@ -95,7 +130,7 @@ export default function AdminDashboard() {
                                     : 'bg-red-500/10 border-red-500/20 text-red-500'
                                     }`}
                             >
-                                {status.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                                {status.type === 'success' ? <CheckCircle2 size={18} /> : status.type === 'error' ? <AlertCircle size={18} /> : <Loader2 className="animate-spin" size={18} />}
                                 <span className="text-sm font-medium">{status.message}</span>
                             </motion.div>
                         )}
@@ -138,6 +173,24 @@ export default function AdminDashboard() {
                             <button className="w-full text-left p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group">
                                 <p className="font-bold group-hover:text-primary transition-colors">Ver lista de productos</p>
                                 <p className="text-sm text-foreground/60 line-clamp-1">Edita stock, precios y destacados.</p>
+                            </button>
+
+                            <button
+                                onClick={handleExport}
+                                disabled={exporting}
+                                className="w-full text-left p-4 rounded-xl border border-green-500/20 bg-green-500/5 hover:border-green-500/50 hover:bg-green-500/10 transition-all group disabled:opacity-50"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-bold text-green-700 dark:text-green-400 group-hover:text-green-600 transition-colors">Descargar Inventario (Excel)</p>
+                                        <p className="text-sm text-foreground/60 line-clamp-1">Obtén un reporte completo de todos los productos.</p>
+                                    </div>
+                                    {exporting ? (
+                                        <Loader2 className="animate-spin text-green-500" size={20} />
+                                    ) : (
+                                        <FileDown className="text-green-500 group-hover:translate-y-0.5 transition-transform" size={20} />
+                                    )}
+                                </div>
                             </button>
 
                             <div className="grid grid-cols-2 gap-4 pt-2">
