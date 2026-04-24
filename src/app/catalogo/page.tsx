@@ -96,6 +96,8 @@ export default function Catalogo() {
         query = query.order('id', { ascending: false });
       }
 
+      query = query.range(start, end);
+
       // Crear una promesa de timeout de 15 segundos
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Tiempo de espera agotado: La base de datos no responde.')), 15000)
