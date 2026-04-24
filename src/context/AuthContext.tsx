@@ -45,13 +45,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            const currentUser = session?.user ?? null;
-            setUser(currentUser);
-            if (currentUser) {
-                await fetchProfile(currentUser.id);
+            try {
+                console.log('🔄 Verificando sesión de Supabase...');
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                
+                const currentUser = session?.user ?? null;
+                setUser(currentUser);
+                if (currentUser) {
+                    await fetchProfile(currentUser.id);
+                }
+                console.log('✅ Sesión verificada');
+            } catch (err) {
+                console.error('❌ Error al obtener sesión:', err);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         getSession();

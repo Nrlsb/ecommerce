@@ -65,7 +65,9 @@ export default function Catalogo() {
     try {
       const start = currentPage * PAGE_SIZE;
       const end = start + PAGE_SIZE - 1;
-
+      
+      console.log(`🔍 Buscando productos (Página ${currentPage})...`);
+      
       const selectString = activeCategory === 'todos'
         ? '*, categorias:categoria_id(slug)'
         : '*, categorias:categoria_id!inner(slug)';
@@ -94,13 +96,21 @@ export default function Catalogo() {
         query = query.order('id', { ascending: false });
       }
 
-      query = query.range(start, end);
+      // Crear una promesa de timeout de 15 segundos
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Tiempo de espera agotado: La base de datos no responde.')), 15000)
+      );
 
-      const { data, count, error: supabaseError } = await query;
+      // Competir entre la consulta real y el timeout
+      const { data, count, error: supabaseError } = await Promise.race([
+        query,
+        timeoutPromise
+      ]) as any;
 
       if (supabaseError) throw supabaseError;
 
       if (data) {
+        console.log(`✅ Se cargaron ${data.length} productos.`);
         const formattedProducts = data.map((p: any) => ({
           ...p,
           category: p.categorias?.slug || 'interior',
