@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ShoppingCart, PaintBucket, Menu, X, Search, User, ShieldCheck, Sun, Moon } from 'lucide-react';
@@ -12,22 +12,22 @@ export default function Navbar() {
     const router = useRouter();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [mounted, setMounted] = useState(false);
     const { totalItems } = useCart();
     const { user, profile, signOut } = useAuth();
     const isAdmin = profile?.rol?.toLowerCase() === 'admin';
 
     // Initial theme setup
-    useState(() => {
-        if (typeof window !== 'undefined') {
-            const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-            setTheme(initialTheme);
-            if (initialTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-            }
+    useEffect(() => {
+        setMounted(true);
+        const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+        setTheme(initialTheme);
+        if (initialTheme === 'dark') {
+            document.documentElement.classList.add('dark');
         }
-    });
+    }, []);
 
     const toggleTheme = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -92,7 +92,7 @@ export default function Navbar() {
                             className="text-foreground/80 hover:text-primary transition-colors p-2 rounded-full hover:bg-secondary"
                             aria-label="Cambiar tema"
                         >
-                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                            {mounted && theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
 
                         {user ? (
