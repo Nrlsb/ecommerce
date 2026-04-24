@@ -1,14 +1,13 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
 interface AuthContextType {
-    user: { id: string; email: string } | null;
-    profile: { id: string; rol: string } | null;
+    user: any;
+    profile: any;
     loading: boolean;
-    signUp: (email: string, password: string) => Promise<any>;
-    signIn: (email: string, password: string) => Promise<any>;
+    signUp: (email: string, password: string, nombre?: string) => Promise<{ error?: any }>;
+    signIn: (email: string, password: string) => Promise<{ error?: any }>;
     signOut: () => Promise<void>;
 }
 
@@ -16,8 +15,8 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     profile: null,
     loading: true,
-    signUp: async () => {},
-    signIn: async () => {},
+    signUp: async () => ({}),
+    signIn: async () => ({}),
     signOut: async () => {},
 });
 
@@ -26,71 +25,79 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchProfile = async (userId: string) => {
-        try {
-            const { data, error } = await supabase
-                .from('perfiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
-
-            if (error) throw error;
-            console.log('Perfil cargado para:', userId, 'Rol:', data.rol);
-            setProfile(data);
-        } catch (error) {
-            console.error('Error fetching profile:', error instanceof Error ? error.message : String(error));
-            setProfile(null);
-        }
-    };
-
     useEffect(() => {
-        const getSession = async () => {
+        const loadSession = () => {
             try {
-                console.log('🔄 Verificando sesión de Supabase...');
-                const { data: { session }, error } = await supabase.auth.getSession();
-                if (error) throw error;
-                
-                const currentUser = session?.user ?? null;
-                setUser(currentUser);
-                if (currentUser) {
-                    await fetchProfile(currentUser.id);
+                const storedUser = localStorage.getItem('auth_user');
+                if (storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
+                    setUser(parsedUser);
+                    setProfile(parsedUser); // En el nuevo sistema, el perfil viene con el usuario
                 }
-                console.log('✅ Sesión verificada');
-            } catch (err) {
-                console.error('❌ Error al obtener sesión:', err);
+            } catch (error) {
+                console.error('Error loading session:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        getSession();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            const currentUser = session?.user ?? null;
-            setUser(currentUser);
-            if (currentUser) {
-                await fetchProfile(currentUser.id);
-            } else {
-                setProfile(null);
-            }
-            setLoading(false);
-        });
-
-        return () => subscription.unsubscribe();
+        loadSession();
     }, []);
 
-    const signUp = (email: string, password: string) => supabase.auth.signUp({ email, password });
-    const signIn = (email: string, password: string) => supabase.auth.signInWithPassword({ email, password });
-    const signOut = async () => {
+    const signUp = async (email: string, password: string, nombre?: string) => {
         try {
-            console.log('Iniciando cierre de sesión...');
-            await supabase.auth.signOut();
-            setProfile(null);
-            setUser(null);
-            console.log('Sesión cerrada correctamente');
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, nombre }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return { error: new Error(data.error || 'Error al registrarse') };
+            }
+
+            const newUser = data.user;
+            setUser(newUser);
+            setProfile(newUser);
+            localStorage.setItem('auth_user', JSON.stringify(newUser));
+            
+            return {};
         } catch (error) {
-            console.error('Error al cerrar sesión:', error instanceof Error ? error.message : String(error));
+            return { error };
         }
+    };
+
+    const signIn = async (email: string, password: string) => {
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return { error: new Error(data.error || 'Credenciales inválidas') };
+            }
+
+            const loggedUser = data.user;
+            setUser(loggedUser);
+            setProfile(loggedUser);
+            localStorage.setItem('auth_user', JSON.stringify(loggedUser));
+
+            return {};
+        } catch (error) {
+            return { error };
+        }
+    };
+
+    const signOut = async () => {
+        setUser(null);
+        setProfile(null);
+        localStorage.removeItem('auth_user');
     };
 
     return (

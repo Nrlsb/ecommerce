@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle, User } from 'lucide-react';
 
 export default function AuthForm() {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
+    const [nombre, setNombre] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export default function AuthForm() {
         try {
             const { error: authError } = isLogin
                 ? await signIn(email, password)
-                : await signUp(email, password);
+                : await signUp(email, password, nombre);
 
             if (authError) throw authError;
 
@@ -53,6 +54,28 @@ export default function AuthForm() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+                <AnimatePresence>
+                    {!isLogin && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                        >
+                            <label className="block text-sm font-medium text-foreground/80 mb-1">Nombre</label>
+                            <div className="relative mb-4">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+                                <input
+                                    type="text"
+                                    value={nombre}
+                                    onChange={(e) => setNombre(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    placeholder="Tu nombre"
+                                />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <div>
                     <label className="block text-sm font-medium text-foreground/80 mb-1">Email</label>
                     <div className="relative">
