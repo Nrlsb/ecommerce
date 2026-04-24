@@ -140,9 +140,9 @@ export default function AdminDashboard() {
     }
 
     const stats = [
-        { label: 'Productos', value: statsData?.stats?.totalProducts || '...', icon: Package, color: 'text-blue-600', bg: 'bg-blue-100' },
-        { label: 'Usuarios', value: statsData?.stats?.totalUsers || '...', icon: Users, color: 'text-green-600', bg: 'bg-green-100' },
-        { label: 'Pedidos', value: statsData?.stats?.totalOrders || '...', icon: ShoppingBag, color: 'text-purple-600', bg: 'bg-purple-100' },
+        { label: 'Productos', value: statsData?.stats?.totalProducts || '...', icon: Package, color: 'text-blue-600', bg: 'bg-blue-100', href: '#' },
+        { label: 'Usuarios', value: statsData?.stats?.totalUsers || '...', icon: Users, color: 'text-green-600', bg: 'bg-green-100', href: '/admin/usuarios' },
+        { label: 'Pedidos', value: statsData?.stats?.totalOrders || '...', icon: ShoppingBag, color: 'text-purple-600', bg: 'bg-purple-100', href: '/admin/pedidos' },
     ];
 
     return (
@@ -182,21 +182,22 @@ export default function AdminDashboard() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     {stats.map((stat, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: idx * 0.1 }}
-                            className="bg-card p-6 rounded-2xl border border-border shadow-sm flex items-center gap-5 hover:border-primary/30 transition-all group"
-                        >
-                            <div className={`p-4 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-                                <stat.icon size={28} />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-foreground/60 uppercase tracking-wider">{stat.label}</p>
-                                <p className="text-3xl font-black text-foreground">{stat.value}</p>
-                            </div>
-                        </motion.div>
+                        <Link key={idx} href={stat.href}>
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="bg-card p-6 rounded-2xl border border-border shadow-sm flex items-center gap-5 hover:border-primary/50 hover:bg-primary/5 transition-all group h-full cursor-pointer"
+                            >
+                                <div className={`p-4 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+                                    <stat.icon size={28} />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-foreground/60 uppercase tracking-wider">{stat.label}</p>
+                                    <p className="text-3xl font-black text-foreground">{stat.value}</p>
+                                </div>
+                            </motion.div>
+                        </Link>
                     ))}
                 </div>
 
