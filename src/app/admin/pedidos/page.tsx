@@ -95,7 +95,10 @@ export default function OrderManagement() {
                 });
                 setOrders(prev => prev.map(o => o.id === orderId ? { ...o, estado: newStatus } : o));
             } else {
-                throw new Error(data.error || 'Error al actualizar pedido');
+                const errorMsg = data.details 
+                    ? `${data.error}: ${data.details}` 
+                    : (data.error || 'Error al actualizar pedido');
+                throw new Error(errorMsg);
             }
         } catch (err: any) {
             setStatus({ message: err.message, type: 'error' });

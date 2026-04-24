@@ -55,17 +55,40 @@ export async function PATCH(request: NextRequest) {
         // 2. Si el nuevo estado es 'anulado' y hay un payment_id, procedemos al reembolso
         if (estado === 'anulado' && pedido.payment_id) {
             console.log(`Iniciando reembolso para el pago ${pedido.payment_id} del pedido ${id}`);
+            
+            // Verificar si tenemos token configurado
+            if (!process.env.MP_ACCESS_TOKEN) {
+                console.error('Error: MP_ACCESS_TOKEN no configurado');
+                return NextResponse.json({ 
+                    error: 'Configuración incompleta', 
+                    details: 'No se encontró el token de Mercado Pago en el servidor.' 
+                }, { status: 500 });
+            }
+
             try {
                 const refund = new PaymentRefund(client);
-                await refund.create({ payment_id: pedido.payment_id });
-                console.log('Reembolso procesado exitosamente en Mercado Pago');
+                // Aseguramos que el payment_id sea string y no tenga espacios
+                const refundResult = await refund.create({ 
+                    payment_id: String(pedido.payment_id).trim() 
+                });
+                console.log('Reembolso procesado exitosamente:', refundResult.id);
             } catch (refundError: any) {
-                console.error('Error al procesar el reembolso en MP:', refundError);
-                // Si falla el reembolso, podrías decidir si cancelar o no la anulación en DB.
-                // Aquí seguiremos para al menos marcarlo como anulado en DB, pero avisamos.
+                console.error('Error detallado al procesar el reembolso en Mercado Pago:', refundError);
+                
+                // Extraer el mensaje de error más específico de la respuesta de MP
+                let mensajeError = 'Error al procesar el reembolso en Mercado Pago';
+                let detallesError = refundError.message || 'Error desconocido';
+
+                // Si es un error del SDK de MP, suele tener una estructura con 'message' o 'cause'
+                if (refundError.cause && Array.isArray(refundError.cause) && refundError.cause.length > 0) {
+                    detallesError = refundError.cause[0].description || detallesError;
+                } else if (refundError.error) {
+                    detallesError = refundError.error;
+                }
+
                 return NextResponse.json({ 
-                    error: 'Error al procesar el reembolso en Mercado Pago', 
-                    details: refundError.message 
+                    error: mensajeError, 
+                    details: detallesError 
                 }, { status: 500 });
             }
         }
