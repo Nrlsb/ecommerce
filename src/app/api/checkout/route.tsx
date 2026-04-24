@@ -50,13 +50,19 @@ export async function POST(request: NextRequest) {
         // 3. Crear la preferencia de MercadoPago
         const mpPreference = new Preference(client);
         
-        const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+        let baseUrl = process.env.NEXT_PUBLIC_URL || 
+                      (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
+                      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+                      
+        if (baseUrl.endsWith('/')) {
+            baseUrl = baseUrl.slice(0, -1);
+        }
         
         const preferenceData = {
             body: {
                 items: items.map((item: any) => ({
                     id: String(item.id),
-                    title: String(item.name || 'Producto'),
+                    title: String(item.name || item.nombre || 'Producto'),
                     quantity: parseInt(item.quantity) || 1,
                     unit_price: parseFloat(item.price) || 0,
                     currency_id: 'ARS'
