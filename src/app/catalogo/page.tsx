@@ -82,6 +82,15 @@ export default function Catalogo() {
 
       if (searchQuery) {
         query = query.ilike('nombre', `%${searchQuery}%`);
+        
+        // Registrar la búsqueda en analíticas (sin esperar respuesta para no bloquear)
+        if (searchQuery.length >= 3 && currentPage === 0) {
+          fetch('/api/analytics/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: searchQuery })
+          }).catch(err => console.error('Error reporting search analytics:', err));
+        }
       }
 
       if (selectedBrands.length > 0) {

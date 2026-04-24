@@ -4,11 +4,27 @@ import { supabase } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  let syncId = '';
+  
   try {
     console.log('Iniciando sincronización de productos...');
+    
+    // Registrar inicio en el historial
+    const { data: syncEntry } = await supabase
+      .from('sync_history')
+      .insert({
+        estado: 'en_progreso',
+        fecha_inicio: new Date().toISOString()
+      })
+      .select('id')
+      .single();
+    
+    if (syncEntry) syncId = syncEntry.id;
+
     const response = await fetch('http://119.8.78.68:9078/rest/MERWS01B', {
       cache: 'no-store'
     });
+    
     if (!response.ok) {
       throw new Error('Error al obtener productos de la API externa');
     }
@@ -33,12 +49,11 @@ export async function GET() {
       return chunks;
     };
 
-    // 1. Obtener todas las categorías únicas del JSON externo (soporta códigos de 3 y 6 dígitos)
+    // 1. Obtener todas las categorías únicas 
     const uniqueCategoryCodes = new Set<string>();
     products.forEach((p: any) => {
       const code = String(p.Categoria || '');
       if (!code) return;
-
       if (code.length === 6) {
         uniqueCategoryCodes.add(code.substring(0, 3));
         uniqueCategoryCodes.add(code.substring(3, 6));
@@ -49,17 +64,13 @@ export async function GET() {
 
     const finalCategoryCodes = [...uniqueCategoryCodes];
 
-    // 2. Asegurar que todas las categorías existan en Supabase (Solo insertar si no existen)
     if (finalCategoryCodes.length > 0) {
-      // Primero obtenemos las categorías que ya existen
       const { data: existingCats } = await supabase
         .from('categorias')
         .select('codigo_externo')
         .in('codigo_externo', finalCategoryCodes);
 
       const existingCodes = new Set(existingCats?.map(c => c.codigo_externo) || []);
-
-      // Filtramos para quedarnos solo con las que NO existen
       const newCategoryCodes = finalCategoryCodes.filter(code => !existingCodes.has(code));
 
       if (newCategoryCodes.length > 0) {
@@ -70,37 +81,17 @@ export async function GET() {
         }));
 
         const catChunks = chunkArray(categoriesToInsert, 100);
-        console.log(`Insertando ${categoriesToInsert.length} nuevas categorías detectadas en ${catChunks.length} lotes...`);
-
         for (const chunk of catChunks) {
-          const { error: catInsertError } = await supabase
-            .from('categorias')
-            .insert(chunk);
-
-          if (catInsertError) {
-            console.error('Error al insertar lote de categorías:', catInsertError);
-          }
+          await supabase.from('categorias').insert(chunk);
         }
-      } else {
-        console.log('No se detectaron categorías nuevas para insertar.');
       }
     }
 
-    // 3. Obtener mapeo de categorías (codigo_externo -> id)
-    const { data: catList, error: catListError } = await supabase
-      .from('categorias')
-      .select('id, codigo_externo');
-
-    if (catListError) throw catListError;
-
+    const { data: catList } = await supabase.from('categorias').select('id, codigo_externo');
     const categoryMap: Record<string, string> = {};
-    catList.forEach((c: any) => {
-      categoryMap[c.codigo_externo] = c.id;
-    });
+    catList?.forEach((c: any) => { categoryMap[c.codigo_externo] = c.id; });
 
-    // 4. Preparar productos para upsert por lotes (con deduplicación)
     const productsMap = new Map<string, any>();
-
     products.forEach((item: any) => {
       const codigo = item.Producto;
       if (!codigo) return;
@@ -135,32 +126,47 @@ export async function GET() {
     });
 
     const productsToUpsert = Array.from(productsMap.values());
-
-    // 5. UPSERT por lotes de productos
     const productChunks = chunkArray(productsToUpsert, 100);
-    console.log(`Sincronizando ${productsToUpsert.length} productos en ${productChunks.length} lotes...`);
-
+    
     let processedCount = 0;
-    for (const [index, chunk] of productChunks.entries()) {
+    for (const chunk of productChunks) {
       const { error: upsertError } = await supabase
         .from('productos')
         .upsert(chunk, { onConflict: 'codigo_externo' });
 
-      if (upsertError) {
-        console.error(`Error en lote de productos ${index + 1}:`, upsertError);
-        throw upsertError;
-      }
+      if (upsertError) throw upsertError;
       processedCount += chunk.length;
-      console.log(`Lote ${index + 1}/${productChunks.length} completado (${processedCount} productos)`);
     }
 
-    return NextResponse.json({
-      message: 'Sincronización completada',
-      processed: products.length
-    });
+    // Registrar éxito
+    if (syncId) {
+      await supabase
+        .from('sync_history')
+        .update({
+          estado: 'exito',
+          fecha_fin: new Date().toISOString(),
+          productos_procesados: processedCount
+        })
+        .eq('id', syncId);
+    }
+
+    return NextResponse.json({ message: 'Sincronización completada', processed: processedCount });
 
   } catch (error) {
     console.error('Error fatal en sincronización:', error);
+    
+    // Registrar error en el historial
+    if (syncId) {
+       await supabase
+        .from('sync_history')
+        .update({
+          estado: 'error',
+          fecha_fin: new Date().toISOString(),
+          mensaje_error: error instanceof Error ? error.message : String(error)
+        })
+        .eq('id', syncId);
+    }
+
     return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
