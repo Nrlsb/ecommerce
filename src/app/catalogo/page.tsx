@@ -6,6 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { FilterPanel } from '@/components/catalogo/FilterPanel';
 import { SearchBar } from '@/components/catalogo/SearchBar';
 import { ProductGrid } from '@/components/catalogo/ProductGrid';
+import { FilterChips } from '@/components/catalogo/FilterChips';
 
 interface Category {
   id: string;
@@ -31,6 +32,7 @@ export default function Catalogo() {
   const [activeSort, setActiveSort] = useState('destacados');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -97,6 +99,14 @@ export default function Catalogo() {
         query = query.in('marca', selectedBrands);
       }
 
+      // Filtro de precio
+      if (priceRange[0] > 0) {
+        query = query.gte('precio', priceRange[0]);
+      }
+      if (priceRange[1] < 1000000) {
+        query = query.lte('precio', priceRange[1]);
+      }
+
       if (activeSort === 'menor_precio') {
         query = query.order('precio', { ascending: true });
       } else if (activeSort === 'mayor_precio') {
@@ -149,7 +159,7 @@ export default function Catalogo() {
     setPage(0);
     setHasMore(true);
     fetchProducts(0, true);
-  }, [activeCategory, activeSort, searchQuery, selectedBrands]);
+  }, [activeCategory, activeSort, searchQuery, selectedBrands, priceRange]);
 
   const handleLoadMore = () => {
     if (!isLoading && hasMore) {
@@ -177,12 +187,19 @@ export default function Catalogo() {
     );
   };
 
+  const clearAllFilters = () => {
+    setActiveCategory('todos');
+    setSelectedBrands([]);
+    setPriceRange([0, 1000000]);
+    setSearchQuery('');
+  };
+
   return (
     <div className="min-h-screen bg-muted/20 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Catálogo de Productos</h1>
-          <p className="text-foreground/60 mt-2">Encuentra todo lo que necesitas para tu proyecto</p>
+          <h1 className="text-4xl font-black text-foreground tracking-tight">Catálogo de Productos</h1>
+          <p className="text-foreground/60 mt-2 text-lg">Encuentra todo lo que necesitas para tu proyecto</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -195,12 +212,26 @@ export default function Catalogo() {
             brands={currentLoadedBrands}
             activeSort={activeSort}
             onSortChange={setActiveSort}
+            priceRange={priceRange}
+            onPriceChange={setPriceRange}
             isOpen={isMobileFiltersOpen}
             onToggle={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+            onClearAll={clearAllFilters}
           />
 
           <div className="flex-1">
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
+            
+            <FilterChips
+              activeCategory={activeCategory}
+              categories={categories}
+              selectedBrands={selectedBrands}
+              priceRange={priceRange}
+              onRemoveCategory={() => setActiveCategory('todos')}
+              onRemoveBrand={toggleBrand}
+              onResetPrice={() => setPriceRange([0, 1000000])}
+              onClearAll={clearAllFilters}
+            />
 
             <ProductGrid
               products={products}
