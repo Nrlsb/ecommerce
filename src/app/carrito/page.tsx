@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { Trash2, Plus, Minus, ArrowLeft, CreditCard } from 'lucide-react';
@@ -8,6 +8,12 @@ import { Trash2, Plus, Minus, ArrowLeft, CreditCard } from 'lucide-react';
 export default function CarritoPage() {
     const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Evitar errores de hidratación
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const handleCheckout = async () => {
         setIsProcessing(true);
@@ -40,6 +46,10 @@ export default function CarritoPage() {
             setIsProcessing(false);
         }
     };
+
+    if (!isMounted) {
+        return <div className="min-h-screen bg-background" />;
+    }
 
     if (items.length === 0) {
         return (

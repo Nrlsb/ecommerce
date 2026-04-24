@@ -50,23 +50,25 @@ export async function POST(request: NextRequest) {
         // 3. Crear la preferencia de MercadoPago
         const mpPreference = new Preference(client);
         
+        const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+        
         const preferenceData = {
             body: {
                 items: items.map((item: any) => ({
                     id: String(item.id),
-                    title: item.name,
-                    quantity: item.quantity,
-                    unit_price: Number(item.price),
+                    title: String(item.name || 'Producto'),
+                    quantity: parseInt(item.quantity) || 1,
+                    unit_price: parseFloat(item.price) || 0,
                     currency_id: 'ARS'
                 })),
                 back_urls: {
-                    success: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/checkout/success`,
-                    failure: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/checkout/failure`,
-                    pending: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/checkout/pending`,
+                    success: `${baseUrl}/checkout/success`,
+                    failure: `${baseUrl}/checkout/failure`,
+                    pending: `${baseUrl}/checkout/pending`,
                 },
                 auto_return: 'approved',
-                external_reference: pedido.id, // Referencia interna para vincular el pago
-                notification_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/webhooks/mercadopago`,
+                external_reference: String(pedido.id), 
+                notification_url: `${baseUrl}/api/webhooks/mercadopago`,
             }
         };
 
@@ -82,10 +84,19 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
 
-    } catch (error) {
-        console.error('Error procesando checkout:', error instanceof Error ? error.message : String(error));
+    } catch (error: any) {
+        console.error('Error detallado procesando checkout:', error);
+        
+        // Error específico de Supabase
+        if (error.code) {
+            return NextResponse.json(
+                { error: `Error de Base de Datos: ${error.message} (Código: ${error.code})` },
+                { status: 500 }
+            );
+        }
+
         return NextResponse.json(
-            { error: 'Error interno del servidor al procesar el pago' },
+            { error: error.message || 'Error interno del servidor al procesar el pago' },
             { status: 500 }
         );
     }
