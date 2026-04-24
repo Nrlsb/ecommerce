@@ -6,36 +6,53 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        // 1. Obtener todos los productos
-        const { data: productos, error } = await supabase
-            .from('productos')
-            .select(`
-                id,
-                nombre,
-                marca,
-                descripcion,
-                precio,
-                stock,
-                codigo_externo,
-                descripcion_corta,
-                peso,
-                precio_con_descuento,
-                descuento_porcentual,
-                destacado,
-                created_at,
-                categorias:categoria_id(nombre)
-            `)
-            .order('id', { ascending: true });
+        // 1. Obtener TODOS los productos en lotes (evita el límite de 1000 de Supabase)
+        let allProducts: any[] = [];
+        let from = 0;
+        const step = 1000;
+        let hasMore = true;
 
-        if (error) {
-            console.error('Supabase Error:', error);
-            throw error;
+        while (hasMore) {
+            const { data: productos, error } = await supabase
+                .from('productos')
+                .select(`
+                    id,
+                    nombre,
+                    marca,
+                    descripcion,
+                    precio,
+                    stock,
+                    codigo_externo,
+                    descripcion_corta,
+                    peso,
+                    precio_con_descuento,
+                    descuento_porcentual,
+                    destacado,
+                    created_at,
+                    categorias:categoria_id(nombre)
+                `)
+                .order('id', { ascending: true })
+                .range(from, from + step - 1);
+
+            if (error) {
+                console.error('Supabase Error at range', from, ':', error);
+                throw error;
+            }
+
+            if (productos && productos.length > 0) {
+                allProducts = [...allProducts, ...productos];
+                from += step;
+                // Si el lote trajo menos de 1000, es que ya no hay más
+                if (productos.length < step) hasMore = false;
+            } else {
+                hasMore = false;
+            }
         }
 
-        if (!productos) throw new Error('No se encontraron productos');
+        if (allProducts.length === 0) throw new Error('No se encontraron productos');
 
         // 2. Transformar datos para el Excel
-        const dataParaExcel = productos.map(p => ({
+        const dataParaExcel = allProducts.map(p => ({
             ID: p.id,
             Nombre: p.nombre,
             Marca: p.marca || '-',
