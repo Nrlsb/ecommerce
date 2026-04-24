@@ -2,11 +2,6 @@ import { NextResponse, NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { MercadoPagoConfig, PaymentRefund } from 'mercadopago';
 
-// Configuración de MercadoPago
-const client = new MercadoPagoConfig({ 
-    accessToken: process.env.MP_ACCESS_TOKEN || '' 
-});
-
 export const dynamic = 'force-dynamic';
 
 // GET /api/admin/orders - Listar todos los pedidos con sus ítems
@@ -37,6 +32,11 @@ export async function PATCH(request: NextRequest) {
     try {
         const { id, estado } = await request.json();
 
+        // Inicializar cliente MP dentro del handler para asegurar uso de variables de entorno actuales
+        const client = new MercadoPagoConfig({ 
+            accessToken: process.env.MP_ACCESS_TOKEN || '' 
+        });
+
         if (!id || !estado) {
             return NextResponse.json({ error: 'ID y estado son requeridos' }, { status: 400 });
         }
@@ -54,10 +54,12 @@ export async function PATCH(request: NextRequest) {
 
         // 2. Si el nuevo estado es 'anulado' y hay un payment_id, procedemos al reembolso
         if (estado === 'anulado' && pedido.payment_id) {
+            const token = process.env.MP_ACCESS_TOKEN || '';
             console.log(`Iniciando reembolso para el pago ${pedido.payment_id} del pedido ${id}`);
+            console.log(`Usando token que empieza con: ${token.substring(0, 10)}... (Longitud: ${token.length})`);
             
             // Verificar si tenemos token configurado
-            if (!process.env.MP_ACCESS_TOKEN) {
+            if (!token) {
                 console.error('Error: MP_ACCESS_TOKEN no configurado');
                 return NextResponse.json({ 
                     error: 'Configuración incompleta', 
