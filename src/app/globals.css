@@ -32,31 +32,36 @@
   --border: #e2e8f0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
+.dark {
+  --background: #0B1120;
+  /* Deep Navy */
+  --foreground: #F1F5F9;
 
-    --primary: #3b82f6;
-    --primary-foreground: #0f172a;
+  --primary: #3B82F6;
+  --primary-foreground: #0B1120;
 
-    --secondary: #1e293b;
-    --secondary-foreground: #f8fafc;
+  --secondary: #1E293B;
+  --secondary-foreground: #F1F5F9;
 
-    --accent: #EB2891;
-    --accent-foreground: #0f172a;
+  --accent: #FB7185;
+  /* Rose 400 */
+  --accent-foreground: #0B1120;
 
-    --destructive: #f87171;
-    --destructive-foreground: #0f172a;
+  --destructive: #F87171;
+  --destructive-foreground: #0B1120;
 
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8;
 
-    --card: #1e293b;
-    --card-foreground: #f8fafc;
+  --card: #111827;
+  --card-foreground: #F1F5F9;
 
-    --border: #334155;
-  }
+  --border: #1E293B;
+}
+
+/* Base transitions for theme switching */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 body {

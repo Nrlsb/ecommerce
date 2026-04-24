@@ -1,5 +1,6 @@
 import { Loader2, PaintBucket, Filter } from 'lucide-react';
 import { ProductCard } from './ProductCard';
+import Skeleton from '../ui/Skeleton';
 
 interface Product {
   id: string;
@@ -34,7 +35,17 @@ export function ProductGrid({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="bg-card rounded-2xl h-80 animate-pulse border border-border" />
+          <div key={i} className="bg-card rounded-[2rem] p-5 border border-border space-y-4">
+            <Skeleton className="aspect-square w-full rounded-2xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-6 w-full" />
+              <div className="flex justify-between items-center pt-4">
+                <Skeleton className="h-8 w-1/2" />
+                <Skeleton className="h-12 w-12 rounded-xl" />
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     );

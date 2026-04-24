@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, PaintBucket, Menu, X, Search, User, ShieldCheck } from 'lucide-react';
+import { ShoppingCart, PaintBucket, Menu, X, Search, User, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -11,9 +11,34 @@ import { useAuth } from '@/context/AuthContext';
 export default function Navbar() {
     const router = useRouter();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [theme, setTheme] = useState<'light' | 'dark'>('light');
     const { totalItems } = useCart();
     const { user, profile, signOut } = useAuth();
     const isAdmin = profile?.rol?.toLowerCase() === 'admin';
+
+    // Initial theme setup
+    useState(() => {
+        if (typeof window !== 'undefined') {
+            const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+            setTheme(initialTheme);
+            if (initialTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        }
+    });
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    };
 
     return (
         <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-border shadow-sm">
@@ -60,6 +85,14 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center space-x-6">
                         <button className="text-foreground/80 hover:text-primary transition-colors">
                             <Search size={20} />
+                        </button>
+
+                        <button 
+                            onClick={toggleTheme}
+                            className="text-foreground/80 hover:text-primary transition-colors p-2 rounded-full hover:bg-secondary"
+                            aria-label="Cambiar tema"
+                        >
+                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                         </button>
 
                         {user ? (
