@@ -25,7 +25,10 @@ export default function CarritoPage() {
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && data.initPoint) {
+                // Redirigir a MercadoPago
+                window.location.href = data.initPoint;
+            } else if (response.ok) {
                 alert('¡Pedido creado exitosamente con ID: ' + data.pedidoId);
                 clearCart();
             } else {
