@@ -57,8 +57,14 @@ export default function AdminDashboard() {
             const res = await fetch('/api/admin/export-products');
 
             if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || 'Error al generar el Excel');
+                let errorMsg = 'Error al generar el Excel';
+                try {
+                    const data = await res.json();
+                    errorMsg = data.details || data.error || errorMsg;
+                } catch (e) {
+                    errorMsg = `Error del servidor (${res.status}): ${res.statusText}`;
+                }
+                throw new Error(errorMsg);
             }
 
             const blob = await res.blob();

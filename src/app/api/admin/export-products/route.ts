@@ -23,18 +23,23 @@ export async function GET() {
                 descuento_porcentual,
                 destacado,
                 created_at,
-                categoria:categorias(nombre)
+                categorias:categoria_id(nombre)
             `)
             .order('id', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase Error:', error);
+            throw error;
+        }
+
+        if (!productos) throw new Error('No se encontraron productos');
 
         // 2. Transformar datos para el Excel
         const dataParaExcel = productos.map(p => ({
             ID: p.id,
             Nombre: p.nombre,
             Marca: p.marca || '-',
-            Categoría: (p.categoria as any)?.nombre || '-',
+            Categoría: (p.categorias as any)?.nombre || '-',
             Precio: p.precio,
             'Precio con Descuento': p.precio_con_descuento || p.precio,
             'Descuento %': p.descuento_porcentual || 0,
@@ -44,7 +49,7 @@ export async function GET() {
             Descripción: p.descripcion || '-',
             Peso: p.peso || 0,
             Destacado: p.destacado ? 'Sí' : 'No',
-            'Fecha de Creación': new Date(p.created_at).toLocaleString()
+            'Fecha de Creación': p.created_at ? new Date(p.created_at).toLocaleString() : '-'
         }));
 
         // 3. Crear el libro de Excel
