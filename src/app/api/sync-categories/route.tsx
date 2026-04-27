@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 // Utilidad para procesar en lotes
 const chunkArray = <T,>(array: T[], size: number): T[][] => {
@@ -63,7 +63,7 @@ export async function GET() {
         let totalProcessed = 0;
 
         for (const [index, chunk] of categoryChunks.entries()) {
-            const { error: upsertError } = await supabase
+            const { error: upsertError } = await supabaseAdmin
                 .from('categorias')
                 .upsert(chunk, { onConflict: 'codigo_externo' });
 

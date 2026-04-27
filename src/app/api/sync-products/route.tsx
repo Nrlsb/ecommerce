@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getCorrectImagesMap } from '@/lib/product-images';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,7 @@ export async function GET() {
     const correctImagesMap = getCorrectImagesMap();
     
     // Registrar inicio en el historial
-    const { data: syncEntry } = await supabase
+    const { data: syncEntry } = await supabaseAdmin
       .from('sync_history')
       .insert({
         estado: 'en_progreso',
@@ -69,7 +69,7 @@ export async function GET() {
     const finalCategoryCodes = [...uniqueCategoryCodes];
 
     if (finalCategoryCodes.length > 0) {
-      const { data: existingCats } = await supabase
+      const { data: existingCats } = await supabaseAdmin
         .from('categorias')
         .select('codigo_externo')
         .in('codigo_externo', finalCategoryCodes);
@@ -86,12 +86,12 @@ export async function GET() {
 
         const catChunks = chunkArray(categoriesToInsert, 100);
         for (const chunk of catChunks) {
-          await supabase.from('categorias').insert(chunk);
+          await supabaseAdmin.from('categorias').insert(chunk);
         }
       }
     }
 
-    const { data: catList } = await supabase.from('categorias').select('id, codigo_externo');
+    const { data: catList } = await supabaseAdmin.from('categorias').select('id, codigo_externo');
     const categoryMap: Record<string, string> = {};
     catList?.forEach((c: any) => { categoryMap[c.codigo_externo] = c.id; });
 
@@ -136,7 +136,7 @@ export async function GET() {
     
     let processedCount = 0;
     for (const chunk of productChunks) {
-      const { error: upsertError } = await supabase
+      const { error: upsertError } = await supabaseAdmin
         .from('productos')
         .upsert(chunk, { onConflict: 'codigo_externo' });
 
@@ -146,7 +146,7 @@ export async function GET() {
 
     // Registrar éxito
     if (syncId) {
-      await supabase
+      await supabaseAdmin
         .from('sync_history')
         .update({
           estado: 'exito',
@@ -163,7 +163,7 @@ export async function GET() {
     
     // Registrar error en el historial
     if (syncId) {
-       await supabase
+       await supabaseAdmin
         .from('sync_history')
         .update({
           estado: 'error',
