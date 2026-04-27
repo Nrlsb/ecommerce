@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getCorrectImagesMap } from '@/lib/product-images';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +9,9 @@ export async function GET() {
   
   try {
     console.log('Iniciando sincronización de productos...');
+    
+    // Cargar mapa de imágenes correctas desde el SQL
+    const correctImagesMap = getCorrectImagesMap();
     
     // Registrar inicio en el historial
     const { data: syncEntry } = await supabase
@@ -107,12 +111,14 @@ export async function GET() {
         categoriaId = categoryMap[catCode] || null;
       }
 
+      const correctImageUrl = correctImagesMap.get(codigo);
+
       productsMap.set(codigo, {
         nombre: item["Descripcion Corta"] || item.Descripcion,
         descripcion: item.Descripcion,
         precio: parseNumber(item.Precio),
         stock: item.Stock,
-        imagen_url: item.Imagen,
+        imagen_url: correctImageUrl || item.Imagen,
         marca: item.Marca,
         codigo_externo: codigo,
         categoria_id: categoriaId,
