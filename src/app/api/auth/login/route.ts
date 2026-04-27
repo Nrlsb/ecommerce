@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
+import { createSession } from '@/lib/auth-server';
 
 export async function POST(request: Request) {
     try {
@@ -28,7 +29,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
         }
 
-        // 3. Retornar el usuario (sin el password)
+        // 3. Crear sesión segura (Cookie HttpOnly)
+        await createSession(user);
+
+        // 4. Retornar el usuario (sin el password)
         const { password: _, ...userWithoutPassword } = user;
         return NextResponse.json({ user: userWithoutPassword }, { status: 200 });
 

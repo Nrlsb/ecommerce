@@ -26,13 +26,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const loadSession = () => {
+        const loadSession = async () => {
             try {
+                // Intentar cargar desde localStorage como cache rápido
                 const storedUser = localStorage.getItem('auth_user');
                 if (storedUser) {
-                    const parsedUser = JSON.parse(storedUser);
-                    setUser(parsedUser);
-                    setProfile(parsedUser); // En el nuevo sistema, el perfil viene con el usuario
+                    setUser(JSON.parse(storedUser));
+                    setProfile(JSON.parse(storedUser));
+                }
+
+                // Verificar sesión real con el servidor (Cookie HttpOnly)
+                const res = await fetch('/api/auth/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    setUser(data.user);
+                    setProfile(data.user);
+                    localStorage.setItem('auth_user', JSON.stringify(data.user));
+                } else {
+                    // Si el servidor dice que no hay sesión, limpiar local
+                    setUser(null);
+                    setProfile(null);
+                    localStorage.removeItem('auth_user');
                 }
             } catch (error) {
                 console.error('Error loading session:', error);
@@ -95,6 +109,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signOut = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (error) {
+            console.error('Error signing out from server:', error);
+        }
         setUser(null);
         setProfile(null);
         localStorage.removeItem('auth_user');

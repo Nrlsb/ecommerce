@@ -1,8 +1,17 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { MercadoPagoConfig, PaymentRefund } from 'mercadopago';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Esquema de validación para el PATCH de pedidos
+const updateOrderSchema = z.object({
+    id: z.string().uuid({ message: "ID de pedido inválido" }),
+    estado: z.enum(['pendiente', 'pagado', 'enviado', 'anulado'], { 
+        errorMap: () => ({ message: "Estado no válido" }) 
+    })
+});
 
 // GET /api/admin/orders - Listar todos los pedidos con sus ítems
 export async function GET() {
@@ -30,16 +39,24 @@ export async function GET() {
 // PATCH /api/admin/orders - Actualizar estado y procesar reembolso si aplica
 export async function PATCH(request: NextRequest) {
     try {
-        const { id, estado } = await request.json();
+        const body = await request.json();
+        
+        // Validar entrada con Zod
+        const validation = updateOrderSchema.safeParse(body);
+        
+        if (!validation.success) {
+            return NextResponse.json({ 
+                error: 'Validación fallida', 
+                details: validation.error.format() 
+            }, { status: 400 });
+        }
+
+        const { id, estado } = validation.data;
 
         // Inicializar cliente MP dentro del handler para asegurar uso de variables de entorno actuales
         const client = new MercadoPagoConfig({ 
             accessToken: process.env.MP_ACCESS_TOKEN || '' 
         });
-
-        if (!id || !estado) {
-            return NextResponse.json({ error: 'ID y estado son requeridos' }, { status: 400 });
-        }
 
         // 1. Obtener el pedido actual para ver si tiene payment_id
         const { data: pedido, error: pedidoError } = await supabase
