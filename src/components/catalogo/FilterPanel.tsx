@@ -1,14 +1,11 @@
 import { motion } from 'framer-motion';
 import { Filter, Check, ChevronDown, RotateCcw } from 'lucide-react';
 import { RangeSlider } from '../ui/RangeSlider';
+import { PRODUCT_CATEGORIES_HIERARCHY } from '@/config/categories';
+import { useState } from 'react';
 
-interface Category {
-  id: string;
-  name: string;
-}
 
 interface FilterPanelProps {
-  categories: Category[];
   activeCategory: string;
   onCategoryChange: (id: string) => void;
   selectedBrands: string[];
@@ -24,7 +21,6 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({
-  categories,
   activeCategory,
   onCategoryChange,
   selectedBrands,
@@ -38,6 +34,14 @@ export function FilterPanel({
   onToggle,
   onClearAll,
 }: FilterPanelProps) {
+  const [openGroups, setOpenGroups] = useState<string[]>([]);
+
+  const toggleGroup = (slug: string) => {
+    setOpenGroups(prev => 
+      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
+    );
+  };
+
   const hasFilters = activeCategory !== 'todos' || selectedBrands.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000000;
 
   return (
@@ -79,26 +83,58 @@ export function FilterPanel({
             )}
           </div>
 
-          {/* Categorías */}
+          {/* Categorías Agrupadas */}
           <section>
-            <h4 className="font-bold text-sm text-foreground/50 uppercase tracking-widest mb-4">Categorías</h4>
-            <ul className="space-y-2">
-              {categories.map((cat) => (
-                <li key={cat.id}>
-                  <button
-                    onClick={() => onCategoryChange(cat.id)}
-                    className={`w-full text-left flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 text-sm ${
-                      activeCategory === cat.id
-                        ? 'bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 scale-[1.02]'
-                        : 'text-foreground/70 hover:bg-secondary hover:text-foreground'
-                    }`}
-                  >
-                    {cat.name}
-                    {activeCategory === cat.id && <Check size={16} strokeWidth={3} />}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-bold text-sm text-foreground/50 uppercase tracking-widest">Categorías</h4>
+              {activeCategory !== 'todos' && (
+                <button 
+                  onClick={() => onCategoryChange('todos')}
+                  className="text-[10px] font-black bg-secondary px-2 py-1 rounded-md hover:bg-primary hover:text-white transition-colors"
+                >
+                  VER TODO
+                </button>
+              )}
+            </div>
+            
+            <div className="space-y-3">
+              {PRODUCT_CATEGORIES_HIERARCHY.map((group) => {
+                const isGroupActive = group.subcategories.some(sub => sub.slug === activeCategory);
+                const isOpenManual = openGroups.includes(group.slug);
+                const isExpanded = isGroupActive || isOpenManual;
+                
+                return (
+                  <div key={group.slug} className="space-y-1">
+                    <button
+                      onClick={() => toggleGroup(group.slug)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-sm ${
+                        isGroupActive ? 'text-primary bg-primary/5' : 'text-foreground/80 hover:bg-secondary'
+                      }`}
+                    >
+                      {group.name}
+                      <ChevronDown size={14} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <div className={`pl-4 space-y-1 overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                      {group.subcategories.map((sub) => (
+                        <button
+                          key={sub.slug}
+                          onClick={() => onCategoryChange(sub.slug)}
+                          className={`w-full text-left flex items-center justify-between px-4 py-2 rounded-lg transition-all text-xs ${
+                            activeCategory === sub.slug
+                              ? 'bg-primary text-primary-foreground font-bold shadow-md'
+                              : 'text-foreground/60 hover:text-foreground hover:bg-secondary/50'
+                          }`}
+                        >
+                          {sub.name}
+                          {activeCategory === sub.slug && <Check size={12} strokeWidth={3} />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </section>
 
           {/* Rango de Precio */}

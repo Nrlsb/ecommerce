@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, PaintBucket, Menu, X, Search, User, ShieldCheck, Sun, Moon } from 'lucide-react';
+import { ShoppingCart, PaintBucket, Menu, X, Search, User, ShieldCheck, Sun, Moon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { PRODUCT_CATEGORIES_HIERARCHY } from '@/config/categories';
 
 export default function Navbar() {
     const router = useRouter();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [activeHoverGroup, setActiveHoverGroup] = useState<string | null>(null);
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
     const [mounted, setMounted] = useState(false);
     const { totalItems } = useCart();
@@ -69,12 +71,10 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-8">
-                        <Link href="/catalogo" className="text-foreground/80 hover:text-primary transition-colors font-medium">Catálogo</Link>
-                        <Link href="/ofertas" className="text-foreground/80 hover:text-primary transition-colors font-medium">Ofertas</Link>
-                        <Link href="/marcas" className="text-foreground/80 hover:text-primary transition-colors font-medium">Marcas</Link>
-                        <Link href="/contacto" className="text-foreground/80 hover:text-primary transition-colors font-medium">Contacto</Link>
+                        <Link href="/catalogo" className="text-foreground/80 hover:text-primary transition-colors font-bold text-sm uppercase tracking-wider">Catálogo</Link>
+                        <Link href="/ofertas" className="text-foreground/80 hover:text-primary transition-colors font-bold text-sm uppercase tracking-wider">Ofertas</Link>
                         {isAdmin && (
-                            <Link href="/admin" className="text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1">
+                            <Link href="/admin" className="text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1 text-sm uppercase tracking-wider">
                                 <ShieldCheck size={18} />
                                 Admin
                             </Link>
@@ -142,6 +142,58 @@ export default function Navbar() {
                         >
                             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Categorías Desktop Bar */}
+            <div className="hidden md:block bg-primary/5 border-t border-border/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-start items-center h-12 space-x-1">
+                        {PRODUCT_CATEGORIES_HIERARCHY.map((group) => (
+                            <div 
+                                key={group.slug}
+                                className="relative h-full flex items-center"
+                                onMouseEnter={() => setActiveHoverGroup(group.slug)}
+                                onMouseLeave={() => setActiveHoverGroup(null)}
+                            >
+                                <button
+                                    onClick={() => router.push(`/catalogo?categoria=${group.slug}`)}
+                                    className={`px-6 h-full flex items-center gap-2 text-[13px] font-black tracking-tight transition-colors border-b-2 border-transparent hover:text-primary ${
+                                        activeHoverGroup === group.slug ? 'text-primary border-primary bg-primary/5' : 'text-foreground/70'
+                                    }`}
+                                >
+                                    {group.name}
+                                    <ChevronDown size={14} className={`transition-transform duration-300 ${activeHoverGroup === group.slug ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {/* Dropdown Menu */}
+                                <AnimatePresence>
+                                    {activeHoverGroup === group.slug && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="absolute top-full left-0 w-64 bg-background border border-border rounded-b-2xl shadow-2xl overflow-hidden py-4 z-[100]"
+                                        >
+                                            <div className="flex flex-col">
+                                                {group.subcategories.map((sub) => (
+                                                    <Link
+                                                        key={sub.slug}
+                                                        href={`/catalogo?categoria=${sub.slug}`}
+                                                        className="px-6 py-3 text-sm font-bold text-foreground/70 hover:text-primary hover:bg-secondary transition-all flex items-center justify-between group/item"
+                                                    >
+                                                        {sub.name}
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-primary opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

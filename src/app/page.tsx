@@ -6,10 +6,10 @@ import { Paintbrush, PaintRoller, Droplet, Palette, ArrowRight, ShieldCheck, Tru
 import { ProductCard } from '@/components/catalogo/ProductCard';
 
 const categories = [
-  { name: 'Pintura Interior', icon: PaintRoller, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400', link: '/catalogo?tipo=interior', img: '/images/interior_paint.jpg' },
-  { name: 'Pintura Exterior', icon: Paintbrush, color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400', link: '/catalogo?tipo=exterior', img: '/images/exterior_paint.jpg' },
-  { name: 'Esmaltes y Barnices', icon: Droplet, color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400', link: '/catalogo?tipo=esmaltes', img: '/images/enamel_paint.jpg' },
-  { name: 'Accesorios', icon: Palette, color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400', link: '/catalogo?tipo=accesorios', img: '/images/roller_tool.jpg' },
+  { name: 'Pintura', icon: PaintRoller, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400', link: '/catalogo?categoria=pintura', img: '/images/interior_paint.jpg' },
+  { name: 'Automotor', icon: Paintbrush, color: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400', link: '/catalogo?categoria=automotor', img: '/images/exterior_paint.jpg' },
+  { name: 'Accesorios', icon: Palette, color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400', link: '/catalogo?categoria=accesorios', img: '/images/roller_tool.jpg' },
+  { name: 'Prep. de Superficies', icon: Droplet, color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400', link: '/catalogo?categoria=prep-superficies', img: '/images/enamel_paint.jpg' },
 ];
 
 const features = [

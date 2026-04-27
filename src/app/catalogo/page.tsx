@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '@/context/CartContext';
 import { FilterPanel } from '@/components/catalogo/FilterPanel';
@@ -26,9 +27,20 @@ interface Product {
 const PAGE_SIZE = 20;
 
 export default function Catalogo() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Cargando catálogo...</div>}>
+      <CatalogoContent />
+    </Suspense>
+  );
+}
+
+function CatalogoContent() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get('categoria') || 'todos';
+
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([{ id: 'todos', name: 'Todos los productos' }]);
-  const [activeCategory, setActiveCategory] = useState('todos');
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeSort, setActiveSort] = useState('destacados');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -161,6 +173,14 @@ export default function Catalogo() {
     fetchProducts(0, true);
   }, [activeCategory, activeSort, searchQuery, selectedBrands, priceRange]);
 
+  // Sincronizar con cambios en la URL
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('categoria');
+    if (categoryFromUrl && categoryFromUrl !== activeCategory) {
+      setActiveCategory(categoryFromUrl);
+    }
+  }, [searchParams]);
+
   const handleLoadMore = () => {
     if (!isLoading && hasMore) {
       const nextPage = page + 1;
@@ -204,7 +224,6 @@ export default function Catalogo() {
 
         <div className="flex flex-col lg:flex-row gap-8">
           <FilterPanel
-            categories={categories}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
             selectedBrands={selectedBrands}

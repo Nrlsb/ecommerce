@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PRODUCT_CATEGORIES_HIERARCHY } from '@/config/categories';
 
 interface FilterChipsProps {
   activeCategory: string;
@@ -24,7 +25,19 @@ export function FilterChips({
   onResetPrice,
   onClearAll,
 }: FilterChipsProps) {
-  const categoryName = categories.find((c) => c.id === activeCategory)?.name;
+  // Buscar el nombre en la jerarquía primero, luego en las categorías de la DB
+  const getCategoryName = () => {
+    // Buscar en subcategorías
+    for (const group of PRODUCT_CATEGORIES_HIERARCHY) {
+      if (group.slug === activeCategory) return group.name;
+      const sub = group.subcategories.find(s => s.slug === activeCategory);
+      if (sub) return sub.name;
+    }
+    // Fallback a la lista de la DB
+    return categories.find((c) => c.id === activeCategory)?.name;
+  };
+
+  const categoryName = getCategoryName();
   const hasActiveFilters = activeCategory !== 'todos' || selectedBrands.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000000;
 
   if (!hasActiveFilters) return null;
