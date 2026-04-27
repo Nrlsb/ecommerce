@@ -158,7 +158,7 @@ export async function GET() {
 
     return NextResponse.json({ message: 'Sincronización completada', processed: processedCount });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fatal en sincronización:', error);
     
     // Registrar error en el historial
@@ -173,6 +173,10 @@ export async function GET() {
         .eq('id', syncId);
     }
 
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : String(error),
+      details: error.details || error.hint || 'No additional details',
+      code: error.code || 'UNKNOWN_ERROR'
+    }, { status: 500 });
   }
 }

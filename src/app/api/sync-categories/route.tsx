@@ -80,9 +80,13 @@ export async function GET() {
             processed: totalProcessed
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error general en sync-categories:', error);
-        return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+        return NextResponse.json({ 
+            error: error instanceof Error ? error.message : String(error),
+            details: error.details || error.hint || 'No additional details',
+            code: error.code || 'UNKNOWN_ERROR'
+        }, { status: 500 });
     }
 }
 
