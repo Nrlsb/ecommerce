@@ -61,8 +61,6 @@ function CatalogoContent() {
         const { data: catData, error: catError } = await supabase.from('categorias').select('id, nombre, slug');
         if (catError) console.warn('Aviso: No se pudo cargar la tabla "categorias".', catError.message);
 
-        const { data: subCatData, error: subError } = await supabase.from('subcategorias').select('id, nombre, slug');
-        if (subError) console.warn('Aviso: No se pudo cargar la tabla "subcategorias".', subError.message);
         
         const allCategories = [{ id: 'todos', slug: 'todos', name: 'Todos los productos' }];
 
@@ -70,9 +68,6 @@ function CatalogoContent() {
           allCategories.push(...catData.map((c: any) => ({ id: c.id, slug: c.slug, name: c.nombre })));
         }
         
-        if (subCatData) {
-          allCategories.push(...subCatData.map((s: any) => ({ id: s.id, slug: s.slug, name: s.nombre })));
-        }
         
         setCategories(allCategories);
       } catch (error) {
@@ -94,7 +89,7 @@ function CatalogoContent() {
       
       console.log(`🔍 Buscando productos (Página ${currentPage})...`);
       
-      const selectString = '*, categorias:categoria_id(slug), subcategorias:subcategoria_id(slug)';
+      const selectString = '*, categorias:categoria_id(slug)';
 
       let query = supabase
         .from('productos')
@@ -108,7 +103,7 @@ function CatalogoContent() {
 
         if (relevantCategoryIds.length > 0) {
           // Filtramos directamente en productos por los IDs encontrados
-          const idFilter = relevantCategoryIds.map(id => `categoria_id.eq.${id},subcategoria_id.eq.${id}`).join(',');
+          const idFilter = relevantCategoryIds.map(id => `categoria_id.eq.${id}`).join(',');
           query = query.or(idFilter);
         }
       }
@@ -173,7 +168,7 @@ function CatalogoContent() {
           return {
             ...p,
             imagen_url: safeImageUrl,
-            category: p.subcategorias?.slug || p.categorias?.slug || 'interior',
+            category: p.categorias?.slug || 'interior',
           };
         });
 
