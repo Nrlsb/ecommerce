@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getCorrectImagesMap } from '@/lib/product-images';
 
 export const dynamic = 'force-dynamic';
