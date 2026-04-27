@@ -57,23 +57,26 @@ function CatalogoContent() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data: catData } = await supabase.from('categorias').select('id, nombre, slug');
-        const { data: subCatData } = await supabase.from('subcategorias').select('id, nombre, slug');
+        // Cargamos categorías y subcategorías por separado para que si una falla la otra funcione
+        const { data: catData, error: catError } = await supabase.from('categorias').select('id, nombre, slug');
+        if (catError) console.warn('Aviso: No se pudo cargar la tabla "categorias".', catError.message);
+
+        const { data: subCatData, error: subError } = await supabase.from('subcategorias').select('id, nombre, slug');
+        if (subError) console.warn('Aviso: No se pudo cargar la tabla "subcategorias".', subError.message);
         
+        const allCategories = [{ id: 'todos', slug: 'todos', name: 'Todos los productos' }];
+
         if (catData) {
-          const allCategories = [
-            { id: 'todos', slug: 'todos', name: 'Todos los productos' },
-            ...catData.map((c: any) => ({ id: c.id, slug: c.slug, name: c.nombre })),
-          ];
-          
-          if (subCatData) {
-            allCategories.push(...subCatData.map((s: any) => ({ id: s.id, slug: s.slug, name: s.nombre })));
-          }
-          
-          setCategories(allCategories);
+          allCategories.push(...catData.map((c: any) => ({ id: c.id, slug: c.slug, name: c.nombre })));
         }
+        
+        if (subCatData) {
+          allCategories.push(...subCatData.map((s: any) => ({ id: s.id, slug: s.slug, name: s.nombre })));
+        }
+        
+        setCategories(allCategories);
       } catch (error) {
-        console.error('Error fetching categories:', error instanceof Error ? error.message : String(error));
+        console.error('Error general cargando categorías:', error);
       }
     };
     fetchCategories();
@@ -160,10 +163,19 @@ function CatalogoContent() {
 
       if (data) {
         console.log(`✅ Se cargaron ${data.length} productos.`);
-        const formattedProducts = data.map((p: any) => ({
-          ...p,
-          category: p.subcategorias?.slug || p.categorias?.slug || 'interior',
-        }));
+        const formattedProducts = data.map((p: any) => {
+          // Aseguramos que la imagen use HTTPS para evitar el error de "Mixed Content"
+          let safeImageUrl = p.imagen_url;
+          if (safeImageUrl && safeImageUrl.startsWith('http://')) {
+            safeImageUrl = safeImageUrl.replace('http://', 'https://');
+          }
+
+          return {
+            ...p,
+            imagen_url: safeImageUrl,
+            category: p.subcategorias?.slug || p.categorias?.slug || 'interior',
+          };
+        });
 
         if (isNewSearch) {
           setProducts(formattedProducts);
