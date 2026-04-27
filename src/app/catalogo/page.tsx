@@ -11,6 +11,7 @@ import { FilterChips } from '@/components/catalogo/FilterChips';
 
 interface Category {
   id: string;
+  slug: string;
   name: string;
 }
 
@@ -39,7 +40,7 @@ function CatalogoContent() {
   const initialCategory = searchParams.get('categoria') || 'todos';
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([{ id: 'todos', name: 'Todos los productos' }]);
+  const [categories, setCategories] = useState<Category[]>([{ id: 'todos', slug: 'todos', name: 'Todos los productos' }]);
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeSort, setActiveSort] = useState('destacados');
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,12 +57,20 @@ function CatalogoContent() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data: catData } = await supabase.from('categorias').select('*');
+        const { data: catData } = await supabase.from('categorias').select('id, nombre, slug');
+        const { data: subCatData } = await supabase.from('subcategorias').select('id, nombre, slug');
+        
         if (catData) {
-          setCategories([
-            { id: 'todos', name: 'Todos los productos' },
-            ...catData.map((c: any) => ({ id: c.slug, name: c.nombre })),
-          ]);
+          const allCategories = [
+            { id: 'todos', slug: 'todos', name: 'Todos los productos' },
+            ...catData.map((c: any) => ({ id: c.id, slug: c.slug, name: c.nombre })),
+          ];
+          
+          if (subCatData) {
+            allCategories.push(...subCatData.map((s: any) => ({ id: s.id, slug: s.slug, name: s.nombre })));
+          }
+          
+          setCategories(allCategories);
         }
       } catch (error) {
         console.error('Error fetching categories:', error instanceof Error ? error.message : String(error));
@@ -89,8 +98,16 @@ function CatalogoContent() {
         .select(selectString, { count: 'exact' });
 
       if (activeCategory !== 'todos') {
-        // Buscamos coincidencia en la categoría principal O en la subcategoría usando los alias definidos en selectString
-        query = query.or(`categorias.slug.eq.${activeCategory},subcategorias.slug.eq.${activeCategory}`);
+        // Buscamos los IDs que corresponden a este slug (puede ser de categoría o subcategoría)
+        const relevantCategoryIds = categories
+          .filter(c => c.slug === activeCategory)
+          .map(c => c.id);
+
+        if (relevantCategoryIds.length > 0) {
+          // Filtramos directamente en productos por los IDs encontrados
+          const idFilter = relevantCategoryIds.map(id => `categoria_id.eq.${id},subcategoria_id.eq.${id}`).join(',');
+          query = query.or(idFilter);
+        }
       }
 
       if (searchQuery) {

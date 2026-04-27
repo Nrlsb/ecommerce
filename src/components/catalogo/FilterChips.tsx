@@ -6,7 +6,7 @@ import { PRODUCT_CATEGORIES_HIERARCHY } from '@/config/categories';
 
 interface FilterChipsProps {
   activeCategory: string;
-  categories: { id: string; name: string }[];
+  categories: { id: string; slug: string; name: string }[];
   selectedBrands: string[];
   priceRange: [number, number];
   onRemoveCategory: () => void;
@@ -33,8 +33,8 @@ export function FilterChips({
       const sub = group.subcategories.find(s => s.slug === activeCategory);
       if (sub) return sub.name;
     }
-    // Fallback a la lista de la DB
-    return categories.find((c) => c.id === activeCategory)?.name;
+    // Fallback a la lista de la DB buscando por slug
+    return categories.find((c) => c.slug === activeCategory)?.name;
   };
 
   const categoryName = getCategoryName();
