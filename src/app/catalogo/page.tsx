@@ -98,12 +98,15 @@ function CatalogoContent() {
       if (activeCategory !== 'todos') {
         // Buscamos los IDs que corresponden a este slug (puede ser de categoría o subcategoría)
         const relevantCategoryIds = categories
-          .filter(c => c.slug === activeCategory)
+          .filter(c => c.slug === activeCategory || c.slug.startsWith(activeCategory + '-'))
           .map(c => c.id);
 
         if (relevantCategoryIds.length > 0) {
-          // Filtramos directamente en productos por los IDs encontrados
-          const idFilter = relevantCategoryIds.map(id => `categoria_id.eq.${id}`).join(',');
+          // Filtramos en productos por los IDs encontrados en ambas columnas (categoría y subcategoría)
+          const idFilter = relevantCategoryIds.flatMap(id => [
+            `categoria_id.eq.${id}`,
+            `subcategoria_id.eq.${id}`
+          ]).join(',');
           query = query.or(idFilter);
         }
       }

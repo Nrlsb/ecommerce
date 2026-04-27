@@ -33,8 +33,8 @@ export function FilterChips({
       const sub = group.subcategories.find(s => s.slug === activeCategory);
       if (sub) return sub.name;
     }
-    // Fallback a la lista de la DB buscando por slug
-    return categories.find((c) => c.slug === activeCategory)?.name;
+    // Fallback a la lista de la DB buscando por slug (exacto o con sufijo de código)
+    return categories.find((c) => c.slug === activeCategory || c.slug.startsWith(activeCategory + '-'))?.name;
   };
 
   const categoryName = getCategoryName();
