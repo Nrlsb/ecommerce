@@ -82,16 +82,15 @@ function CatalogoContent() {
       
       console.log(`🔍 Buscando productos (Página ${currentPage})...`);
       
-      const selectString = activeCategory === 'todos'
-        ? '*, categorias:categoria_id(slug)'
-        : '*, categorias:categoria_id!inner(slug)';
+      const selectString = '*, categorias:categoria_id(slug), subcategorias:subcategoria_id(slug)';
 
       let query = supabase
         .from('productos')
         .select(selectString, { count: 'exact' });
 
       if (activeCategory !== 'todos') {
-        query = query.eq('categorias.slug', activeCategory);
+        // Buscamos coincidencia en la categoría principal O en la subcategoría usando los alias definidos en selectString
+        query = query.or(`categorias.slug.eq.${activeCategory},subcategorias.slug.eq.${activeCategory}`);
       }
 
       if (searchQuery) {
@@ -146,7 +145,7 @@ function CatalogoContent() {
         console.log(`✅ Se cargaron ${data.length} productos.`);
         const formattedProducts = data.map((p: any) => ({
           ...p,
-          category: p.categorias?.slug || 'interior',
+          category: p.subcategorias?.slug || p.categorias?.slug || 'interior',
         }));
 
         if (isNewSearch) {
