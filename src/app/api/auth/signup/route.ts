@@ -1,21 +1,25 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
     try {
-        const { email, password, nombre, rol } = await request.json();
+        const body = await request.json();
+        const email = body.email?.trim().toLowerCase();
+        const password = body.password;
+        const nombre = body.nombre;
+        const rol = body.rol;
 
         if (!email || !password) {
             return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 });
         }
 
-        // 1. Verificar si el usuario ya existe
-        const { data: existingUser } = await supabase
+        // 1. Verificar si el usuario ya existe usando el cliente Admin
+        const { data: existingUser } = await supabaseAdmin
             .from('usuarios')
             .select('id')
-            .eq('email', email)
-            .single();
+            .ilike('email', email)
+            .maybeSingle();
 
         if (existingUser) {
             return NextResponse.json({ error: 'El usuario ya existe' }, { status: 400 });
@@ -26,7 +30,7 @@ export async function POST(request: Request) {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // 3. Crear el usuario
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('usuarios')
             .insert([
                 { 
@@ -46,7 +50,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ user: userWithoutPassword }, { status: 201 });
 
     } catch (error) {
-        console.error('Signup error:', error);
+        console.error('[Signup Error]:', error);
         return NextResponse.json({ error: 'Error al registrar el usuario' }, { status: 500 });
     }
 }
