@@ -19,17 +19,21 @@ export async function POST(request: Request) {
             .single();
 
         if (error || !user) {
+            console.log('Login: Usuario no encontrado para el email:', email);
             return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
         }
 
         // 2. Verificar la contraseña
+        console.log('Login: Usuario encontrado, verificando password...');
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
+            console.log('Login: Password incorrecta para el usuario:', email);
             return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
         }
 
         // 3. Crear sesión segura (Cookie HttpOnly)
+        console.log('Login: Creando sesión para el usuario:', email);
         await createSession(user);
 
         // 4. Retornar el usuario (sin el password)
