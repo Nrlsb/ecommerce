@@ -3,7 +3,6 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 interface ProductVariant {

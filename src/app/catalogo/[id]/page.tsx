@@ -63,11 +63,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             const nameBeforeSize = parts[0].trim();
                             
                             // Trying to separate Base Name from Color
-                            // We use the current product name as a reference to find the "Family Name"
-                            const currentParts = currentProduct.nombre.split(/ [xX] /i);
-                            const currentNameBeforeSize = currentParts[0].trim();
-                            
-                            // Let's assume the family name is a significant prefix
+                            // We assume the family name is a significant prefix
                             // For simplicity, we'll take the first few words that are common
                             return { nameBeforeSize, size };
                         };
