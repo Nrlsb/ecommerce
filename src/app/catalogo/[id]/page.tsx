@@ -26,7 +26,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const { addToCart } = useCart();
     const [added, setAdded] = useState(false);
     const [isLoading, setIsLoading] = useState(!productCache.has(productId));
-    const [showAnimation, setShowAnimation] = useState(!hasDoneInitialAnimation);
+    const [showAnimation] = useState(!hasDoneInitialAnimation);
 
     useEffect(() => {
         if (!hasDoneInitialAnimation && product) {
