@@ -11,22 +11,41 @@ import ReviewSection from '@/components/products/ReviewSection';
 import VariantSelector from '@/components/products/VariantSelector';
 import { supabase } from '@/lib/supabase';
 
+// Caché persistente fuera del componente para evitar parpadeos en remounts de Next.js
+const productCache = new Map<string, any>();
+const variantsCache = new Map<string, any[]>();
+let hasDoneInitialAnimation = false;
+
 export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);
     const productId = resolvedParams.id;
 
-    const [product, setProduct] = useState<any>(null);
-    const [variants, setVariants] = useState<any[]>([]);
+    const [product, setProduct] = useState<any>(productCache.get(productId) || null);
+    const [variants, setVariants] = useState<any[]>(variantsCache.get(productId) || []);
     const [quantity, setQuantity] = useState(1);
     const { addToCart } = useCart();
     const [added, setAdded] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(!productCache.has(productId));
+    const [showAnimation, setShowAnimation] = useState(!hasDoneInitialAnimation);
+
+    useEffect(() => {
+        if (!hasDoneInitialAnimation && product) {
+            hasDoneInitialAnimation = true;
+        }
+    }, [product]);
 
     useEffect(() => {
         const fetchProductAndVariants = async () => {
+            // 1. Verificar caché
+            if (productCache.has(productId)) {
+                setProduct(productCache.get(productId));
+                setVariants(variantsCache.get(productId) || []);
+                setIsLoading(false);
+                return;
+            }
+
             setIsLoading(true);
             try {
-                // 1. Fetch current product
                 const { data: currentProduct, error } = await supabase
                     .from('productos')
                     .select('*')
@@ -42,83 +61,82 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                         reviewsCount: 0,
                         yield: currentProduct.rendimiento || 10 
                     };
-                    setProduct(prodData);
-
-                    // 2. Fetch potential variants
-                    // Priority 1: Use familia_id if assigned
-                    // Priority 2: Heuristic based on name
                     
                     let siblings: any[] = [];
-                    
                     if (currentProduct.familia_id) {
                         const { data } = await supabase
                             .from('productos')
-                            .select('id, nombre, precio')
+                            .select('*')
                             .eq('familia_id', currentProduct.familia_id);
                         siblings = data || [];
                     } else {
-                        // Fallback to brand/category heuristic
                         const { data } = await supabase
                             .from('productos')
-                            .select('id, nombre, precio')
+                            .select('*')
                             .eq('marca', currentProduct.marca)
                             .eq('categoria_id', currentProduct.categoria_id)
-                            .limit(200);
+                            .limit(50);
                         siblings = data || [];
                     }
 
-                    if (siblings && siblings.length > 0) {
-                        const parseName = (name: string) => {
-                            const parts = name.split(/ [xX] /i);
-                            const size = parts.length > 1 ? parts[1].trim() : '1';
-                            const nameBeforeSize = parts[0].trim();
-                            return { nameBeforeSize, size };
+                    const parseName = (name: string) => {
+                        const parts = name.split(/ [xX] /i);
+                        const size = parts.length > 1 ? parts[1].trim() : '1';
+                        return { nameBeforeSize: parts[0].trim(), size };
+                    };
+
+                    const currentParsed = parseName(currentProduct.nombre);
+                    let filteredSiblings = siblings;
+                    if (!currentProduct.familia_id) {
+                        const baseWords = currentParsed.nameBeforeSize.split(' ').slice(0, 3).join(' ');
+                        filteredSiblings = siblings.filter(s => s.nombre.toUpperCase().startsWith(baseWords.toUpperCase()));
+                    }
+                    
+                    const processedVariants = filteredSiblings.map(s => {
+                        const { size, nameBeforeSize } = parseName(s.nombre);
+                        return { 
+                            id: s.id, 
+                            nombre: s.nombre, 
+                            precio: s.precio,
+                            size: size,
+                            fullNameBeforeSize: nameBeforeSize,
+                            fullProduct: { ...s, rating: 4.8, yield: s.rendimiento || 10 }
                         };
+                    });
 
-                        const currentParsed = parseName(currentProduct.nombre);
-                        
-                        let filteredSiblings = siblings;
-                        
-                        // If using heuristic, we still filter by base words to avoid mixing different product lines
-                        if (!currentProduct.familia_id) {
-                            const baseWords = currentParsed.nameBeforeSize.split(' ').slice(0, 3).join(' ');
-                            filteredSiblings = siblings.filter(s => s.nombre.toUpperCase().startsWith(baseWords.toUpperCase()));
-                        }
-                        
-                        const processedVariants = filteredSiblings.map(s => {
-                            const parts = s.nombre.split(/ [xX] /i);
-                            const size = parts.length > 1 ? parts[1].trim() : '1';
-                            const fullNameBeforeSize = parts[0].trim();
-                            return { 
-                                id: s.id, 
-                                nombre: s.nombre, 
-                                precio: s.precio,
-                                size: size,
-                                fullNameBeforeSize
-                            };
-                        });
-
-                        if (processedVariants.length > 0) {
-                            const names = processedVariants.map(v => v.fullNameBeforeSize);
-                            let prefix = names[0];
-                            for (let i = 1; i < names.length; i++) {
-                                while (names[i].indexOf(prefix) !== 0) {
-                                    prefix = prefix.substring(0, prefix.lastIndexOf(' '));
-                                    if (prefix === '') break;
-                                }
+                    const names = processedVariants.map(v => v.fullNameBeforeSize);
+                    let prefix = names[0] || '';
+                    if (names.length > 1) {
+                        for (let i = 1; i < names.length; i++) {
+                            while (names[i].indexOf(prefix) !== 0) {
+                                prefix = prefix.substring(0, prefix.lastIndexOf(' '));
+                                if (prefix === '') break;
                             }
-                            
-                            const finalVariants = processedVariants.map(v => ({
-                                ...v,
-                                color: v.fullNameBeforeSize.replace(prefix, '').trim() || 'Estándar'
-                            }));
-
-                            setVariants(finalVariants);
                         }
                     }
+                    
+                    const finalVariants = processedVariants.map(v => ({
+                        ...v,
+                        color: v.fullNameBeforeSize.replace(prefix, '').trim() || 'Estándar'
+                    }));
+
+                    // Guardar en caché TODAS las variantes encontradas para navegación instantánea
+                    finalVariants.forEach(v => {
+                        productCache.set(String(v.id), v.fullProduct);
+                        variantsCache.set(String(v.id), finalVariants);
+                    });
+
+                    // Caso específico para el ID actual si no estaba en la lista (raro pero posible)
+                    if (!productCache.has(productId)) {
+                        productCache.set(productId, prodData);
+                        variantsCache.set(productId, finalVariants);
+                    }
+
+                    setProduct(productCache.get(productId));
+                    setVariants(finalVariants);
                 }
             } catch (error) {
-                console.error('Error:', error instanceof Error ? error.message : String(error));
+                console.error('Error:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -182,11 +200,11 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     Catálogo de Productos
                 </Link>
 
-                <div className={`grid grid-cols-1 lg:grid-cols-2 gap-20 items-start transition-all duration-500 ${isLoading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : 'opacity-100'}`}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
                     {/* Left: Product Media */}
                     <div className="sticky top-12 space-y-8">
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            initial={showAnimation ? { opacity: 0, scale: 0.9 } : false}
                             animate={{ opacity: 1, scale: 1 }}
                             className="aspect-square bg-muted/30 rounded-[3rem] flex items-center justify-center border border-border overflow-hidden relative group/image shadow-2xl"
                         >
@@ -212,7 +230,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     {/* Right: Product Info */}
                     <div className="flex flex-col">
                         <motion.div 
-                            initial={{ opacity: 0, x: 20 }}
+                            initial={showAnimation ? { opacity: 0, x: 20 } : false}
                             animate={{ opacity: 1, x: 0 }}
                             className="mb-12"
                         >
