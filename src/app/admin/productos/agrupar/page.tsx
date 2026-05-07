@@ -5,8 +5,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Search, Package, Link as LinkIcon, Unlink, 
-    Plus, Save, Loader2, ArrowLeft, CheckCircle2,
-    Filter, X
+    Plus, Save, Loader2, ArrowLeft, CheckCircle2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
