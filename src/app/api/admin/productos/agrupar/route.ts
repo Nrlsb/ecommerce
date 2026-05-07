@@ -14,7 +14,10 @@ export async function GET(request: Request) {
       .order('nombre', { ascending: true });
 
     if (search) {
-      query = query.ilike('nombre', `%${search}%`);
+      const words = search.split(/\s+/).filter(w => w.length > 0);
+      words.forEach(word => {
+        query = query.or(`nombre.ilike.%${word}%,marca.ilike.%${word}%`);
+      });
     }
     if (marca) {
       query = query.eq('marca', marca);

@@ -112,7 +112,10 @@ function CatalogoContent() {
       }
 
       if (searchQuery) {
-        query = query.ilike('nombre', `%${searchQuery}%`);
+        const words = searchQuery.split(/\s+/).filter(w => w.length > 0);
+        words.forEach(word => {
+          query = query.or(`nombre.ilike.%${word}%,marca.ilike.%${word}%`);
+        });
         
         // Registrar la búsqueda en analíticas (sin esperar respuesta para no bloquear)
         if (searchQuery.length >= 3 && currentPage === 0) {
