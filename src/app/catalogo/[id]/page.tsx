@@ -139,7 +139,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         setTimeout(() => setAdded(false), 2000);
     };
 
-    if (isLoading) {
+    if (isLoading && !product) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
@@ -182,7 +182,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     Catálogo de Productos
                 </Link>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
+                <div className={`grid grid-cols-1 lg:grid-cols-2 gap-20 items-start transition-all duration-500 ${isLoading ? 'opacity-40 grayscale-[0.5] pointer-events-none' : 'opacity-100'}`}>
                     {/* Left: Product Media */}
                     <div className="sticky top-12 space-y-8">
                         <motion.div
@@ -256,11 +256,13 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                 
                                 <div className="flex items-center bg-background border-2 border-border/50 rounded-[1.5rem] p-1.5 shadow-xl">
                                     <button
+                                        type="button"
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                         className="w-12 h-12 flex items-center justify-center hover:bg-muted rounded-xl transition-all font-black text-2xl"
                                     >-</button>
                                     <span className="w-16 text-center font-black text-2xl tracking-tighter">{quantity}</span>
                                     <button
+                                        type="button"
                                         onClick={() => setQuantity(quantity + 1)}
                                         className="w-12 h-12 flex items-center justify-center hover:bg-muted rounded-xl transition-all font-black text-2xl"
                                     >+</button>
@@ -268,6 +270,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             </div>
 
                             <button
+                                type="button"
                                 onClick={handleAddToCart}
                                 disabled={added}
                                 className={`w-full py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-4 transition-all transform active:scale-95 shadow-2xl relative ${added

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check } from 'lucide-react';
 
@@ -43,17 +43,25 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
     const [selectedColor, setSelectedColor] = useState(currentVariant?.color || '');
     const [selectedSize, setSelectedSize] = useState(currentVariant?.size || '');
 
+    // Sincronizar estado local cuando cambia la variante (por navegación)
+    useEffect(() => {
+        if (currentVariant) {
+            setSelectedColor(currentVariant.color);
+            setSelectedSize(currentVariant.size);
+        }
+    }, [currentVariant]);
+
     // Cuando cambia el color o el tamaño, buscar la variante correspondiente
     const handleSelectVariant = (color: string, size: string) => {
         const variant = variants.find(v => v.color === color && v.size === size);
         if (variant) {
-            router.push(`/catalogo/${variant.id}`);
+            router.push(`/catalogo/${variant.id}`, { scroll: false });
         } else {
             // Si no existe esa combinación exacta, al menos cambiar la selección visual
             // y buscar la variante más cercana (mismo color, diferente tamaño o viceversa)
             const nextVariant = variants.find(v => v.color === color) || variants.find(v => v.size === size);
             if (nextVariant) {
-                router.push(`/catalogo/${nextVariant.id}`);
+                router.push(`/catalogo/${nextVariant.id}`, { scroll: false });
             }
         }
     };
@@ -94,6 +102,7 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                         const hex = getColorHex(color);
                         return (
                             <button
+                                type="button"
                                 key={color}
                                 onClick={() => {
                                     setSelectedColor(color);
@@ -131,6 +140,7 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                         
                         return (
                             <button
+                                type="button"
                                 key={size}
                                 onClick={() => {
                                     if (hasVariant) {

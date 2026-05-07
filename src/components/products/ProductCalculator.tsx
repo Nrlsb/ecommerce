@@ -99,17 +99,17 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                                 <div className="flex flex-col">
                                     <span className="text-xs font-bold text-foreground/60">Puertas</span>
                                     <div className="flex items-center gap-3 pt-1">
-                                        <button onClick={() => setDoors(Math.max(0, doors - 1))} className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary/10 transition-colors text-lg font-bold">-</button>
+                                        <button type="button" onClick={() => setDoors(Math.max(0, doors - 1))} className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary/10 transition-colors text-lg font-bold">-</button>
                                         <span className="font-black text-lg w-4 text-center">{doors}</span>
-                                        <button onClick={() => setDoors(doors + 1)} className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary/10 transition-colors text-lg font-bold">+</button>
+                                        <button type="button" onClick={() => setDoors(doors + 1)} className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary/10 transition-colors text-lg font-bold">+</button>
                                     </div>
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-xs font-bold text-foreground/60">Ventanas</span>
                                     <div className="flex items-center gap-3 pt-1">
-                                        <button onClick={() => setWindows(Math.max(0, windows - 1))} className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary/10 transition-colors text-lg font-bold">-</button>
+                                        <button type="button" onClick={() => setWindows(Math.max(0, windows - 1))} className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary/10 transition-colors text-lg font-bold">-</button>
                                         <span className="font-black text-lg w-4 text-center">{windows}</span>
-                                        <button onClick={() => setWindows(windows + 1)} className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary/10 transition-colors text-lg font-bold">+</button>
+                                        <button type="button" onClick={() => setWindows(windows + 1)} className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary/10 transition-colors text-lg font-bold">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -120,6 +120,7 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                             <div className="grid grid-cols-3 gap-2 h-full">
                                 {[1, 2, 3].map((num) => (
                                     <button
+                                        type="button"
                                         key={num}
                                         onClick={() => setLayers(num)}
                                         className={`rounded-xl font-black transition-all flex items-center justify-center text-lg ${layers === num
@@ -137,7 +138,7 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
 
                 <div className="flex flex-col justify-between p-8 bg-primary/[0.03] rounded-[2rem] border-2 border-primary/10 text-center relative overflow-hidden group/result">
                     <div className="absolute top-4 right-4">
-                        <button onClick={reset} className="p-2 hover:bg-primary/10 rounded-full text-foreground/30 transition-colors hover:text-primary">
+                        <button type="button" onClick={reset} className="p-2 hover:bg-primary/10 rounded-full text-foreground/30 transition-colors hover:text-primary">
                             <RotateCcw className="w-5 h-5" />
                         </button>
                     </div>
@@ -163,6 +164,7 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
 
                             {onApplyQuantity && (
                                 <button
+                                    type="button"
                                     onClick={() => onApplyQuantity(recommendation.qty)}
                                     className="w-full py-4 bg-foreground text-background rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-primary hover:text-white transition-all transform active:scale-95 shadow-xl"
                                 >
