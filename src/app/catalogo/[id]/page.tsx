@@ -45,57 +45,60 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     setProduct(prodData);
 
                     // 2. Fetch potential variants
-                    // We search for products of the same brand and category
-                    const { data: siblings } = await supabase
-                        .from('productos')
-                        .select('id, nombre, precio')
-                        .eq('marca', currentProduct.marca)
-                        .eq('categoria_id', currentProduct.categoria_id)
-                        .limit(200);
+                    // Priority 1: Use familia_id if assigned
+                    // Priority 2: Heuristic based on name
+                    
+                    let siblings: any[] = [];
+                    
+                    if (currentProduct.familia_id) {
+                        const { data } = await supabase
+                            .from('productos')
+                            .select('id, nombre, precio')
+                            .eq('familia_id', currentProduct.familia_id);
+                        siblings = data || [];
+                    } else {
+                        // Fallback to brand/category heuristic
+                        const { data } = await supabase
+                            .from('productos')
+                            .select('id, nombre, precio')
+                            .eq('marca', currentProduct.marca)
+                            .eq('categoria_id', currentProduct.categoria_id)
+                            .limit(200);
+                        siblings = data || [];
+                    }
 
                     if (siblings && siblings.length > 0) {
-                        // Logic to group by "Family"
-                        // Heuristic: Products that share the same "Base Name" (before color and size)
-                        
                         const parseName = (name: string) => {
                             const parts = name.split(/ [xX] /i);
                             const size = parts.length > 1 ? parts[1].trim() : '1';
                             const nameBeforeSize = parts[0].trim();
-                            
-                            // Trying to separate Base Name from Color
-                            // We assume the family name is a significant prefix
-                            // For simplicity, we'll take the first few words that are common
                             return { nameBeforeSize, size };
                         };
 
                         const currentParsed = parseName(currentProduct.nombre);
                         
-                        // We filter siblings that look like they belong to the same family
-                        // A simple way is to see if they share the first 2-3 words
-                        const baseWords = currentParsed.nameBeforeSize.split(' ').slice(0, 3).join(' ');
+                        let filteredSiblings = siblings;
                         
-                        const processedVariants = siblings
-                            .filter(s => s.nombre.toUpperCase().startsWith(baseWords.toUpperCase()))
-                            .map(s => {
-                                const parts = s.nombre.split(/ [xX] /i);
-                                const size = parts.length > 1 ? parts[1].trim() : '1';
-                                const fullNameBeforeSize = parts[0].trim();
-                                
-                                // Extract color: It's the part that remains after removing the base words
-                                // But more accurately, it's the part after the "Base Product Name"
-                                // Let's try to find the longest common prefix among variants
-                                return { 
-                                    id: s.id, 
-                                    nombre: s.nombre, 
-                                    precio: s.precio,
-                                    size: size,
-                                    fullNameBeforeSize
-                                };
-                            });
+                        // If using heuristic, we still filter by base words to avoid mixing different product lines
+                        if (!currentProduct.familia_id) {
+                            const baseWords = currentParsed.nameBeforeSize.split(' ').slice(0, 3).join(' ');
+                            filteredSiblings = siblings.filter(s => s.nombre.toUpperCase().startsWith(baseWords.toUpperCase()));
+                        }
+                        
+                        const processedVariants = filteredSiblings.map(s => {
+                            const parts = s.nombre.split(/ [xX] /i);
+                            const size = parts.length > 1 ? parts[1].trim() : '1';
+                            const fullNameBeforeSize = parts[0].trim();
+                            return { 
+                                id: s.id, 
+                                nombre: s.nombre, 
+                                precio: s.precio,
+                                size: size,
+                                fullNameBeforeSize
+                            };
+                        });
 
-                        // Now let's determine the color by stripping the common prefix
                         if (processedVariants.length > 0) {
-                            // Find common prefix
                             const names = processedVariants.map(v => v.fullNameBeforeSize);
                             let prefix = names[0];
                             for (let i = 1; i < names.length; i++) {
@@ -104,9 +107,6 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                     if (prefix === '') break;
                                 }
                             }
-                            
-                            // Special case for some names where the prefix might be too short or too long
-                            // Usually "PINTURA [NAME] [FINISH]"
                             
                             const finalVariants = processedVariants.map(v => ({
                                 ...v,

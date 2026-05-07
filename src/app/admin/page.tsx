@@ -8,7 +8,7 @@ import {
     LayoutDashboard, Package, Users, ShoppingBag, Settings, 
     ArrowLeft, RefreshCw, Tags, CheckCircle2, AlertCircle, 
     Loader2, FileDown, TrendingUp, BarChart3, AlertTriangle, 
-    Search, UserCog
+    Search, UserCog, Link as LinkIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import { 
@@ -365,6 +365,16 @@ export default function AdminDashboard() {
                                     <p className="text-xs font-bold">Sync Categorías</p>
                                 </button>
                             </div>
+
+                            <Link href="/admin/productos/agrupar" className="w-full p-4 rounded-xl border border-primary/20 bg-primary/5 hover:border-primary/50 hover:bg-primary/10 transition-all group flex items-center justify-center gap-4">
+                                <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
+                                    <LinkIcon size={20} />
+                                </div>
+                                <div className="text-left">
+                                    <p className="font-bold group-hover:text-primary transition-colors">Agrupador de Variantes</p>
+                                    <p className="text-xs text-foreground/60">Gestionar grupos de color y tamaño manualmente.</p>
+                                </div>
+                            </Link>
                         </div>
                     </div>
                 </div>
