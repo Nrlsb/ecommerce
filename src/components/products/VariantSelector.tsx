@@ -4,6 +4,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ProductVariant {
     id: string | number;
@@ -90,13 +91,13 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
     if (variants.length <= 1) return null;
 
     return (
-        <div className="space-y-8 my-8 p-6 bg-muted/20 rounded-3xl border border-border/50">
+        <div className="glass p-8 rounded-[2.5rem] border border-white/40 dark:border-white/5 shadow-premium my-12">
             {/* Selector de Color */}
-            <div>
-                <span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest block mb-4">
-                    Color: <span className="text-foreground">{selectedColor}</span>
+            <div className="mb-10">
+                <span className="text-[10px] font-display font-bold text-foreground/30 uppercase tracking-[0.3em] block mb-5 pl-1">
+                    Colección de Color: <span className="text-foreground font-black">{selectedColor}</span>
                 </span>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-4">
                     {colors.map((color) => {
                         const isSelected = color === selectedColor;
                         const hex = getColorHex(color);
@@ -108,19 +109,19 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                                     setSelectedColor(color);
                                     handleSelectVariant(color, selectedSize);
                                 }}
-                                className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center relative ${
-                                    isSelected ? 'border-primary scale-110 shadow-lg' : 'border-transparent hover:scale-105'
+                                className={`w-12 h-12 rounded-full border-2 transition-all flex items-center justify-center relative p-1 ${
+                                    isSelected ? 'border-primary scale-110 shadow-premium' : 'border-transparent hover:scale-110'
                                 }`}
                                 title={color}
                             >
                                 <div 
-                                    className="w-full h-full rounded-full border border-black/10" 
+                                    className="w-full h-full rounded-full border border-black/5 shadow-inner" 
                                     style={{ backgroundColor: hex }}
                                 />
                                 {isSelected && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <Check className={`w-5 h-5 ${hex.toLowerCase() === '#ffffff' ? 'text-black' : 'text-white'}`} strokeWidth={3} />
-                                    </div>
+                                    <motion.div layoutId="color-check" className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <Check className={`w-6 h-6 ${hex.toLowerCase() === '#ffffff' ? 'text-black' : 'text-white'} drop-shadow-md`} strokeWidth={3} />
+                                    </motion.div>
                                 )}
                             </button>
                         );
@@ -130,10 +131,10 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
 
             {/* Selector de Tamaño */}
             <div>
-                <span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest block mb-4">
-                    Tamaño (Litros): <span className="text-foreground">{selectedSize}L</span>
+                <span className="text-[10px] font-display font-bold text-foreground/30 uppercase tracking-[0.3em] block mb-5 pl-1">
+                    Presentación: <span className="text-foreground font-black">{selectedSize} Litros</span>
                 </span>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-4">
                     {sizes.map((size) => {
                         const isSelected = size === selectedSize;
                         const hasVariant = variants.some(v => v.color === selectedColor && v.size === size);
@@ -149,12 +150,12 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                                     }
                                 }}
                                 disabled={!hasVariant}
-                                className={`px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-wider transition-all border-2 ${
+                                className={`px-8 py-4 rounded-2xl font-display font-bold text-sm uppercase tracking-[0.15em] transition-all border-2 relative overflow-hidden active:scale-95 ${
                                     isSelected 
-                                        ? 'bg-primary text-primary-foreground border-primary shadow-xl scale-105' 
+                                        ? 'bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20' 
                                         : hasVariant
-                                            ? 'bg-background border-border hover:border-primary/50 text-foreground/60'
-                                            : 'bg-muted/50 border-transparent text-foreground/20 cursor-not-allowed'
+                                            ? 'bg-white/50 dark:bg-slate-900/50 border-slate-200/50 dark:border-slate-800/50 hover:border-primary/40 text-foreground/50'
+                                            : 'bg-slate-50/30 border-transparent text-foreground/10 cursor-not-allowed'
                                 }`}
                             >
                                 {size} L

@@ -43,38 +43,44 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/80 border-b border-border shadow-sm">
+        <nav className="sticky top-0 z-50 w-full glass border-b border-white/20 dark:border-white/5 shadow-premium transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
+                <div className="flex justify-between items-center h-20">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-3 group">
+                    <Link href="/" className="flex items-center gap-4 group">
                         <div className="relative flex flex-col items-center justify-center">
-                            <div className="p-2 bg-primary text-primary-foreground rounded-xl group-hover:bg-primary/90 transition-all shadow-md group-hover:shadow-lg group-hover:-rotate-3">
-                                <PaintBucket size={24} />
+                            <div className="p-2.5 bg-primary text-primary-foreground rounded-2xl group-hover:bg-primary/90 transition-all shadow-xl group-hover:shadow-primary/20 group-hover:-rotate-6 duration-500">
+                                <PaintBucket size={26} />
                             </div>
                             {/* Brand Swoosh decorative element */}
-                            <div className="absolute -bottom-1 -right-1 flex gap-0.5">
-                                <div className="w-2 h-2 rounded-full bg-mercurio-pink shadow-sm"></div>
-                                <div className="w-2 h-2 rounded-full bg-mercurio-yellow shadow-sm"></div>
-                                <div className="w-2 h-2 rounded-full bg-mercurio-green shadow-sm"></div>
+                            <div className="absolute -bottom-1.5 -right-1.5 flex gap-1">
+                                <div className="w-2.5 h-2.5 rounded-full bg-mercurio-pink shadow-sm"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-mercurio-yellow shadow-sm"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-mercurio-green shadow-sm"></div>
                             </div>
                         </div>
-                        <div className="flex flex-col leading-none">
-                            <span className="text-2xl font-black italic tracking-tighter text-primary">
+                        <div className="flex flex-col leading-[0.85]">
+                            <span className="text-3xl font-display font-black italic tracking-tighter text-primary group-hover:text-primary/80 transition-colors">
                                 mercurio
                             </span>
-                            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-primary/70">
+                            <span className="text-[10px] font-display font-bold tracking-[0.3em] uppercase text-primary/40 ml-1">
                                 pinturerías
                             </span>
                         </div>
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        <Link href="/catalogo" className="text-foreground/80 hover:text-primary transition-colors font-bold text-sm uppercase tracking-wider">Catálogo</Link>
-                        <Link href="/ofertas" className="text-foreground/80 hover:text-primary transition-colors font-bold text-sm uppercase tracking-wider">Ofertas</Link>
+                    <div className="hidden md:flex items-center space-x-10">
+                        <Link href="/catalogo" className="text-foreground/60 hover:text-primary transition-all font-display font-bold text-[13px] uppercase tracking-[0.2em] relative group/link">
+                            Catálogo
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover/link:w-full" />
+                        </Link>
+                        <Link href="/ofertas" className="text-foreground/60 hover:text-primary transition-all font-display font-bold text-[13px] uppercase tracking-[0.2em] relative group/link">
+                            Ofertas
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover/link:w-full" />
+                        </Link>
                         {isAdmin && (
-                            <Link href="/admin" className="text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1 text-sm uppercase tracking-wider">
+                            <Link href="/admin" className="text-primary hover:text-primary/80 transition-all font-display font-bold flex items-center gap-2 text-[13px] uppercase tracking-[0.2em] bg-primary/5 px-4 py-2 rounded-full border border-primary/10">
                                 <ShieldCheck size={18} />
                                 Admin
                             </Link>
@@ -82,22 +88,22 @@ export default function Navbar() {
                     </div>
 
                     {/* Icons Context */}
-                    <div className="hidden md:flex items-center space-x-6">
-                        <button className="text-foreground/80 hover:text-primary transition-colors">
+                    <div className="hidden md:flex items-center space-x-5">
+                        <button className="text-foreground/40 hover:text-primary transition-all hover:scale-110 p-2">
                             <Search size={20} />
                         </button>
 
                         <button 
                             onClick={toggleTheme}
-                            className="text-foreground/80 hover:text-primary transition-colors p-2 rounded-full hover:bg-secondary"
+                            className="text-foreground/40 hover:text-primary transition-all p-2.5 rounded-xl hover:bg-primary/5 active:scale-90"
                             aria-label="Cambiar tema"
                         >
                             {mounted && theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
 
                         {user ? (
-                            <div className="flex items-center gap-4">
-                                <span className="text-sm font-medium text-foreground/60 hidden lg:inline-block max-w-[150px] truncate">
+                            <div className="flex items-center gap-6">
+                                <span className="text-xs font-display font-bold text-foreground/30 hidden lg:inline-block max-w-[150px] truncate uppercase tracking-widest">
                                     {user.email}
                                 </span>
                                 <button
@@ -105,21 +111,21 @@ export default function Navbar() {
                                         await signOut();
                                         router.push('/');
                                     }}
-                                    className="text-foreground/80 hover:text-destructive transition-colors text-sm font-bold"
+                                    className="text-foreground/60 hover:text-destructive transition-all text-[11px] font-display font-bold uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg"
                                 >
                                     Salir
                                 </button>
                             </div>
                         ) : (
-                            <Link href="/login" className="text-foreground/80 hover:text-primary transition-colors">
+                            <Link href="/login" className="text-foreground/40 hover:text-primary transition-all hover:scale-110 p-2">
                                 <User size={20} />
                             </Link>
                         )}
 
-                        <Link href="/carrito" className="text-foreground/80 hover:text-primary transition-colors relative">
-                            <ShoppingCart size={20} />
+                        <Link href="/carrito" className="text-foreground/60 hover:text-primary transition-all relative p-2.5 bg-primary/5 rounded-xl border border-primary/5 hover:border-primary/20 group/cart">
+                            <ShoppingCart size={20} className="group-hover:rotate-12 transition-transform" />
                             {totalItems > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+                                <span className="absolute -top-1.5 -right-1.5 bg-accent text-white text-[9px] font-display font-black w-5 h-5 rounded-full flex items-center justify-center shadow-lg shadow-accent/20 border-2 border-white dark:border-slate-900">
                                     {totalItems}
                                 </span>
                             )}
@@ -128,17 +134,17 @@ export default function Navbar() {
 
                     {/* Mobile menu button */}
                     <div className="md:hidden flex items-center gap-4">
-                        <Link href="/carrito" className="text-foreground/80 relative">
+                        <Link href="/carrito" className="text-foreground/60 relative p-2">
                             <ShoppingCart size={24} />
                             {totalItems > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+                                <span className="absolute -top-1 -right-1 bg-accent text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900">
                                     {totalItems}
                                 </span>
                             )}
                         </Link>
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="text-foreground/80 hover:text-primary transition-colors"
+                            className="text-foreground/60 hover:text-primary transition-all p-2"
                         >
                             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
                         </button>
@@ -147,9 +153,9 @@ export default function Navbar() {
             </div>
 
             {/* Categorías Desktop Bar */}
-            <div className="hidden md:block bg-primary/5 border-t border-border/50">
+            <div className="hidden md:block border-t border-white/10 dark:border-white/5 bg-white/30 dark:bg-slate-950/30 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-start items-center h-12 space-x-1">
+                    <div className="flex justify-center items-center h-14 space-x-2">
                         {PRODUCT_CATEGORIES_HIERARCHY.map((group) => (
                             <div 
                                 key={group.slug}
@@ -159,12 +165,15 @@ export default function Navbar() {
                             >
                                 <button
                                     onClick={() => router.push(`/catalogo?categoria=${group.slug}`)}
-                                    className={`px-6 h-full flex items-center gap-2 text-[13px] font-black tracking-tight transition-colors border-b-2 border-transparent hover:text-primary ${
-                                        activeHoverGroup === group.slug ? 'text-primary border-primary bg-primary/5' : 'text-foreground/70'
+                                    className={`px-8 h-full flex items-center gap-2 text-[11px] font-display font-bold uppercase tracking-[0.2em] transition-all relative group/cat ${
+                                        activeHoverGroup === group.slug ? 'text-primary' : 'text-foreground/40 hover:text-foreground/70'
                                     }`}
                                 >
                                     {group.name}
-                                    <ChevronDown size={14} className={`transition-transform duration-300 ${activeHoverGroup === group.slug ? 'rotate-180' : ''}`} />
+                                    <ChevronDown size={14} className={`transition-transform duration-500 ${activeHoverGroup === group.slug ? 'rotate-180 text-primary' : 'opacity-30'}`} />
+                                    {activeHoverGroup === group.slug && (
+                                        <motion.div layoutId="nav-active" className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary rounded-full" />
+                                    )}
                                 </button>
 
                                 {/* Dropdown Menu */}
