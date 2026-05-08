@@ -8,9 +8,6 @@ import { useState } from 'react';
 interface FilterPanelProps {
   activeCategory: string;
   onCategoryChange: (id: string) => void;
-  selectedBrands: string[];
-  onBrandChange: (brand: string) => void;
-  brands: string[];
   activeSort: string;
   onSortChange: (sort: string) => void;
   priceRange: [number, number];
@@ -23,9 +20,6 @@ interface FilterPanelProps {
 export function FilterPanel({
   activeCategory,
   onCategoryChange,
-  selectedBrands,
-  onBrandChange,
-  brands,
   activeSort,
   onSortChange,
   priceRange,
@@ -42,7 +36,7 @@ export function FilterPanel({
     );
   };
 
-  const hasFilters = activeCategory !== 'todos' || selectedBrands.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000000;
+  const hasFilters = activeCategory !== 'todos' || priceRange[0] > 0 || priceRange[1] < 1000000;
 
   return (
     <>
@@ -147,29 +141,6 @@ export function FilterPanel({
               value={priceRange}
               onChange={onPriceChange}
             />
-          </section>
-
-          {/* Marcas */}
-          <section>
-            <h4 className="font-bold text-sm text-foreground/50 uppercase tracking-widest mb-4">Marcas</h4>
-            <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {brands.map((brand) => (
-                <label key={brand} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary cursor-pointer transition-colors group">
-                  <div className="relative flex items-center justify-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedBrands.includes(brand)}
-                      onChange={() => onBrandChange(brand)}
-                      className="peer appearance-none w-5 h-5 rounded-md border-2 border-border checked:bg-primary checked:border-primary transition-all cursor-pointer"
-                    />
-                    <Check size={14} className="absolute text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" strokeWidth={4} />
-                  </div>
-                  <span className="text-sm text-foreground/70 group-hover:text-foreground font-medium transition-colors">
-                    {brand}
-                  </span>
-                </label>
-              ))}
-            </div>
           </section>
 
           {/* Ordenar */}

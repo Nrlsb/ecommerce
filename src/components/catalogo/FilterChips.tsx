@@ -7,10 +7,8 @@ import { PRODUCT_CATEGORIES_HIERARCHY } from '@/config/categories';
 interface FilterChipsProps {
   activeCategory: string;
   categories: { id: string; slug: string; name: string }[];
-  selectedBrands: string[];
   priceRange: [number, number];
   onRemoveCategory: () => void;
-  onRemoveBrand: (brand: string) => void;
   onResetPrice: () => void;
   onClearAll: () => void;
 }
@@ -18,10 +16,8 @@ interface FilterChipsProps {
 export function FilterChips({
   activeCategory,
   categories,
-  selectedBrands,
   priceRange,
   onRemoveCategory,
-  onRemoveBrand,
   onResetPrice,
   onClearAll,
 }: FilterChipsProps) {
@@ -38,7 +34,7 @@ export function FilterChips({
   };
 
   const categoryName = getCategoryName();
-  const hasActiveFilters = activeCategory !== 'todos' || selectedBrands.length > 0 || priceRange[0] > 0 || priceRange[1] < 1000000;
+  const hasActiveFilters = activeCategory !== 'todos' || priceRange[0] > 0 || priceRange[1] < 1000000;
 
   if (!hasActiveFilters) return null;
 
@@ -59,20 +55,6 @@ export function FilterChips({
             <X size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
           </motion.button>
         )}
-
-        {selectedBrands.map((brand) => (
-          <motion.button
-            key={brand}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            onClick={() => onRemoveBrand(brand)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-foreground border border-border rounded-full text-xs font-bold hover:bg-border transition-colors group"
-          >
-            {brand}
-            <X size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
-          </motion.button>
-        ))}
 
         {(priceRange[0] > 0 || priceRange[1] < 1000000) && (
           <motion.button

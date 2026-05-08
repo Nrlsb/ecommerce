@@ -44,7 +44,6 @@ function CatalogoContent() {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeSort, setActiveSort] = useState('destacados');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -127,10 +126,6 @@ function CatalogoContent() {
         }
       }
 
-      if (selectedBrands.length > 0) {
-        query = query.in('marca', selectedBrands);
-      }
-
       // Filtro de precio
       if (priceRange[0] > 0) {
         query = query.gte('precio', priceRange[0]);
@@ -200,7 +195,7 @@ function CatalogoContent() {
     setPage(0);
     setHasMore(true);
     fetchProducts(0, true);
-  }, [activeCategory, activeSort, searchQuery, selectedBrands, priceRange]);
+  }, [activeCategory, activeSort, searchQuery, priceRange]);
 
   // Sincronizar con cambios en la URL
   useEffect(() => {
@@ -218,8 +213,6 @@ function CatalogoContent() {
     }
   };
 
-  const currentLoadedBrands = [...new Set(products.map((p) => p.marca || 'Pinturería Mercurio'))];
-
   const handleAddToCart = (product: Product) => {
     addToCart({
       ...product,
@@ -230,15 +223,8 @@ function CatalogoContent() {
     });
   };
 
-  const toggleBrand = (brand: string) => {
-    setSelectedBrands((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
-    );
-  };
-
   const clearAllFilters = () => {
     setActiveCategory('todos');
-    setSelectedBrands([]);
     setPriceRange([0, 1000000]);
     setSearchQuery('');
   };
@@ -255,9 +241,6 @@ function CatalogoContent() {
           <FilterPanel
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
-            selectedBrands={selectedBrands}
-            onBrandChange={toggleBrand}
-            brands={currentLoadedBrands}
             activeSort={activeSort}
             onSortChange={setActiveSort}
             priceRange={priceRange}
@@ -273,10 +256,8 @@ function CatalogoContent() {
             <FilterChips
               activeCategory={activeCategory}
               categories={categories}
-              selectedBrands={selectedBrands}
               priceRange={priceRange}
               onRemoveCategory={() => setActiveCategory('todos')}
-              onRemoveBrand={toggleBrand}
               onResetPrice={() => setPriceRange([0, 1000000])}
               onClearAll={clearAllFilters}
             />
