@@ -92,22 +92,22 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-4">
                         {/* Aberturas */}
                         <div className="bg-white/40 dark:bg-slate-950/40 border border-slate-300/30 dark:border-slate-800/30 p-5 rounded-2xl flex flex-col gap-4">
                             <label className="text-[10px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em]">Aberturas</label>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-wider block">Puertas</span>
-                                    <div className="flex items-center gap-2 bg-white/50 dark:bg-slate-900/50 rounded-xl p-1 border border-slate-200/50 w-fit">
+                                    <div className="flex items-center justify-between bg-white/50 dark:bg-slate-900/50 rounded-xl p-1.5 border border-slate-200/50">
                                         <button type="button" onClick={() => setDoors(Math.max(0, doors - 1))} className="w-8 h-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all text-base font-bold shadow-sm">-</button>
                                         <span className="font-display font-black text-lg w-6 text-center">{doors}</span>
                                         <button type="button" onClick={() => setDoors(doors + 1)} className="w-8 h-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all text-base font-bold shadow-sm">+</button>
                                     </div>
                                 </div>
-                                <div className="space-y-2 border-l border-slate-300/20 pl-4">
+                                <div className="space-y-2">
                                     <span className="text-[9px] font-bold text-foreground/50 uppercase tracking-wider block">Ventanas</span>
-                                    <div className="flex items-center gap-2 bg-white/50 dark:bg-slate-900/50 rounded-xl p-1 border border-slate-200/50 w-fit">
+                                    <div className="flex items-center justify-between bg-white/50 dark:bg-slate-900/50 rounded-xl p-1.5 border border-slate-200/50">
                                         <button type="button" onClick={() => setWindows(Math.max(0, windows - 1))} className="w-8 h-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all text-base font-bold shadow-sm">-</button>
                                         <span className="font-display font-black text-lg w-6 text-center">{windows}</span>
                                         <button type="button" onClick={() => setWindows(windows + 1)} className="w-8 h-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all text-base font-bold shadow-sm">+</button>
@@ -119,7 +119,7 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                         {/* Nº de Manos */}
                         <div className="bg-white/40 dark:bg-slate-950/40 border border-slate-300/30 dark:border-slate-800/30 p-5 rounded-2xl flex flex-col gap-4">
                             <label className="text-[10px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em]">Nº de Manos</label>
-                            <div className="flex items-center p-1 bg-white/50 dark:bg-slate-900/50 rounded-xl border border-slate-200/50 h-12 mt-auto">
+                            <div className="flex items-center p-1 bg-white/50 dark:bg-slate-900/50 rounded-xl border border-slate-200/50 h-12">
                                 {[1, 2, 3].map((num) => (
                                     <button
                                         type="button"
