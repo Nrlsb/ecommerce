@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 
 // Configuración de MercadoPago
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Crear el pedido en la tabla "pedidos"
-        const { data: pedido, error: pedidoError } = await supabase
+        const { data: pedido, error: pedidoError } = await supabaseAdmin
             .from('pedidos')
             .insert([
                 { 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
             precio_unitario: item.price
         }));
 
-        const { error: itemsError } = await supabase
+        const { error: itemsError } = await supabaseAdmin
             .from('pedido_items')
             .insert(pedidoItemsData);
 

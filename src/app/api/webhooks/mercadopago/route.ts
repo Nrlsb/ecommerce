@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 
 // Configuración de MercadoPago
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
                     updateData.payment_id = String(id);
                 }
 
-                const { error } = await supabase
+                const { error } = await supabaseAdmin
                     .from('pedidos')
                     .update(updateData)
                     .eq('id', orderId);
