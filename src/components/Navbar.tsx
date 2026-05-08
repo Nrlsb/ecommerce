@@ -45,7 +45,7 @@ export default function Navbar() {
     return (
         <nav className="sticky top-0 z-50 w-full glass border-b border-white/20 dark:border-white/5 shadow-premium transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-20">
+                <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-4 group">
                         <div className="relative flex flex-col items-center justify-center">
@@ -155,7 +155,7 @@ export default function Navbar() {
             {/* Categorías Desktop Bar */}
             <div className="hidden md:block border-t border-white/10 dark:border-white/5 bg-white/30 dark:bg-slate-950/30 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-center items-center h-14 space-x-2">
+                    <div className="flex justify-center items-center h-10 space-x-2">
                         {PRODUCT_CATEGORIES_HIERARCHY.map((group) => (
                             <div 
                                 key={group.slug}

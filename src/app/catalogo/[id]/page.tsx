@@ -235,23 +235,23 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             initial={showAnimation ? { opacity: 0, x: 30 } : false}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                            className="mb-12"
+                            className="mb-10"
                         >
-                            <p className="text-xs font-display font-bold text-primary uppercase tracking-[0.4em] mb-4 opacity-70">{product.categoria_nombre || 'Nuestra Colección'}</p>
-                            <h1 className="text-5xl lg:text-7xl font-display font-extrabold text-foreground mb-6 leading-[1.1] tracking-tight">{product.nombre}</h1>
+                            <p className="text-xs font-display font-bold text-primary uppercase tracking-[0.3em] mb-3 opacity-70">{product.categoria_nombre || 'Nuestra Colección'}</p>
+                            <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 dark:text-white mb-5 leading-[1.1] tracking-tight">{product.nombre}</h1>
                             
-                            <div className="flex items-center gap-8 mb-10">
+                            <div className="flex items-center gap-6 mb-8">
                                 <div className="flex items-center gap-1.5 text-amber-400">
                                     {[1, 2, 3, 4, 5].map((s) => (
-                                        <Star key={s} size={20} fill={s <= 4 ? "currentColor" : "none"} strokeWidth={s <= 4 ? 0 : 2} />
+                                        <Star key={s} size={18} fill={s <= 4 ? "currentColor" : "none"} strokeWidth={s <= 4 ? 0 : 2} />
                                     ))}
-                                    <span className="ml-3 font-display font-bold text-2xl text-foreground">4.8</span>
+                                    <span className="ml-2 font-display font-bold text-xl text-foreground">4.8</span>
                                 </div>
-                                <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
-                                <span className="text-foreground/40 font-display font-bold uppercase tracking-[0.2em] text-[10px]">Basado en 24 Opiniones</span>
+                                <div className="h-5 w-px bg-slate-200 dark:bg-slate-800" />
+                                <span className="text-foreground/40 font-display font-bold uppercase tracking-[0.2em] text-[9px]">Basado en 24 Opiniones</span>
                             </div>
 
-                            <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 leading-relaxed font-medium mb-12 max-w-xl">
+                            <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium mb-10 max-w-xl">
                                 {product.descripcion || 'Una fórmula de alto rendimiento diseñada para transformar tus espacios con elegancia y durabilidad extrema.'}
                             </p>
                         </motion.div>
@@ -268,11 +268,11 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             <div className="absolute -left-20 -top-20 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 mb-10 relative">
-                                <div className="space-y-2">
+                                <div className="space-y-1">
                                     <span className="text-[10px] text-foreground/40 font-display font-bold uppercase tracking-[0.3em] block">Inversión Profesional</span>
-                                    <div className="flex items-baseline gap-3">
-                                        <span className="text-5xl lg:text-7xl font-display font-black text-primary tracking-tighter">${Number(product.precio).toLocaleString('es-AR')}</span>
-                                        <span className="text-sm font-display font-bold text-foreground/40 uppercase tracking-widest">ARS</span>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-4xl lg:text-5xl font-display font-bold text-primary tracking-tighter">${Number(product.precio).toLocaleString('es-AR')}</span>
+                                        <span className="text-xs font-display font-bold text-foreground/40 uppercase tracking-widest">ARS</span>
                                     </div>
                                 </div>
                                 
@@ -315,22 +315,22 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
                         {/* Features Badges */}
                         <div className="grid grid-cols-2 gap-6 mb-12">
-                            <div className="flex items-center gap-5 p-7 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-[2rem] shadow-sm group hover:border-primary/30 transition-all hover:shadow-premium">
-                                <div className="p-4 bg-primary/5 rounded-2xl group-hover:scale-110 transition-transform group-hover:bg-primary/10">
-                                    <Truck className="w-6 h-6 text-primary" />
+                            <div className="flex items-center gap-5 p-6 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl shadow-sm group hover:border-primary/30 transition-all">
+                                <div className="p-3 bg-primary/5 rounded-xl group-hover:scale-110 transition-transform group-hover:bg-primary/10">
+                                    <Truck className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <span className="text-[10px] font-display font-bold text-foreground/30 uppercase tracking-[0.2em] block leading-none mb-1.5">Envío Express</span>
-                                    <span className="text-sm font-display font-extrabold text-foreground/80">Entrega en 24hs</span>
+                                    <span className="text-[10px] font-display font-bold text-slate-400 uppercase tracking-widest block leading-none mb-1">Envío Express</span>
+                                    <span className="text-sm font-display font-bold text-slate-700 dark:text-slate-200">Entrega en 24hs</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-5 p-7 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-[2rem] shadow-sm group hover:border-primary/30 transition-all hover:shadow-premium">
-                                <div className="p-4 bg-primary/5 rounded-2xl group-hover:scale-110 transition-transform group-hover:bg-primary/10">
-                                    <ShieldCheck className="w-6 h-6 text-primary" />
+                            <div className="flex items-center gap-5 p-6 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl shadow-sm group hover:border-primary/30 transition-all">
+                                <div className="p-3 bg-primary/5 rounded-xl group-hover:scale-110 transition-transform group-hover:bg-primary/10">
+                                    <ShieldCheck className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <span className="text-[10px] font-display font-bold text-foreground/30 uppercase tracking-[0.2em] block leading-none mb-1.5">Confianza</span>
-                                    <span className="text-sm font-display font-extrabold text-foreground/80">Garantía Mercurio</span>
+                                    <span className="text-[10px] font-display font-bold text-slate-400 uppercase tracking-widest block leading-none mb-1">Confianza</span>
+                                    <span className="text-sm font-display font-bold text-slate-700 dark:text-slate-200">Garantía Mercurio</span>
                                 </div>
                             </div>
                         </div>

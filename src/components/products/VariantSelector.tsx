@@ -97,7 +97,7 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                 <span className="text-[10px] font-display font-bold text-foreground/30 uppercase tracking-[0.3em] block mb-5 pl-1">
                     Colección de Color: <span className="text-foreground font-black">{selectedColor}</span>
                 </span>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-3">
                     {colors.map((color) => {
                         const isSelected = color === selectedColor;
                         const hex = getColorHex(color);
@@ -109,8 +109,8 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                                     setSelectedColor(color);
                                     handleSelectVariant(color, selectedSize);
                                 }}
-                                className={`w-12 h-12 rounded-full border-2 transition-all flex items-center justify-center relative p-1 ${
-                                    isSelected ? 'border-primary scale-110 shadow-premium' : 'border-transparent hover:scale-110'
+                                className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center relative p-0.5 ${
+                                    isSelected ? 'border-primary scale-110 shadow-lg shadow-primary/10' : 'border-transparent hover:scale-110'
                                 }`}
                                 title={color}
                             >
@@ -134,7 +134,7 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                 <span className="text-[10px] font-display font-bold text-foreground/30 uppercase tracking-[0.3em] block mb-5 pl-1">
                     Presentación: <span className="text-foreground font-black">{selectedSize} Litros</span>
                 </span>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-3">
                     {sizes.map((size) => {
                         const isSelected = size === selectedSize;
                         const hasVariant = variants.some(v => v.color === selectedColor && v.size === size);
@@ -150,9 +150,9 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                                     }
                                 }}
                                 disabled={!hasVariant}
-                                className={`px-8 py-4 rounded-2xl font-display font-bold text-sm uppercase tracking-[0.15em] transition-all border-2 relative overflow-hidden active:scale-95 ${
+                                className={`px-6 py-3 rounded-xl font-display font-bold text-[13px] uppercase tracking-wider transition-all border-2 relative overflow-hidden active:scale-95 ${
                                     isSelected 
-                                        ? 'bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20' 
+                                        ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/10' 
                                         : hasVariant
                                             ? 'bg-white/50 dark:bg-slate-900/50 border-slate-200/50 dark:border-slate-800/50 hover:border-primary/40 text-foreground/50'
                                             : 'bg-slate-50/30 border-transparent text-foreground/10 cursor-not-allowed'
