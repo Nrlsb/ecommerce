@@ -195,7 +195,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         <div className="min-h-screen bg-background pb-32">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Back Link */}
-                <Link href="/catalogo" className="inline-flex items-center text-foreground/40 hover:text-primary transition-all mb-12 group font-display font-bold uppercase tracking-[0.2em] text-[10px]">
+                <Link href="/catalogo" className="inline-flex items-center text-foreground/60 hover:text-primary transition-all mb-12 group font-display font-bold uppercase tracking-[0.2em] text-[10px]">
                     <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-2 transition-transform" />
                     Catálogo de Productos
                 </Link>
@@ -248,7 +248,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                     <span className="ml-2 font-display font-bold text-xl text-foreground">4.8</span>
                                 </div>
                                 <div className="h-5 w-px bg-slate-200 dark:bg-slate-800" />
-                                <span className="text-foreground/40 font-display font-bold uppercase tracking-[0.2em] text-[9px]">Basado en 24 Opiniones</span>
+                                <span className="text-foreground/60 font-display font-bold uppercase tracking-[0.2em] text-[9px]">Basado en 24 Opiniones</span>
                             </div>
 
                             <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium mb-10 max-w-xl">
@@ -272,7 +272,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                     <span className="text-[10px] text-foreground/40 font-display font-bold uppercase tracking-[0.3em] block">Inversión Profesional</span>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-4xl lg:text-5xl font-display font-bold text-primary tracking-tighter">${Number(product.precio).toLocaleString('es-AR')}</span>
-                                        <span className="text-xs font-display font-bold text-foreground/40 uppercase tracking-widest">ARS</span>
+                                        <span className="text-xs font-display font-bold text-foreground/60 uppercase tracking-widest">ARS</span>
                                     </div>
                                 </div>
                                 

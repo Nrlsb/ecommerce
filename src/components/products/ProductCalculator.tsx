@@ -63,7 +63,7 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                 </div>
                 <div>
                     <h3 className="font-display font-black text-2xl uppercase tracking-tighter">Calculadora Pro</h3>
-                    <p className="text-[9px] font-display font-bold text-foreground/40 uppercase tracking-[0.2em] -mt-1">Dpto. Técnico Mercurio</p>
+                    <p className="text-[9px] font-display font-bold text-foreground/60 uppercase tracking-[0.2em] -mt-1">Dpto. Técnico Mercurio</p>
                 </div>
             </div>
 
@@ -71,52 +71,52 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="block text-[9px] font-display font-bold text-foreground/40 uppercase tracking-[0.2em] pl-1">Ancho (metros)</label>
+                            <label className="block text-[9px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em] pl-1">Ancho (metros)</label>
                             <input
                                 type="number"
                                 value={width}
                                 onChange={(e) => setWidth(e.target.value)}
                                 placeholder="4.5"
-                                className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 rounded-2xl focus:border-primary/50 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-display font-bold text-lg"
+                                className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-slate-300/50 dark:border-slate-800/50 rounded-2xl focus:border-primary/50 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-display font-bold text-lg"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="block text-[9px] font-display font-bold text-foreground/40 uppercase tracking-[0.2em] pl-1">Alto (metros)</label>
+                            <label className="block text-[9px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em] pl-1">Alto (metros)</label>
                             <input
                                 type="number"
                                 value={height}
                                 onChange={(e) => setHeight(e.target.value)}
                                 placeholder="2.8"
-                                className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 rounded-2xl focus:border-primary/50 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-display font-bold text-lg"
+                                className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-slate-300/50 dark:border-slate-800/50 rounded-2xl focus:border-primary/50 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-display font-bold text-lg"
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/40 dark:bg-slate-950/40 border border-slate-200/30 dark:border-slate-800/30 p-5 rounded-2xl flex flex-col gap-3">
-                            <label className="text-[9px] font-display font-bold text-foreground/40 uppercase tracking-[0.2em]">Aberturas</label>
+                        <div className="bg-white/40 dark:bg-slate-950/40 border border-slate-300/30 dark:border-slate-800/30 p-5 rounded-2xl flex flex-col gap-3">
+                            <label className="text-[9px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em]">Aberturas</label>
                             <div className="flex items-center justify-between gap-2">
                                 <div className="flex flex-col gap-1">
                                     <span className="text-[9px] font-bold text-foreground/60 uppercase">Puertas</span>
                                     <div className="flex items-center gap-2">
-                                        <button type="button" onClick={() => setDoors(Math.max(0, doors - 1))} className="w-8 h-8 rounded-lg border border-slate-200/50 flex items-center justify-center hover:bg-white transition-all text-base font-bold shadow-sm">-</button>
+                                        <button type="button" onClick={() => setDoors(Math.max(0, doors - 1))} className="w-8 h-8 rounded-lg border border-slate-300/50 flex items-center justify-center hover:bg-white transition-all text-base font-bold shadow-sm">-</button>
                                         <span className="font-display font-black text-lg w-4 text-center">{doors}</span>
-                                        <button type="button" onClick={() => setDoors(doors + 1)} className="w-8 h-8 rounded-lg border border-slate-200/50 flex items-center justify-center hover:bg-white transition-all text-base font-bold shadow-sm">+</button>
+                                        <button type="button" onClick={() => setDoors(doors + 1)} className="w-8 h-8 rounded-lg border border-slate-300/50 flex items-center justify-center hover:bg-white transition-all text-base font-bold shadow-sm">+</button>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <span className="text-[9px] font-bold text-foreground/60 uppercase">Ventanas</span>
                                     <div className="flex items-center gap-2">
-                                        <button type="button" onClick={() => setWindows(Math.max(0, windows - 1))} className="w-8 h-8 rounded-lg border border-slate-200/50 flex items-center justify-center hover:bg-white transition-all text-base font-bold shadow-sm">-</button>
+                                        <button type="button" onClick={() => setWindows(Math.max(0, windows - 1))} className="w-8 h-8 rounded-lg border border-slate-300/50 flex items-center justify-center hover:bg-white transition-all text-base font-bold shadow-sm">-</button>
                                         <span className="font-display font-black text-lg w-4 text-center">{windows}</span>
-                                        <button type="button" onClick={() => setWindows(windows + 1)} className="w-8 h-8 rounded-lg border border-slate-200/50 flex items-center justify-center hover:bg-white transition-all text-base font-bold shadow-sm">+</button>
+                                        <button type="button" onClick={() => setWindows(windows + 1)} className="w-8 h-8 rounded-lg border border-slate-300/50 flex items-center justify-center hover:bg-white transition-all text-base font-bold shadow-sm">+</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white/40 dark:bg-slate-950/40 border border-slate-200/30 dark:border-slate-800/30 p-5 rounded-2xl flex flex-col gap-2">
-                            <label className="text-[9px] font-display font-bold text-foreground/40 uppercase tracking-[0.2em]">Nº de Manos</label>
+                        <div className="bg-white/40 dark:bg-slate-950/40 border border-slate-300/30 dark:border-slate-800/30 p-5 rounded-2xl flex flex-col gap-2">
+                            <label className="text-[9px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em]">Nº de Manos</label>
                             <div className="grid grid-cols-3 gap-2 h-full">
                                 {[1, 2, 3].map((num) => (
                                     <button

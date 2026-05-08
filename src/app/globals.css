@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fdfdfe;
-  --foreground: #020617;
+  --background: #ffffff;
+  --foreground: #0f172a; /* Slate 900 más profundo */
 
   --primary: #1E3773;
   --primary-foreground: #ffffff;
 
-  --secondary: #f1f5f9;
+  --secondary: #f8fafc;
   --secondary-foreground: #0f172a;
 
   --accent: #EB2891;
@@ -26,11 +26,11 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  --muted: #f8fafc;
-  --muted-foreground: #64748b;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569; /* Slate 600 para mejor legibilidad */
 
   --card: #ffffff;
-  --card-foreground: #020617;
+  --card-foreground: #0f172a;
 
   --border: #e2e8f0;
   
@@ -64,7 +64,9 @@
   --border: #1e293b;
 }
 
-@theme inline {
+@theme {
+  --variant-dark: .dark &;
+  
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
@@ -111,10 +113,10 @@ h1, h2, h3, h4, h5, h6, .font-display {
 
 /* Glassmorphism Utilities */
 .glass {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .dark .glass {

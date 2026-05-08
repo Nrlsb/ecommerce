@@ -94,7 +94,7 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
         <div className="glass p-8 rounded-[2.5rem] border border-white/40 dark:border-white/5 shadow-premium my-12">
             {/* Selector de Color */}
             <div className="mb-10">
-                <span className="text-[10px] font-display font-bold text-foreground/30 uppercase tracking-[0.3em] block mb-5 pl-1">
+                <span className="text-[10px] font-display font-bold text-foreground/60 uppercase tracking-[0.3em] block mb-5 pl-1">
                     Colección de Color: <span className="text-foreground font-black">{selectedColor}</span>
                 </span>
                 <div className="flex flex-wrap gap-3">
@@ -131,7 +131,7 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
 
             {/* Selector de Tamaño */}
             <div>
-                <span className="text-[10px] font-display font-bold text-foreground/30 uppercase tracking-[0.3em] block mb-5 pl-1">
+                <span className="text-[10px] font-display font-bold text-foreground/60 uppercase tracking-[0.3em] block mb-5 pl-1">
                     Presentación: <span className="text-foreground font-black">{selectedSize} Litros</span>
                 </span>
                 <div className="flex flex-wrap gap-3">
@@ -154,8 +154,8 @@ export default function VariantSelector({ currentProductId, variants }: VariantS
                                     isSelected 
                                         ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/10' 
                                         : hasVariant
-                                            ? 'bg-white/50 dark:bg-slate-900/50 border-slate-200/50 dark:border-slate-800/50 hover:border-primary/40 text-foreground/50'
-                                            : 'bg-slate-50/30 border-transparent text-foreground/10 cursor-not-allowed'
+                                            ? 'bg-white dark:bg-slate-900/50 border-slate-300 dark:border-slate-800/50 hover:border-primary/40 text-foreground/70'
+                                            : 'bg-slate-50/30 border-transparent text-foreground/20 cursor-not-allowed'
                                 }`}
                             >
                                 {size} L

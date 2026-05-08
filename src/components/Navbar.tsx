@@ -63,7 +63,7 @@ export default function Navbar() {
                             <span className="text-3xl font-display font-black italic tracking-tighter text-primary group-hover:text-primary/80 transition-colors">
                                 mercurio
                             </span>
-                            <span className="text-[10px] font-display font-bold tracking-[0.3em] uppercase text-primary/40 ml-1">
+                            <span className="text-[10px] font-display font-bold tracking-[0.3em] uppercase text-primary/60 ml-1">
                                 pinturerías
                             </span>
                         </div>
