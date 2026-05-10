@@ -38,6 +38,8 @@ CREATE TABLE pedidos (
   cliente_email VARCHAR(200) NOT NULL,
   total DECIMAL(10, 2) NOT NULL,
   estado VARCHAR(50) DEFAULT 'pendiente', -- pendiente, pagado, enviado
+  metodo_pago VARCHAR(50),
+  payment_id VARCHAR(100),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 

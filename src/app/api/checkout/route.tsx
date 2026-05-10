@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
                     cliente_nombre, 
                     cliente_email, 
                     total: totalValidado, 
-                    estado: 'pendiente' 
+                    estado: 'pendiente',
+                    metodo_pago
                 }
             ])
             .select()
@@ -165,7 +166,10 @@ export async function POST(request: NextRequest) {
                 // Actualizar pedido a pagado
                 await supabaseAdmin
                     .from('pedidos')
-                    .update({ estado: 'pagado' })
+                    .update({ 
+                        estado: 'pagado',
+                        payment_id: String(decidirData.id)
+                    })
                     .eq('id', pedido.id);
 
                 return NextResponse.json(
