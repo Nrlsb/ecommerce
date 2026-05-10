@@ -11,7 +11,7 @@ const mpClient = new MercadoPagoConfig({
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { items, cliente_nombre, cliente_email, total, metodo_pago = 'mercadopago', payway_token, bin } = body;
+        const { items, cliente_nombre, cliente_email, metodo_pago = 'mercadopago', payway_token, bin } = body;
 
         if (!items || items.length === 0) {
             return NextResponse.json({ error: 'El carrito está vacío' }, { status: 400 });
