@@ -221,28 +221,34 @@ export default function CarritoPage() {
                             <h2 className="text-xl font-bold border-b border-border pb-4 mb-4">Método de Pago</h2>
                             
                             <div className="space-y-3 mb-6">
-                                <label className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all ${paymentMethod === 'mercadopago' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                                    <input 
-                                        type="radio" 
-                                        name="paymentMethod" 
-                                        value="mercadopago" 
-                                        checked={paymentMethod === 'mercadopago'} 
-                                        onChange={() => setPaymentMethod('mercadopago')}
-                                        className="text-primary"
-                                    />
-                                    <span className="font-medium">Mercado Pago</span>
+                                <label className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-all hover:border-primary/50 ${paymentMethod === 'mercadopago' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-border bg-card'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <input 
+                                            type="radio" 
+                                            name="paymentMethod" 
+                                            value="mercadopago" 
+                                            checked={paymentMethod === 'mercadopago'} 
+                                            onChange={() => setPaymentMethod('mercadopago')}
+                                            className="w-4 h-4 text-primary border-border focus:ring-primary"
+                                        />
+                                        <span className="font-bold text-foreground">Mercado Pago</span>
+                                    </div>
+                                    <img src="/images/logos/mercadopago.png" alt="Mercado Pago" className="h-6 w-auto object-contain mix-blend-multiply dark:mix-blend-normal" />
                                 </label>
                                 
-                                <label className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all ${paymentMethod === 'payway' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                                    <input 
-                                        type="radio" 
-                                        name="paymentMethod" 
-                                        value="payway" 
-                                        checked={paymentMethod === 'payway'} 
-                                        onChange={() => setPaymentMethod('payway')}
-                                        className="text-primary"
-                                    />
-                                    <span className="font-medium">Tarjeta de Crédito / Débito (Payway)</span>
+                                <label className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-all hover:border-primary/50 ${paymentMethod === 'payway' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-border bg-card'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <input 
+                                            type="radio" 
+                                            name="paymentMethod" 
+                                            value="payway" 
+                                            checked={paymentMethod === 'payway'} 
+                                            onChange={() => setPaymentMethod('payway')}
+                                            className="w-4 h-4 text-primary border-border focus:ring-primary"
+                                        />
+                                        <span className="font-bold text-foreground">Tarjeta (Payway)</span>
+                                    </div>
+                                    <img src="/images/logos/payway.png" alt="Payway" className="h-6 w-auto object-contain mix-blend-multiply dark:mix-blend-normal" />
                                 </label>
                             </div>
 
