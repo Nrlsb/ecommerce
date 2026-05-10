@@ -17,6 +17,29 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'El carrito está vacío' }, { status: 400 });
         }
 
+        // --- INICIO DE VALIDACIÓN DE PRECIOS EN EL SERVIDOR ---
+        const itemIds = items.map((item: any) => item.id);
+        const { data: dbProducts, error: dbError } = await supabaseAdmin
+            .from('productos')
+            .select('id, precio, precio_con_descuento')
+            .in('id', itemIds);
+
+        if (dbError || !dbProducts) {
+            return NextResponse.json({ error: 'Error al verificar productos en el servidor' }, { status: 500 });
+        }
+
+        let totalValidado = 0;
+        const validatedItems = items.map((item: any) => {
+            const dbProduct = dbProducts.find((p) => p.id === item.id);
+            if (!dbProduct) throw new Error(`Producto con ID ${item.id} no encontrado`);
+            
+            const precioReal = dbProduct.precio_con_descuento || dbProduct.precio;
+            totalValidado += precioReal * (item.quantity || 1);
+            
+            return { ...item, price: precioReal };
+        });
+        // --- FIN DE VALIDACIÓN DE PRECIOS ---
+
         // 1. Crear el pedido en la tabla "pedidos"
         const { data: pedido, error: pedidoError } = await supabaseAdmin
             .from('pedidos')
@@ -24,7 +47,7 @@ export async function POST(request: NextRequest) {
                 { 
                     cliente_nombre, 
                     cliente_email, 
-                    total, 
+                    total: totalValidado, 
                     estado: 'pendiente' 
                 }
             ])
@@ -34,7 +57,7 @@ export async function POST(request: NextRequest) {
         if (pedidoError) throw pedidoError;
 
         // 2. Insertar los ítems del pedido en "pedido_items"
-        const pedidoItemsData = items.map((item: any) => ({
+        const pedidoItemsData = validatedItems.map((item: any) => ({
             pedido_id: pedido.id,
             producto_id: item.id,
             cantidad: item.quantity,
@@ -61,7 +84,7 @@ export async function POST(request: NextRequest) {
             
             const preferenceData = {
                 body: {
-                    items: items.map((item: any) => ({
+                    items: validatedItems.map((item: any) => ({
                         id: String(item.id),
                         title: String(item.name || item.nombre || 'Producto'),
                         quantity: parseInt(item.quantity) || 1,
@@ -104,7 +127,7 @@ export async function POST(request: NextRequest) {
                 token: payway_token,
                 payment_method_id: 1, // 1 es VISA. Habría que ajustarlo según la tarjeta (bin o selección en frontend)
                 bin: bin || "450799", 
-                amount: total,
+                amount: totalValidado,
                 currency: "ARS",
                 installments: 1,
                 description: `Compra Ecommerce - Pedido #${pedido.id}`,

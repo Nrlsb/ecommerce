@@ -1,7 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-change-me');
+if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+}
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function createSession(user: any) {
     const token = await new SignJWT({ 
