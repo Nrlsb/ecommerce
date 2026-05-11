@@ -1,4 +1,4 @@
-import { Loader2, PaintBucket, Filter } from 'lucide-react';
+import { Loader2, Filter } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import Skeleton from '../ui/Skeleton';
 

@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, PaintBucket, Check, Loader2 } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, Check, Loader2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import ProductCalculator from '@/components/products/ProductCalculator';
 import RoomSimulator from '@/components/products/RoomSimulator';

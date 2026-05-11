@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ShoppingCart, PaintBucket } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 
 interface Product {
   id: string;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, PaintBucket, Menu, X, Search, User, ShieldCheck, Sun, Moon, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Menu, X, Search, User, ShieldCheck, Sun, Moon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
