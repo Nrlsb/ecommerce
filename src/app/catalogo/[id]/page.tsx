@@ -217,7 +217,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                     <img 
                                         src="/images/logos/logomercurio.png" 
                                         alt="Sin imagen" 
-                                        className="w-64 h-auto opacity-10 grayscale brightness-0 dark:invert animate-float" 
+                                        className="w-64 h-auto opacity-30 animate-float" 
                                     />
                                     <span className="text-xs font-display font-bold uppercase tracking-[0.3em] text-foreground/20">Imagen Profesional Pendiente</span>
                                 </div>
@@ -233,7 +233,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                     <img 
                                         src="/images/logos/logomercurio.png" 
                                         alt="Thumbnail placeholder" 
-                                        className="w-full h-auto opacity-30 grayscale brightness-0 dark:invert" 
+                                        className="w-full h-auto opacity-40" 
                                     />
                                 </div>
                             ))}

@@ -35,7 +35,7 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
           <img 
             src="/images/logos/logomercurio.png" 
             alt="Mercurio Pinturerías" 
-            className="absolute bottom-3 right-3 w-14 h-auto opacity-[0.08] grayscale pointer-events-none z-10" 
+            className="absolute bottom-3 right-3 w-14 h-auto opacity-[0.12] pointer-events-none z-10" 
           />
           {product.imagen_url ? (
             <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-700" />
@@ -44,7 +44,7 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
               <img 
                 src="/images/logos/logomercurio.png" 
                 alt="Sin imagen" 
-                className="w-40 h-auto opacity-20 grayscale brightness-0 dark:invert transition-all duration-500 group-hover:scale-110 group-hover:opacity-30" 
+                className="w-40 h-auto opacity-40 transition-all duration-500 group-hover:scale-110 group-hover:opacity-60" 
               />
               <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em] text-foreground/20">Imagen no disponible</span>
             </div>

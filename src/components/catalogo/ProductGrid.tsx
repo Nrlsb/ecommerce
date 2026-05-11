@@ -82,7 +82,7 @@ export function ProductGrid({
             <img 
               src="/images/logos/logomercurio.png" 
               alt="Sin productos" 
-              className="w-48 h-auto opacity-10 grayscale mb-6" 
+              className="w-48 h-auto opacity-30 mb-6" 
             />
             <p className="text-xl font-display font-bold text-foreground/40">No se encontraron productos con estos filtros.</p>
             <p className="text-sm text-foreground/20 mt-2">Prueba ajustando tu búsqueda o filtros.</p>

@@ -52,14 +52,8 @@ export default function Navbar() {
                             <img 
                                 src="/images/logos/logomercurio.png" 
                                 alt="Mercurio Pinturerías" 
-                                className="h-10 w-auto group-hover:scale-105 transition-transform duration-500 brightness-0 dark:invert" 
+                                className="h-10 w-auto group-hover:scale-105 transition-transform duration-500" 
                             />
-                            {/* Brand Swoosh decorative element */}
-                            <div className="absolute -bottom-1 -right-4 flex gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                                <div className="w-2 h-2 rounded-full bg-mercurio-pink shadow-sm"></div>
-                                <div className="w-2 h-2 rounded-full bg-mercurio-yellow shadow-sm"></div>
-                                <div className="w-2 h-2 rounded-full bg-mercurio-green shadow-sm"></div>
-                            </div>
                         </div>
                     </Link>
 
