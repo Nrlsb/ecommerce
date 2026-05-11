@@ -158,6 +158,31 @@ export async function POST(request: NextRequest) {
                         phone_number: "1111111111",
                         postal_code: "1000",
                         state: "C"
+                    },
+                    purchase_totals: {
+                        currency: "ARS",
+                        amount: amountTotal
+                    },
+                    retail_transaction_data: {
+                        ship_to: {
+                            city: "Buenos Aires",
+                            country: "AR",
+                            customer_id: String(pedido.id),
+                            email: cliente_email || "cliente@ejemplo.com",
+                            first_name: cliente_nombre || "Cliente",
+                            last_name: "Web",
+                            phone_number: "1111111111",
+                            postal_code: "1000",
+                            state: "C"
+                        },
+                        items: items.map((item: any) => ({
+                            product_code: String(item.id).substring(0, 50),
+                            product_description: String(item.name || 'Producto').substring(0, 255),
+                            product_sku: String(item.id).substring(0, 255),
+                            total_amount: Math.round(item.price * item.quantity),
+                            quantity: item.quantity,
+                            unit_price: Math.round(item.price)
+                        }))
                     }
                 }
             };
@@ -180,20 +205,26 @@ export async function POST(request: NextRequest) {
                     .update({ estado: 'cancelado' })
                     .eq('id', pedido.id);
 
+                // Mapear errores de validación de Payway
+                const paywayErrors = decidirData.validation_errors?.map((err: any) => err.param + ': ' + err.error).join(', ');
+                const errorMessage = decidirData.message || paywayErrors || 'Pago rechazado o denegado por el emisor';
+                
                 return NextResponse.json(
-                    { error: `Error en Payway: ${decidirData.message || JSON.stringify(decidirData.validation_errors) || 'Rechazado'}` },
+                    { error: `Error en Payway: ${errorMessage}`, code: decidirData.error?.type || 'payment_error' },
                     { status: 400 }
                 );
             }
 
             // Pago aprobado por Decidir
             if (decidirData.status === 'approved') {
-                // Actualizar pedido a pagado
+                // Actualizar pedido a pagado y persistir IDs de auditoría
                 await supabaseAdmin
                     .from('pedidos')
                     .update({ 
                         estado: 'pagado',
-                        payment_id: String(decidirData.id)
+                        payment_id: String(decidirData.id),
+                        payway_tid: decidirData.status_details?.ticket || '',
+                        payway_auth_code: decidirData.status_details?.card_authorization_code || ''
                     })
                     .eq('id', pedido.id);
 
