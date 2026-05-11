@@ -1,23 +1,44 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
-import { CheckCircle2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ShoppingBag, ArrowRight, Loader2, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 function SuccessPageContent() {
     const { clearCart } = useCart();
     const searchParams = useSearchParams();
+    const [pedido, setPedido] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     
     // Mercado Pago envía parámetros como payment_id, status, external_reference, etc.
     const paymentId = searchParams.get('payment_id');
+    const pedidoId = searchParams.get('pedido_id') || searchParams.get('external_reference');
 
     useEffect(() => {
         // Vaciamos el carrito apenas carga la página de éxito
         clearCart();
-    }, [clearCart]);
+        
+        async function fetchPedido() {
+            if (pedidoId) {
+                const { data, error } = await supabase
+                    .from('pedidos')
+                    .select('*')
+                    .eq('id', pedidoId)
+                    .single();
+                    
+                if (data && !error) {
+                    setPedido(data);
+                }
+            }
+            setLoading(false);
+        }
+        
+        fetchPedido();
+    }, [clearCart, pedidoId]);
 
     return (
         <div className="min-h-[80vh] flex items-center justify-center bg-background px-4">
@@ -45,17 +66,43 @@ function SuccessPageContent() {
                     ¡Pago Aprobado!
                 </h1>
                 
-                <p className="text-foreground/60 mb-2">
+                <p className="text-foreground/60 mb-6">
                     Gracias por tu compra. Tu pedido ha sido procesado exitosamente.
                 </p>
                 
-                {paymentId && (
-                    <p className="text-xs font-mono text-foreground/40 mb-8 bg-muted py-2 px-3 rounded-lg inline-block">
-                        ID de Pago: {paymentId}
-                    </p>
+                {loading ? (
+                    <div className="flex justify-center items-center py-4 text-muted-foreground">
+                        <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                        <span className="text-sm">Buscando detalles...</span>
+                    </div>
+                ) : pedido ? (
+                    <div className="bg-muted/50 rounded-2xl p-4 mb-8 text-left border border-border">
+                        <h3 className="font-bold flex items-center gap-2 mb-3 border-b border-border/50 pb-2">
+                            <Package className="w-4 h-4 text-primary" />
+                            Detalle del Pedido #{pedido.id}
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-foreground/60">Cliente:</span>
+                                <span className="font-medium truncate max-w-[150px]">{pedido.cliente_nombre || 'N/A'}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-foreground/60">Método de pago:</span>
+                                <span className="font-medium capitalize">{pedido.metodo_pago}</span>
+                            </div>
+                            <div className="flex justify-between pt-2 mt-2 border-t border-border/50">
+                                <span className="font-bold">Total Pagado:</span>
+                                <span className="font-bold text-primary">${pedido.total?.toLocaleString('es-AR')}</span>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="bg-muted py-3 px-4 rounded-xl mb-8">
+                        <p className="text-sm text-foreground/80">ID de Referencia: {pedidoId || paymentId || 'Desconocido'}</p>
+                    </div>
                 )}
 
-                <div className="space-y-4 pt-4">
+                <div className="space-y-4">
                     <Link 
                         href="/catalogo"
                         className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg active:scale-95"

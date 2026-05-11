@@ -5,7 +5,17 @@ export async function POST(request: NextRequest) {
     try {
         const payload = await request.json();
         
-        console.log('Webhook Payway recibido:', payload);
+        // Validación de origen segura (Firma o Token)
+        const secret = process.env.PAYWAY_WEBHOOK_SECRET;
+        const authHeader = request.headers.get('authorization') || request.headers.get('x-signature') || request.headers.get('x-payway-signature');
+        
+        // Si hay un secreto configurado, validamos
+        if (secret && authHeader !== secret) {
+            console.warn('intento de Webhook bloqueado: Firma no válida o ausente.');
+            return NextResponse.json({ error: 'Acceso no autorizado' }, { status: 401 });
+        }
+
+        console.log('Webhook Payway recibido y autorizado:', payload);
 
         // Extraer los datos principales enviados por Payway
         const paymentId = payload.id;

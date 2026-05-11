@@ -11,7 +11,7 @@ const mpClient = new MercadoPagoConfig({
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { items, cliente_nombre, cliente_email, metodo_pago = 'mercadopago', payway_token, bin } = body;
+        const { items, cliente_nombre, cliente_email, metodo_pago = 'mercadopago', payway_token, bin, payment_method_id, installments = 1, device_unique_identifier } = body;
 
         if (!items || items.length === 0) {
             return NextResponse.json({ error: 'El carrito está vacío' }, { status: 400 });
@@ -120,21 +120,44 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: 'Token de Payway no proporcionado' }, { status: 400 });
             }
 
-            const decidirApiUrl = 'https://developers.decidir.com/api/v2/payments'; // O Sandbox: https://sandbox.decidir.com/api/v2/payments
+            const isProduction = process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production';
+            const decidirApiUrl = isProduction ? 'https://live.decidir.com/api/v2/payments' : 'https://sandbox.decidir.com/api/v2/payments';
             
+            // Cálculo de recargos por cuotas (ejemplo)
+            let recargoMult = 1;
+            if (installments === 3) recargoMult = 1.15; // 15% de recargo
+            if (installments === 6) recargoMult = 1.30; // 30% de recargo
+            if (installments === 12) recargoMult = 1.60; // 60% de recargo
+            const amountTotal = Math.round(totalValidado * recargoMult);
+
             // Requerimientos mínimos para el pago V2
             const decidirPayload = {
                 site_transaction_id: String(pedido.id),
                 token: payway_token,
-                payment_method_id: 1, // 1 es VISA. Habría que ajustarlo según la tarjeta (bin o selección en frontend)
+                payment_method_id: payment_method_id || 1, // Dinámico
                 bin: bin || "450799", 
-                amount: totalValidado,
+                amount: amountTotal,
                 currency: "ARS",
-                installments: 1,
+                installments: installments || 1,
                 description: `Compra Ecommerce - Pedido #${pedido.id}`,
                 payment_type: "single",
                 establishment_name: "ECOMMERCE",
-                sub_payments: []
+                sub_payments: [],
+                fraud_detection: {
+                    send_to_cs: true,
+                    device_unique_identifier: device_unique_identifier || "device_fallback_123",
+                    bill_to: {
+                        city: "Buenos Aires",
+                        country: "AR",
+                        customer_id: String(pedido.id),
+                        email: cliente_email || "cliente@ejemplo.com",
+                        first_name: cliente_nombre || "Cliente",
+                        last_name: "Web",
+                        phone_number: "1111111111",
+                        postal_code: "1000",
+                        state: "C"
+                    }
+                }
             };
 
             const response = await fetch(decidirApiUrl, {

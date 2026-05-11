@@ -21,6 +21,8 @@ export default function CarritoPage() {
         securityCode: '',
         cardHolderIdentificationNumber: ''
     });
+    const [installments, setInstallments] = useState(1);
+    const [paywayError, setPaywayError] = useState<string | null>(null);
 
     useEffect(() => {
         setIsMounted(true);
@@ -66,22 +68,48 @@ export default function CarritoPage() {
         }
     };
 
+    const isValidLuhn = (num: string) => {
+        let arr = (num + '').replace(/\s/g, '').split('').reverse().map(x => parseInt(x, 10));
+        let lastDigit = arr.splice(0, 1)[0];
+        let sum = arr.reduce((acc, val, i) => (i % 2 !== 0 ? acc + val : acc + ((val * 2) % 9) || 9), 0);
+        sum += lastDigit;
+        return sum % 10 === 0;
+    };
+
+    const getPaymentMethodId = (bin: string) => {
+        if (bin.startsWith('4')) return 1; // Visa
+        if (bin.startsWith('5')) return 15; // Mastercard
+        if (bin.startsWith('3')) return 65; // Amex
+        return 1; // default
+    };
+
     const processPayway = () => {
         setIsProcessing(true);
+        setPaywayError(null);
         try {
-            // Validaciones básicas
-            if (!cardData.cardNumber || !cardData.securityCode) {
-                alert('Por favor, complete los datos de la tarjeta.');
+            const cardNumber = cardData.cardNumber.replace(/\s/g, '');
+            if (!cardNumber || !cardData.securityCode || !cardData.cardHolderName) {
+                setPaywayError('Por favor, complete todos los datos de la tarjeta.');
                 setIsProcessing(false);
                 return;
             }
 
-            const dec = new (window as any).Decidir('https://sandbox.decidir.com/api/v2/'); // En producción usar URL de live
-            dec.setPublishableKey(process.env.NEXT_PUBLIC_PAYWAY_PUBLIC_KEY || ''); // Requiere la key pública en .env
+            if (!isValidLuhn(cardNumber)) {
+                setPaywayError('El número de tarjeta no es válido.');
+                setIsProcessing(false);
+                return;
+            }
+
+            const decidirEnvUrl = process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production' 
+                ? 'https://live.decidir.com/api/v2/' 
+                : 'https://sandbox.decidir.com/api/v2/';
+
+            const dec = new (window as any).Decidir(decidirEnvUrl);
+            dec.setPublishableKey(process.env.NEXT_PUBLIC_PAYWAY_PUBLIC_KEY || '');
             dec.setTimeout(10000);
 
             dec.createToken({
-                card_number: cardData.cardNumber.replace(/\s/g, ''),
+                card_number: cardNumber,
                 card_expiration_month: cardData.cardExpirationMonth,
                 card_expiration_year: cardData.cardExpirationYear,
                 security_code: cardData.securityCode,
@@ -92,22 +120,27 @@ export default function CarritoPage() {
                 }
             }, async (status: number, response: any) => {
                 if (status === 200 || status === 201) {
-                    // Token obtenido con éxito, enviar al backend
-                    await sendPaywayPayment(response.id, response.bin);
+                    const paymentMethodId = getPaymentMethodId(response.bin || cardNumber.substring(0, 6));
+                    // Generar un ID de dispositivo para Cybersource
+                    const deviceUniqueId = typeof crypto !== 'undefined' && crypto.randomUUID 
+                        ? crypto.randomUUID() 
+                        : Math.random().toString(36).substring(2, 15);
+                        
+                    await sendPaywayPayment(response.id, response.bin || cardNumber.substring(0, 6), paymentMethodId, deviceUniqueId);
                 } else {
                     console.error("Error al tokenizar con Payway:", response);
-                    alert('Error en tarjeta: ' + (response.error?.[0]?.error?.message || 'Verifique los datos'));
+                    setPaywayError(response.error?.[0]?.error?.message || 'Verifique los datos ingresados.');
                     setIsProcessing(false);
                 }
             });
         } catch (error) {
             console.error('Error al inicializar Decidir:', error);
-            alert('Ocurrió un error al conectar con Payway.');
+            setPaywayError('Ocurrió un error al conectar con Payway.');
             setIsProcessing(false);
         }
     };
 
-    const sendPaywayPayment = async (token: string, bin: string) => {
+    const sendPaywayPayment = async (token: string, bin: string, paymentMethodId: number, deviceId: string) => {
         try {
             const response = await fetch('/api/checkout', {
                 method: 'POST',
@@ -119,7 +152,10 @@ export default function CarritoPage() {
                     total: totalPrice,
                     metodo_pago: 'payway',
                     payway_token: token,
-                    bin: bin
+                    bin: bin,
+                    payment_method_id: paymentMethodId,
+                    installments: installments,
+                    device_unique_identifier: deviceId
                 })
             });
 
@@ -129,13 +165,14 @@ export default function CarritoPage() {
                 clearCart();
                 window.location.href = data.redirectUrl;
             } else if (response.ok) {
-                alert('¡Pago exitoso con Payway!');
+                // Caso alternativo si no hay redirect
                 clearCart();
+                window.location.href = `/checkout/success?pedido_id=${data.pedidoId}`;
             } else {
-                alert('Error al procesar pago: ' + data.error);
+                setPaywayError('Error al procesar pago: ' + data.error);
             }
         } catch (e) {
-            alert('Error de conexión: ' + (e instanceof Error ? e.message : String(e)));
+            setPaywayError('Error de conexión: ' + (e instanceof Error ? e.message : String(e)));
         } finally {
             setIsProcessing(false);
         }
@@ -159,7 +196,12 @@ export default function CarritoPage() {
 
     return (
         <div className="min-h-screen bg-muted/20 py-8">
-            <Script src="https://sandbox.decidir.com/api/v2/decidir.js" strategy="lazyOnload" />
+            <Script 
+                src={process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production' 
+                    ? "https://live.decidir.com/api/v2/decidir.js" 
+                    : "https://sandbox.decidir.com/api/v2/decidir.js"} 
+                strategy="lazyOnload" 
+            />
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
@@ -320,6 +362,24 @@ export default function CarritoPage() {
                                             onChange={(e) => setCardData({...cardData, cardHolderIdentificationNumber: e.target.value})}
                                         />
                                     </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-foreground/70 mb-1 block">Cuotas</label>
+                                        <select 
+                                            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                                            value={installments}
+                                            onChange={(e) => setInstallments(Number(e.target.value))}
+                                        >
+                                            <option value={1}>1 Cuota sin interés</option>
+                                            <option value={3}>3 Cuotas fijas</option>
+                                            <option value={6}>6 Cuotas fijas</option>
+                                            <option value={12}>12 Cuotas fijas</option>
+                                        </select>
+                                    </div>
+                                    {paywayError && (
+                                        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg border border-destructive/20 font-medium">
+                                            {paywayError}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
