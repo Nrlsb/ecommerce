@@ -121,7 +121,9 @@ export async function POST(request: NextRequest) {
             }
 
             const isProduction = process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production';
-            const decidirApiUrl = isProduction ? 'https://live.decidir.com/api/v2/payments' : 'https://sandbox.decidir.com/api/v2/payments';
+            const decidirApiUrl = isProduction 
+                ? 'https://ventasonline.payway.com.ar/api/v2/payments' 
+                : 'https://developers-ventasonline.payway.com.ar/api/v2/payments';
             
             // Cálculo de recargos por cuotas (ejemplo)
             let recargoMult = 1;

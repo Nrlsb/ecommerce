@@ -19,13 +19,17 @@ export default function CarritoPage() {
         cardExpirationMonth: '',
         cardExpirationYear: '',
         securityCode: '',
-        cardHolderIdentificationNumber: ''
+        cardHolderIdentificationNumber: '',
+        cardHolderIdentificationType: 'dni'
     });
     const [installments, setInstallments] = useState(1);
     const [paywayError, setPaywayError] = useState<string | null>(null);
+    const [sessionId, setSessionId] = useState('');
 
     useEffect(() => {
         setIsMounted(true);
+        // Generar un Session ID único para Cybersource al cargar
+        setSessionId(`sess_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`);
     }, []);
 
     const handleCheckout = async () => {
@@ -101,8 +105,8 @@ export default function CarritoPage() {
             }
 
             const decidirEnvUrl = process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production' 
-                ? 'https://live.decidir.com/api/v2/' 
-                : 'https://sandbox.decidir.com/api/v2/';
+                ? 'https://ventasonline.payway.com.ar/api/v2' 
+                : 'https://developers-ventasonline.payway.com.ar/api/v2';
 
             const dec = new (window as any).Decidir(decidirEnvUrl);
             dec.setPublishableKey(process.env.NEXT_PUBLIC_PAYWAY_PUBLIC_KEY || '');
@@ -115,16 +119,14 @@ export default function CarritoPage() {
                 security_code: cardData.securityCode,
                 card_holder_name: cardData.cardHolderName,
                 card_holder_identification: {
-                    type: 'dni',
+                    type: cardData.cardHolderIdentificationType,
                     number: cardData.cardHolderIdentificationNumber
                 }
             }, async (status: number, response: any) => {
                 if (status === 200 || status === 201) {
                     const paymentMethodId = getPaymentMethodId(response.bin || cardNumber.substring(0, 6));
-                    // Generar un ID de dispositivo para Cybersource
-                    const deviceUniqueId = typeof crypto !== 'undefined' && crypto.randomUUID 
-                        ? crypto.randomUUID() 
-                        : Math.random().toString(36).substring(2, 15);
+                    // Usar el sessionId generado para Cybersource como device_unique_identifier
+                    const deviceUniqueId = sessionId || `fallback_${Date.now()}`;
                         
                     await sendPaywayPayment(response.id, response.bin || cardNumber.substring(0, 6), paymentMethodId, deviceUniqueId);
                 } else {
@@ -197,11 +199,15 @@ export default function CarritoPage() {
     return (
         <div className="min-h-screen bg-muted/20 py-8">
             <Script 
-                src={process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production' 
-                    ? "https://live.decidir.com/api/v2/decidir.js" 
-                    : "https://sandbox.decidir.com/api/v2/decidir.js"} 
+                src="https://ventasonline.payway.com.ar/static/v2.6.4/decidir.js" 
                 strategy="lazyOnload" 
             />
+            {sessionId && (
+                <Script 
+                    src={`https://h.online-metrix.net/fp/tags.js?org_id=${process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production' ? '1s449316' : '62nz9otd'}&session_id=${process.env.NEXT_PUBLIC_PAYWAY_MERCHANT_ID || ''}${sessionId}`} 
+                    strategy="lazyOnload" 
+                />
+            )}
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
@@ -352,15 +358,30 @@ export default function CarritoPage() {
                                             />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="text-xs font-semibold text-foreground/70 mb-1 block">DNI del Titular</label>
-                                        <input 
-                                            type="text" 
-                                            placeholder="Sin puntos ni espacios" 
-                                            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
-                                            value={cardData.cardHolderIdentificationNumber}
-                                            onChange={(e) => setCardData({...cardData, cardHolderIdentificationNumber: e.target.value})}
-                                        />
+                                    <div className="flex gap-4">
+                                        <div className="w-1/3">
+                                            <label className="text-xs font-semibold text-foreground/70 mb-1 block">Tipo Doc</label>
+                                            <select 
+                                                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                                                value={cardData.cardHolderIdentificationType}
+                                                onChange={(e) => setCardData({...cardData, cardHolderIdentificationType: e.target.value})}
+                                            >
+                                                <option value="dni">DNI</option>
+                                                <option value="pasaporte">Pasaporte</option>
+                                                <option value="cuil">CUIL</option>
+                                                <option value="cuit">CUIT</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="text-xs font-semibold text-foreground/70 mb-1 block">Número de Documento</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Sin puntos ni espacios" 
+                                                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                                                value={cardData.cardHolderIdentificationNumber}
+                                                onChange={(e) => setCardData({...cardData, cardHolderIdentificationNumber: e.target.value})}
+                                            />
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="text-xs font-semibold text-foreground/70 mb-1 block">Cuotas</label>
