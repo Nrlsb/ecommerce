@@ -48,24 +48,18 @@ export default function Navbar() {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-4 group">
-                        <div className="relative flex flex-col items-center justify-center">
-                            <div className="p-2.5 bg-primary text-primary-foreground rounded-2xl group-hover:bg-primary/90 transition-all shadow-xl group-hover:shadow-primary/20 group-hover:-rotate-6 duration-500">
-                                <PaintBucket size={26} />
-                            </div>
+                        <div className="relative flex items-center justify-center">
+                            <img 
+                                src="/images/logos/logomercurio.png" 
+                                alt="Mercurio Pinturerías" 
+                                className="h-10 w-auto group-hover:scale-105 transition-transform duration-500 brightness-0 dark:invert" 
+                            />
                             {/* Brand Swoosh decorative element */}
-                            <div className="absolute -bottom-1.5 -right-1.5 flex gap-1">
-                                <div className="w-2.5 h-2.5 rounded-full bg-mercurio-pink shadow-sm"></div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-mercurio-yellow shadow-sm"></div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-mercurio-green shadow-sm"></div>
+                            <div className="absolute -bottom-1 -right-4 flex gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                                <div className="w-2 h-2 rounded-full bg-mercurio-pink shadow-sm"></div>
+                                <div className="w-2 h-2 rounded-full bg-mercurio-yellow shadow-sm"></div>
+                                <div className="w-2 h-2 rounded-full bg-mercurio-green shadow-sm"></div>
                             </div>
-                        </div>
-                        <div className="flex flex-col leading-[0.85]">
-                            <span className="text-3xl font-display font-black italic tracking-tighter text-primary group-hover:text-primary/80 transition-colors">
-                                mercurio
-                            </span>
-                            <span className="text-[10px] font-display font-bold tracking-[0.3em] uppercase text-primary/60 ml-1">
-                                pinturerías
-                            </span>
                         </div>
                     </Link>
 

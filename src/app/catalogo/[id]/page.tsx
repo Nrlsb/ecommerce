@@ -213,7 +213,14 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             {product.imagen_url ? (
                                 <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain p-12 group-hover:scale-105 transition-transform duration-1000 ease-out" />
                             ) : (
-                                <PaintBucket className="w-48 h-48 text-foreground/5 animate-float" />
+                                <div className="flex flex-col items-center gap-6">
+                                    <img 
+                                        src="/images/logos/logomercurio.png" 
+                                        alt="Sin imagen" 
+                                        className="w-64 h-auto opacity-10 grayscale brightness-0 dark:invert animate-float" 
+                                    />
+                                    <span className="text-xs font-display font-bold uppercase tracking-[0.3em] text-foreground/20">Imagen Profesional Pendiente</span>
+                                </div>
                             )}
                             <div className="absolute top-8 left-8 glass text-primary text-[10px] font-display font-bold px-5 py-2.5 rounded-full uppercase tracking-[0.2em] shadow-sm">
                                 {product.marca || 'Pintura Premium'}
@@ -222,8 +229,12 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                         
                         <div className="grid grid-cols-4 gap-6">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="aspect-square bg-muted/20 rounded-2xl border border-border/50 flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity cursor-pointer hover:border-primary/50">
-                                    <PaintBucket className="w-8 h-8 text-foreground/20" />
+                                <div key={i} className="aspect-square bg-muted/20 rounded-2xl border border-border/50 flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity cursor-pointer hover:border-primary/50 p-4">
+                                    <img 
+                                        src="/images/logos/logomercurio.png" 
+                                        alt="Thumbnail placeholder" 
+                                        className="w-full h-auto opacity-30 grayscale brightness-0 dark:invert" 
+                                    />
                                 </div>
                             ))}
                         </div>

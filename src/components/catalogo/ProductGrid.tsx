@@ -78,9 +78,14 @@ export function ProductGrid({
         ))}
 
         {products.length === 0 && (
-          <div className="col-span-full py-12 text-center text-foreground/60">
-            <PaintBucket className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg">No se encontraron productos con estos filtros.</p>
+          <div className="col-span-full py-20 text-center flex flex-col items-center justify-center">
+            <img 
+              src="/images/logos/logomercurio.png" 
+              alt="Sin productos" 
+              className="w-48 h-auto opacity-10 grayscale mb-6" 
+            />
+            <p className="text-xl font-display font-bold text-foreground/40">No se encontraron productos con estos filtros.</p>
+            <p className="text-sm text-foreground/20 mt-2">Prueba ajustando tu búsqueda o filtros.</p>
           </div>
         )}
       </div>
