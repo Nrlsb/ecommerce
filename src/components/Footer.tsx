@@ -125,8 +125,31 @@ export default function Footer() {
                     </div>
                 </div>
 
+                {/* Marco Legal y Fiscal */}
+                <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8">
+                    {/* Botón de Arrepentimiento */}
+                    <div className="flex flex-col items-start gap-2">
+                        <Link href="/arrepentimiento" className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all group shadow-sm">
+                            <span className="text-sm font-bold text-white uppercase tracking-wider group-hover:text-mercurio-pink transition-colors">
+                                Botón de Arrepentimiento
+                            </span>
+                        </Link>
+                        <span className="text-[10px] text-slate-500 font-medium">
+                            Defensa de las y los Consumidores. Para reclamos ingrese <a href="https://autogestion.produccion.gob.ar/consumidor" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">aquí</a>.
+                        </span>
+                    </div>
+
+                    {/* Data Fiscal ARCA/AFIP */}
+                    <div className="flex items-center gap-4">
+                        <a href="#" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity bg-white p-1 rounded-md" title="Data Fiscal">
+                            {/* Reemplazar src con la URL real o imagen local del código QR de Data Fiscal */}
+                            <img src="https://www.afip.gob.ar/images/f960/DATAWEB.jpg" alt="Data Fiscal" className="w-10 h-auto object-contain" />
+                        </a>
+                    </div>
+                </div>
+
                 {/* Copyright */}
-                <div className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
                     <p className="text-[10px] font-medium tracking-[0.2em] text-slate-500 uppercase">
                         © 2021-{new Date().getFullYear()} | MERCURIO PINTRURERÍAS
                     </p>

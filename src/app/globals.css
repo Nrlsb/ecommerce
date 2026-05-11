@@ -2,13 +2,13 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0f172a; /* Slate 900 más profundo */
+  --foreground: #020617; /* Slate 950 */
 
   --primary: #1E3773;
   --primary-foreground: #ffffff;
 
-  --secondary: #f8fafc;
-  --secondary-foreground: #0f172a;
+  --secondary: #f1f5f9; /* Slate 100 */
+  --secondary-foreground: #020617;
 
   --accent: #EB2891;
   --accent-foreground: #ffffff;
@@ -26,13 +26,13 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  --muted: #f1f5f9;
-  --muted-foreground: #475569; /* Slate 600 para mejor legibilidad */
+  --muted: #f8fafc; /* Slate 50 */
+  --muted-foreground: #64748b; /* Slate 500 */
 
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #020617;
 
-  --border: #e2e8f0;
+  --border: #e2e8f0; /* Slate 200 */
   
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
@@ -46,7 +46,7 @@
   --primary: #3b82f6;
   --primary-foreground: #020617;
 
-  --secondary: #1e293b;
+  --secondary: #0f172a;
   --secondary-foreground: #f8fafc;
 
   --accent: #f472b6;
@@ -55,7 +55,7 @@
   --destructive: #ef4444;
   --destructive-foreground: #f8fafc;
 
-  --muted: #0f172a;
+  --muted: #1e293b;
   --muted-foreground: #94a3b8;
 
   --card: #0f172a;
@@ -113,20 +113,29 @@ h1, h2, h3, h4, h5, h6, .font-display {
 
 /* Glassmorphism Utilities */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .dark .glass {
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Luxury Card */
 .luxury-card {
-  @apply bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 shadow-premium rounded-[2.5rem];
+  @apply bg-white dark:bg-slate-950 border border-slate-200/50 dark:border-white/5 shadow-premium rounded-[2.5rem];
+}
+
+.animated-border {
+  position: relative;
+  border: 1px solid transparent;
+  background: linear-gradient(var(--background), var(--background)) padding-box,
+              var(--grad-primary) border-box;
 }
 
 /* Selection */

@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, Menu, X, Search, User, ShieldCheck, Sun, Moon, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, ShieldCheck, Sun, Moon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { PRODUCT_CATEGORIES_HIERARCHY } from '@/config/categories';
+import { GlobalSearch } from '@/components/ui/GlobalSearch';
 
 export default function Navbar() {
     const router = useRouter();
@@ -43,7 +44,14 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="sticky top-0 z-50 w-full glass border-b border-white/20 dark:border-white/5 shadow-premium transition-all duration-300">
+        <nav className="sticky top-0 z-50 w-full glass shadow-premium transition-all duration-500">
+            {/* Top accent line with brand colors */}
+            <div className="h-1 w-full flex">
+                <div className="h-full flex-1 bg-mercurio-blue" />
+                <div className="h-full flex-1 bg-mercurio-yellow" />
+                <div className="h-full flex-1 bg-mercurio-green" />
+                <div className="h-full flex-1 bg-mercurio-pink" />
+            </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
@@ -57,19 +65,18 @@ export default function Navbar() {
                         </div>
                     </Link>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-10">
-                        <Link href="/catalogo" className="text-foreground/60 hover:text-primary transition-all font-display font-bold text-[13px] uppercase tracking-[0.2em] relative group/link">
+                    <div className="hidden md:flex items-center space-x-8">
+                        <Link href="/catalogo" className="text-foreground/50 hover:text-primary transition-all font-display font-bold text-[12px] uppercase tracking-[0.25em] relative group/link py-2">
                             Catálogo
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover/link:w-full" />
+                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-primary rounded-full transition-all duration-300 group-hover/link:w-8" />
                         </Link>
-                        <Link href="/ofertas" className="text-foreground/60 hover:text-primary transition-all font-display font-bold text-[13px] uppercase tracking-[0.2em] relative group/link">
+                        <Link href="/ofertas" className="text-foreground/50 hover:text-primary transition-all font-display font-bold text-[12px] uppercase tracking-[0.25em] relative group/link py-2">
                             Ofertas
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover/link:w-full" />
+                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-primary rounded-full transition-all duration-300 group-hover/link:w-8" />
                         </Link>
                         {isAdmin && (
-                            <Link href="/admin" className="text-primary hover:text-primary/80 transition-all font-display font-bold flex items-center gap-2 text-[13px] uppercase tracking-[0.2em] bg-primary/5 px-4 py-2 rounded-full border border-primary/10">
-                                <ShieldCheck size={18} />
+                            <Link href="/admin" className="group flex items-center gap-2 text-[11px] font-display font-bold uppercase tracking-widest bg-primary text-white px-5 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                                <ShieldCheck size={16} className="group-hover:rotate-12 transition-transform" />
                                 Admin
                             </Link>
                         )}
@@ -77,9 +84,7 @@ export default function Navbar() {
 
                     {/* Icons Context */}
                     <div className="hidden md:flex items-center space-x-5">
-                        <button className="text-foreground/40 hover:text-primary transition-all hover:scale-110 p-2">
-                            <Search size={20} />
-                        </button>
+                        <GlobalSearch />
 
                         <button 
                             onClick={toggleTheme}
@@ -99,7 +104,7 @@ export default function Navbar() {
                                         await signOut();
                                         router.push('/');
                                     }}
-                                    className="text-foreground/60 hover:text-destructive transition-all text-[11px] font-display font-bold uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg"
+                                    className="text-foreground/60 hover:text-destructive transition-all text-[11px] font-display font-bold uppercase tracking-widest bg-secondary px-4 py-2 rounded-lg"
                                 >
                                     Salir
                                 </button>
@@ -140,10 +145,10 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Categorías Desktop Bar */}
-            <div className="hidden md:block border-t border-white/10 dark:border-white/5 bg-white/30 dark:bg-slate-950/30 backdrop-blur-sm">
+            {/* Categorías Desktop Bar - Refined */}
+            <div className="hidden md:block border-t border-border/50 bg-white/50 dark:bg-slate-950/20 backdrop-blur-md">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-center items-center h-10 space-x-2">
+                    <div className="flex justify-center items-center h-11 space-x-1">
                         {PRODUCT_CATEGORIES_HIERARCHY.map((group) => (
                             <div 
                                 key={group.slug}
@@ -153,14 +158,14 @@ export default function Navbar() {
                             >
                                 <button
                                     onClick={() => router.push(`/catalogo?categoria=${group.slug}`)}
-                                    className={`px-8 h-full flex items-center gap-2 text-[11px] font-display font-bold uppercase tracking-[0.2em] transition-all relative group/cat ${
-                                        activeHoverGroup === group.slug ? 'text-primary' : 'text-foreground/40 hover:text-foreground/70'
+                                    className={`px-6 h-full flex items-center gap-2 text-[10px] font-display font-bold uppercase tracking-[0.15em] transition-all relative group/cat ${
+                                        activeHoverGroup === group.slug ? 'text-primary' : 'text-foreground/50 hover:text-foreground/80'
                                     }`}
                                 >
                                     {group.name}
-                                    <ChevronDown size={14} className={`transition-transform duration-500 ${activeHoverGroup === group.slug ? 'rotate-180 text-primary' : 'opacity-30'}`} />
+                                    <ChevronDown size={12} className={`transition-transform duration-500 ${activeHoverGroup === group.slug ? 'rotate-180 text-primary opacity-100' : 'opacity-20 group-hover/cat:opacity-100'}`} />
                                     {activeHoverGroup === group.slug && (
-                                        <motion.div layoutId="nav-active" className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary rounded-full" />
+                                        <motion.div layoutId="nav-active" className="absolute bottom-0 left-4 right-4 h-0.5 bg-primary rounded-full shadow-[0_0_10px_rgba(30,55,115,0.3)]" />
                                     )}
                                 </button>
 
