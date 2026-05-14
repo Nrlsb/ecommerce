@@ -5,7 +5,6 @@ import { ProductCard } from '@/components/catalogo/ProductCard';
 import { useCart } from '@/context/CartContext';
 import { Heart, ArrowRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 export default function FavoritosPage() {
     const { wishlist } = useWishlist();

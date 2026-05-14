@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ProductCard } from '@/components/catalogo/ProductCard';
-import { motion } from 'framer-motion';
 
 interface RelatedProductsProps {
   currentProductId: string;

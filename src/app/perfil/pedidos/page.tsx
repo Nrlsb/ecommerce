@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { Package, Calendar, Clock, ChevronRight, ShoppingBag } from 'lucide-react';
+import { Package, Calendar, ChevronRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
