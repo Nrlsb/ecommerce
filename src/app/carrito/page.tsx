@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
-import { Trash2, Plus, Minus, ArrowLeft, CreditCard, ShieldCheck } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowLeft, CreditCard, ShieldCheck, Truck } from 'lucide-react';
 import Script from 'next/script';
+import { motion } from 'framer-motion';
 
 export default function CarritoPage() {
     const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
@@ -26,6 +27,19 @@ export default function CarritoPage() {
     const [paywayError, setPaywayError] = useState<string | null>(null);
     const [sessionId, setSessionId] = useState('');
 
+    // Estado para envío/retiro
+    const [deliveryMethod, setDeliveryMethod] = useState<'envio' | 'retiro'>('envio');
+    const [shippingData, setShippingData] = useState({
+        fullName: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        zipCode: '',
+        notes: ''
+    });
+    const [showShippingForm, setShowShippingForm] = useState(false);
+
     useEffect(() => {
         setIsMounted(true);
         // Generar un Session ID único para Cybersource al cargar
@@ -33,6 +47,19 @@ export default function CarritoPage() {
     }, []);
 
     const handleCheckout = async () => {
+        if (!showShippingForm) {
+            setShowShippingForm(true);
+            // Scroll to form
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        // Validar datos de envío
+        if (!shippingData.fullName || !shippingData.email || !shippingData.phone || (deliveryMethod === 'envio' && !shippingData.address)) {
+            alert('Por favor, complete todos los campos obligatorios de envío.');
+            return;
+        }
+
         if (paymentMethod === 'mercadopago') {
             await processMercadoPago();
         } else {
@@ -48,8 +75,13 @@ export default function CarritoPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     items,
-                    cliente_nombre: 'Cliente Web',
-                    cliente_email: 'cliente@ejemplo.com',
+                    cliente_nombre: shippingData.fullName,
+                    cliente_email: shippingData.email,
+                    cliente_telefono: shippingData.phone,
+                    envio: {
+                        metodo: deliveryMethod,
+                        ...shippingData
+                    },
                     total: totalPrice,
                     metodo_pago: 'mercadopago'
                 })
@@ -149,8 +181,13 @@ export default function CarritoPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     items,
-                    cliente_nombre: cardData.cardHolderName || 'Cliente Web',
-                    cliente_email: 'cliente@ejemplo.com',
+                    cliente_nombre: shippingData.fullName || cardData.cardHolderName || 'Cliente Web',
+                    cliente_email: shippingData.email || 'cliente@ejemplo.com',
+                    cliente_telefono: shippingData.phone,
+                    envio: {
+                        metodo: deliveryMethod,
+                        ...shippingData
+                    },
                     total: totalPrice,
                     metodo_pago: 'payway',
                     payway_token: token,
@@ -218,49 +255,167 @@ export default function CarritoPage() {
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Productos en el Carrito */}
-                    <div className="flex-1 space-y-4">
-                        {items.map((item: any) => (
-                            <div key={item.id} className="bg-card border border-border p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 shadow-sm">
-                                <div className="w-full sm:w-24 h-24 bg-gradient-to-tr from-secondary to-muted rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <span className="text-foreground/30 font-bold uppercase text-xs">{item.brand}</span>
-                                </div>
-
-                                <div className="flex-1">
-                                    <h3 className="text-lg font-bold text-foreground line-clamp-2">{item.name}</h3>
-                                    <p className="text-sm text-primary font-medium mt-1">${item.price.toLocaleString('es-AR')} c/u</p>
-                                </div>
-
-                                <div className="flex items-center justify-between w-full sm:w-auto gap-6 sm:gap-8 mt-4 sm:mt-0">
-                                    <div className="flex items-center border border-border rounded-xl p-1 bg-background">
-                                        <button
-                                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                            className="w-8 h-8 flex items-center justify-center hover:bg-muted text-foreground rounded-lg transition-colors"
-                                        >
-                                            <Minus className="w-4 h-4" />
-                                        </button>
-                                        <span className="font-bold w-8 text-center">{item.quantity}</span>
-                                        <button
-                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                            className="w-8 h-8 flex items-center justify-center hover:bg-muted text-foreground rounded-lg transition-colors"
-                                        >
-                                            <Plus className="w-4 h-4" />
-                                        </button>
-                                    </div>
-
-                                    <div className="text-right">
-                                        <p className="font-black text-xl text-foreground">${(item.price * item.quantity).toLocaleString('es-AR')}</p>
-                                    </div>
-
-                                    <button
-                                        onClick={() => removeFromCart(item.id)}
-                                        className="text-destructive/70 hover:text-destructive transition-colors p-2 hover:bg-destructive/10 rounded-lg"
+                    {/* Productos en el Carrito o Formulario de Envío */}
+                    <div className="flex-1 space-y-6">
+                        {showShippingForm ? (
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="bg-card border border-border p-8 rounded-[2rem] shadow-sm space-y-8"
+                            >
+                                <div className="flex items-center justify-between border-b border-border pb-4">
+                                    <h2 className="text-2xl font-black text-foreground">Datos de Entrega</h2>
+                                    <button 
+                                        onClick={() => setShowShippingForm(false)}
+                                        className="text-primary font-bold text-sm hover:underline"
                                     >
-                                        <Trash2 className="w-5 h-5" />
+                                        Editar productos
                                     </button>
                                 </div>
-                            </div>
-                        ))}
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button 
+                                        onClick={() => setDeliveryMethod('envio')}
+                                        className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${deliveryMethod === 'envio' ? 'border-primary bg-primary/5' : 'border-border opacity-50 hover:opacity-100'}`}
+                                    >
+                                        <Truck className="w-8 h-8 text-primary" />
+                                        <span className="font-bold">Envío a domicilio</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setDeliveryMethod('retiro')}
+                                        className={`p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 ${deliveryMethod === 'retiro' ? 'border-primary bg-primary/5' : 'border-border opacity-50 hover:opacity-100'}`}
+                                    >
+                                        <ShieldCheck className="w-8 h-8 text-primary" />
+                                        <span className="font-bold">Retiro en sucursal</span>
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="col-span-1 md:col-span-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Nombre Completo *</label>
+                                        <input 
+                                            type="text" 
+                                            required
+                                            className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                            value={shippingData.fullName}
+                                            onChange={(e) => setShippingData({...shippingData, fullName: e.target.value})}
+                                            placeholder="Juan Pérez"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Email *</label>
+                                        <input 
+                                            type="email" 
+                                            required
+                                            className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                            value={shippingData.email}
+                                            onChange={(e) => setShippingData({...shippingData, email: e.target.value})}
+                                            placeholder="juan@ejemplo.com"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Teléfono *</label>
+                                        <input 
+                                            type="tel" 
+                                            required
+                                            className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                            value={shippingData.phone}
+                                            onChange={(e) => setShippingData({...shippingData, phone: e.target.value})}
+                                            placeholder="11 1234-5678"
+                                        />
+                                    </div>
+
+                                    {deliveryMethod === 'envio' && (
+                                        <>
+                                            <div className="col-span-1 md:col-span-2">
+                                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Dirección de Entrega *</label>
+                                                <input 
+                                                    type="text" 
+                                                    required
+                                                    className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                                    value={shippingData.address}
+                                                    onChange={(e) => setShippingData({...shippingData, address: e.target.value})}
+                                                    placeholder="Calle 123, Piso 1, Depto A"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Ciudad</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                                    value={shippingData.city}
+                                                    onChange={(e) => setShippingData({...shippingData, city: e.target.value})}
+                                                    placeholder="CABA"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Código Postal</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                                    value={shippingData.zipCode}
+                                                    onChange={(e) => setShippingData({...shippingData, zipCode: e.target.value})}
+                                                    placeholder="1425"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="col-span-1 md:col-span-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Notas adicionales (opcional)</label>
+                                        <textarea 
+                                            rows={3}
+                                            className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors resize-none"
+                                            value={shippingData.notes}
+                                            onChange={(e) => setShippingData({...shippingData, notes: e.target.value})}
+                                            placeholder="Indicaciones para el repartidor..."
+                                        />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            items.map((item: any) => (
+                                <div key={item.id} className="bg-card border border-border p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 shadow-sm">
+                                    <div className="w-full sm:w-24 h-24 bg-gradient-to-tr from-secondary to-muted rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <span className="text-foreground/30 font-bold uppercase text-xs">{item.brand}</span>
+                                    </div>
+
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-bold text-foreground line-clamp-2">{item.name}</h3>
+                                        <p className="text-sm text-primary font-medium mt-1">${item.price.toLocaleString('es-AR')} c/u</p>
+                                    </div>
+
+                                    <div className="flex items-center justify-between w-full sm:w-auto gap-6 sm:gap-8 mt-4 sm:mt-0">
+                                        <div className="flex items-center border border-border rounded-xl p-1 bg-background">
+                                            <button
+                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                className="w-8 h-8 flex items-center justify-center hover:bg-muted text-foreground rounded-lg transition-colors"
+                                            >
+                                                <Minus className="w-4 h-4" />
+                                            </button>
+                                            <span className="font-bold w-8 text-center">{item.quantity}</span>
+                                            <button
+                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                className="w-8 h-8 flex items-center justify-center hover:bg-muted text-foreground rounded-lg transition-colors"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                            </button>
+                                        </div>
+
+                                        <div className="text-right">
+                                            <p className="font-black text-xl text-foreground">${(item.price * item.quantity).toLocaleString('es-AR')}</p>
+                                        </div>
+
+                                        <button
+                                            onClick={() => removeFromCart(item.id)}
+                                            className="text-destructive/70 hover:text-destructive transition-colors p-2 hover:bg-destructive/10 rounded-lg"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     {/* Resumen de Compra y Selección de Pago */}
@@ -430,12 +585,12 @@ export default function CarritoPage() {
                                 disabled={isProcessing}
                                 className="w-full bg-accent text-accent-foreground hover:bg-accent/90 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50"
                             >
-                                {isProcessing ? 'Procesando...' : (
+                                {isProcessing ? 'Procesando...' : (!showShippingForm ? 'Continuar con el envío' : (
                                     <>
                                         {paymentMethod === 'mercadopago' ? <ShieldCheck className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
                                         {paymentMethod === 'mercadopago' ? 'Pagar con Mercado Pago' : 'Pagar de forma segura'}
                                     </>
-                                )}
+                                ))}
                             </button>
                         </div>
                     </div>

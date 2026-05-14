@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Heart } from 'lucide-react';
+import { useWishlist } from '@/context/WishlistContext';
 
 interface Product {
   id: string;
@@ -17,6 +18,19 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(product.id);
+
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -50,6 +64,18 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
             </div>
           )}
         </div>
+        
+        {/* Wishlist Button */}
+        <button 
+          onClick={toggleWishlist}
+          className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md border transition-all z-20 ${
+            isWishlisted 
+              ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-200' 
+              : 'bg-white/50 border-white/20 text-foreground/40 hover:text-red-500 hover:bg-white'
+          }`}
+        >
+          <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} strokeWidth={2.5} />
+        </button>
       </Link>
 
       <div className="p-5 flex flex-col flex-1">
