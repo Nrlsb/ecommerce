@@ -1,9 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
 import { Paintbrush, PaintRoller, Droplet, Palette, ArrowRight, ShieldCheck, Truck, Clock } from 'lucide-react';
 import { ProductCard } from '@/components/catalogo/ProductCard';
+import { supabase } from '@/lib/supabase';
+import { useCart } from '@/context/CartContext';
 
 const categories = [
   { name: 'Pintura', icon: PaintRoller, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400', link: '/catalogo?categoria=pintura', img: '/images/interior_paint.jpg' },
@@ -18,12 +21,7 @@ const features = [
   { title: 'Soporte 24/7', description: 'Te asesoramos en tus proyectos', icon: Clock },
 ];
 
-const featuredProducts = [
-  { id: '1', nombre: 'Látex Interior Premium', marca: 'ColorMaster', precio: 45000, imagen_url: '/images/interior_paint.jpg' },
-  { id: '2', nombre: 'Esmalte Sintético Brillante', marca: 'BrilloMax', precio: 22000, imagen_url: '/images/enamel_paint.jpg' },
-  { id: '3', nombre: 'Impermeabilizante Frentes', marca: 'ProtecExterior', precio: 58000, imagen_url: '/images/exterior_paint.jpg' },
-  { id: '4', nombre: 'Rodillo Antigota 22cm', marca: 'PintaFacil', precio: 8500, imagen_url: '/images/roller_tool.jpg' },
-];
+// Removed hardcoded products
 
 // Animation variants
 const containerVariants: Variants = {
@@ -50,6 +48,55 @@ const itemVariants: Variants = {
 };
 
 export default function Home() {
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        // Primero intentamos traer los marcados como destacados
+        let { data, error } = await supabase
+          .from('productos')
+          .select('*')
+          .eq('destacado', true)
+          .limit(4);
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setFeaturedProducts(data);
+        } else {
+          // Si no hay destacados, traemos los últimos 4 productos
+          const { data: latestData, error: latestError } = await supabase
+            .from('productos')
+            .select('*')
+            .order('id', { ascending: false })
+            .limit(4);
+          
+          if (latestError) throw latestError;
+          if (latestData) setFeaturedProducts(latestData);
+        }
+      } catch (err) {
+        console.error('Error fetching featured products:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
+
+  const handleAddToCart = (product: any) => {
+    addToCart({
+      ...product,
+      name: product.nombre,
+      price: product.precio,
+      brand: product.marca,
+      quantity: 1,
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -173,14 +220,25 @@ export default function Home() {
             viewport={{ once: true }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
           >
-            {featuredProducts.map((product, idx) => (
-               <ProductCard 
-                 key={product.id}
-                 product={product}
-                 delay={idx * 0.1}
-                 onAddToCart={() => {}} // Placeholder para home
-               />
-            ))}
+            {isLoading ? (
+              // Loading Skeletons
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="bg-card rounded-[2rem] h-[400px] animate-pulse border border-border"></div>
+              ))
+            ) : featuredProducts.length > 0 ? (
+              featuredProducts.map((product, idx) => (
+                <ProductCard 
+                  key={product.id}
+                  product={product}
+                  delay={idx * 0.1}
+                  onAddToCart={handleAddToCart}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12 text-foreground/40">
+                No se encontraron productos destacados.
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
