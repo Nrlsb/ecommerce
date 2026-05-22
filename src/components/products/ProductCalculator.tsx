@@ -1,25 +1,37 @@
 'use client';
 
 import { useState, useEffect, FC } from 'react';
-import { Calculator, Info, RotateCcw } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Calculator, Info, RotateCcw, Plus, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductCalculatorProps {
     defaultYield?: number;
     onApplyQuantity?: (quantity: number) => void;
 }
 
+interface Wall {
+    id: string;
+    width: string;
+    height: string;
+}
+
 const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onApplyQuantity }) => {
-    const [width, setWidth] = useState<string>('');
-    const [height, setHeight] = useState<string>('');
+    const [walls, setWalls] = useState<Wall[]>([
+        { id: '1', width: '', height: '' }
+    ]);
     const [doors, setDoors] = useState<number>(0);
     const [windows, setWindows] = useState<number>(0);
     const [layers, setLayers] = useState<number>(2);
     const [litersNeeded, setLitersNeeded] = useState<number>(0);
 
     const calculate = () => {
-        if (width && height) {
-            const wallArea = parseFloat(width) * parseFloat(height);
+        const wallArea = walls.reduce((sum, wall) => {
+            const w = parseFloat(wall.width) || 0;
+            const h = parseFloat(wall.height) || 0;
+            return sum + (w * h);
+        }, 0);
+
+        if (wallArea > 0) {
             const openingsArea = (doors * 2.1) + (windows * 1.5); // Áreas estándar revisadas
             const netArea = Math.max(0, wallArea - openingsArea);
             const totalNeeded = (netArea / defaultYield) * layers;
@@ -31,14 +43,33 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
 
     useEffect(() => {
         calculate();
-    }, [width, height, layers, doors, windows, defaultYield]);
+    }, [walls, layers, doors, windows, defaultYield]);
 
     const reset = () => {
-        setWidth('');
-        setHeight('');
+        setWalls([{ id: '1', width: '', height: '' }]);
         setDoors(0);
         setWindows(0);
         setLayers(2);
+    };
+
+    const addWall = () => {
+        const lastHeight = walls[walls.length - 1]?.height || '';
+        setWalls([...walls, { id: Math.random().toString(), width: '', height: lastHeight }]);
+    };
+
+    const removeWall = (id: string) => {
+        if (walls.length > 1) {
+            setWalls(walls.filter(wall => wall.id !== id));
+        }
+    };
+
+    const updateWall = (id: string, field: 'width' | 'height', value: string) => {
+        setWalls(walls.map(wall => {
+            if (wall.id === id) {
+                return { ...wall, [field]: value };
+            }
+            return wall;
+        }));
     };
 
     // Estimar latas necesarias (basado en tamaños estándar de Argentina)
@@ -69,27 +100,68 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative">
                 <div className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="block text-[9px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em] pl-1">Ancho (metros)</label>
-                            <input
-                                type="number"
-                                value={width}
-                                onChange={(e) => setWidth(e.target.value)}
-                                placeholder="4.5"
-                                className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-slate-300/50 dark:border-slate-800/50 rounded-2xl focus:border-primary/50 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-display font-bold text-lg"
-                            />
+                    {/* Lista de Paredes / Medidas */}
+                    <div className="space-y-3">
+                        <span className="block text-[10px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em] pl-1">Paredes / Medidas</span>
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                            <AnimatePresence initial={false}>
+                                {walls.map((wall, index) => (
+                                    <motion.div
+                                        key={wall.id}
+                                        initial={{ opacity: 0, height: 0, y: -10 }}
+                                        animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                        exit={{ opacity: 0, height: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="flex items-end gap-2 p-3 bg-white/30 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 relative group/wall overflow-hidden"
+                                    >
+                                        <div className="flex-1 grid grid-cols-2 gap-3">
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[8px] font-display font-bold text-foreground/50 uppercase tracking-[0.2em] pl-1">
+                                                    Pared {index + 1} - Ancho (m)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={wall.width}
+                                                    onChange={(e) => updateWall(wall.id, 'width', e.target.value)}
+                                                    placeholder="4.5"
+                                                    className="w-full px-4 py-2.5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 focus:ring-2 focus:ring-primary/5 outline-none transition-all font-display font-bold text-base"
+                                                />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[8px] font-display font-bold text-foreground/50 uppercase tracking-[0.2em] pl-1">
+                                                    Alto (m)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={wall.height}
+                                                    onChange={(e) => updateWall(wall.id, 'height', e.target.value)}
+                                                    placeholder="2.8"
+                                                    className="w-full px-4 py-2.5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 focus:ring-2 focus:ring-primary/5 outline-none transition-all font-display font-bold text-base"
+                                                />
+                                            </div>
+                                        </div>
+                                        {walls.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeWall(wall.id)}
+                                                className="p-3 mb-[1px] bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-all"
+                                                title="Eliminar pared"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
-                        <div className="space-y-2">
-                            <label className="block text-[9px] font-display font-bold text-foreground/70 uppercase tracking-[0.2em] pl-1">Alto (metros)</label>
-                            <input
-                                type="number"
-                                value={height}
-                                onChange={(e) => setHeight(e.target.value)}
-                                placeholder="2.8"
-                                className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-slate-300/50 dark:border-slate-800/50 rounded-2xl focus:border-primary/50 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-display font-bold text-lg"
-                            />
-                        </div>
+                        <button
+                            type="button"
+                            onClick={addWall}
+                            className="w-full py-3.5 border border-dashed border-primary/30 hover:border-primary/60 text-primary bg-primary/5 hover:bg-primary/10 rounded-2xl font-display font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Agregar Pared
+                        </button>
                     </div>
 
                     <div className="space-y-4">
