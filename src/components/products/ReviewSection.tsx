@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, FC } from 'react';
+import { useState, FC } from 'react';
 import { Star, Camera, Send, UserCircle, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,11 +16,12 @@ interface Review {
 
 interface ReviewSectionProps {
     productId: number;
+    reviews: Review[];
+    isLoading: boolean;
+    onReviewAdded: () => void;
 }
 
-const ReviewSection: FC<ReviewSectionProps> = ({ productId }) => {
-    const [reviews, setReviews] = useState<Review[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+const ReviewSection: FC<ReviewSectionProps> = ({ productId, reviews, isLoading, onReviewAdded }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showForm, setShowForm] = useState(false);
 
@@ -30,23 +31,9 @@ const ReviewSection: FC<ReviewSectionProps> = ({ productId }) => {
     const [comment, setComment] = useState('');
     const [image, setImage] = useState<File | null>(null);
 
-    useEffect(() => {
-        fetchReviews();
-    }, [productId]);
-
-    const fetchReviews = async () => {
-        setIsLoading(true);
-        const { data, error } = await supabase
-            .from('resenas')
-            .select('*')
-            .eq('producto_id', productId)
-            .order('created_at', { ascending: false });
-
-        if (!error && data) {
-            setReviews(data);
-        }
-        setIsLoading(false);
-    };
+    const averageRating = reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.calificacion, 0) / reviews.length
+        : 0;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -93,7 +80,7 @@ const ReviewSection: FC<ReviewSectionProps> = ({ productId }) => {
             setComment('');
             setImage(null);
             setShowForm(false);
-            fetchReviews();
+            onReviewAdded();
 
         } catch (error) {
             console.error('Error al subir reseña:', error);
@@ -111,10 +98,12 @@ const ReviewSection: FC<ReviewSectionProps> = ({ productId }) => {
                     <div className="flex items-center gap-4 mt-2">
                         <div className="flex text-amber-500">
                             {[1, 2, 3, 4, 5].map((s) => (
-                                <Star key={s} size={20} fill={s <= 4 ? "currentColor" : "none"} />
+                                <Star key={s} size={20} fill={s <= Math.round(averageRating) ? "currentColor" : "none"} />
                             ))}
                         </div>
-                        <span className="text-foreground/40 font-bold uppercase tracking-widest text-xs">{reviews.length} opiniones</span>
+                        <span className="text-foreground/40 font-bold uppercase tracking-widest text-xs">
+                            {reviews.length === 1 ? '1 opinión' : `${reviews.length} opiniones`}
+                        </span>
                     </div>
                 </div>
 

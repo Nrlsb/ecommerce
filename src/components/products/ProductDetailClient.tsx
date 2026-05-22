@@ -32,6 +32,36 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
     const [isLoading, setIsLoading] = useState(!productCache.has(productId) && !initialProduct);
     const [showAnimation] = useState(!hasDoneInitialAnimation);
 
+    // Reviews state
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [isLoadingReviews, setIsLoadingReviews] = useState(true);
+
+    const fetchReviews = async () => {
+        if (!product?.id) return;
+        setIsLoadingReviews(true);
+        try {
+            const { data, error } = await supabase
+                .from('resenas')
+                .select('*')
+                .eq('producto_id', product.id)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                setReviews(data);
+            }
+        } catch (err) {
+            console.error('Error fetching reviews:', err);
+        } finally {
+            setIsLoadingReviews(false);
+        }
+    };
+
+    useEffect(() => {
+        if (product?.id) {
+            fetchReviews();
+        }
+    }, [product?.id]);
+
     useEffect(() => {
         if (!hasDoneInitialAnimation && product) {
             hasDoneInitialAnimation = true;
@@ -254,16 +284,33 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
                             <p className="text-xs font-display font-bold text-primary uppercase tracking-[0.3em] mb-3 opacity-70">{product.categoria_nombre || 'Nuestra Colección'}</p>
                             <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 dark:text-white mb-5 leading-[1.1] tracking-tight">{product.nombre}</h1>
                             
-                            <div className="flex items-center gap-6 mb-8">
-                                <div className="flex items-center gap-1.5 text-amber-400">
-                                    {[1, 2, 3, 4, 5].map((s) => (
-                                        <Star key={s} size={18} fill={s <= 4 ? "currentColor" : "none"} strokeWidth={s <= 4 ? 0 : 2} />
-                                    ))}
-                                    <span className="ml-2 font-display font-bold text-xl text-foreground">4.8</span>
-                                </div>
-                                <div className="h-5 w-px bg-slate-200 dark:bg-slate-800" />
-                                <span className="text-foreground/60 font-display font-bold uppercase tracking-[0.2em] text-[9px]">Basado en 24 Opiniones</span>
-                            </div>
+                            {(() => {
+                                const reviewsCount = reviews.length;
+                                const averageRating = reviewsCount > 0
+                                    ? Number((reviews.reduce((sum, r) => sum + r.calificacion, 0) / reviewsCount).toFixed(1))
+                                    : 0;
+                                return (
+                                    <div className="flex items-center gap-6 mb-8">
+                                        <div className="flex items-center gap-1.5 text-amber-400">
+                                            {[1, 2, 3, 4, 5].map((s) => (
+                                                <Star 
+                                                    key={s} 
+                                                    size={18} 
+                                                    fill={s <= Math.round(averageRating) ? "currentColor" : "none"} 
+                                                    strokeWidth={s <= Math.round(averageRating) ? 0 : 2} 
+                                                />
+                                            ))}
+                                            <span className="ml-2 font-display font-bold text-xl text-foreground">
+                                                {reviewsCount > 0 ? averageRating.toFixed(1) : '0.0'}
+                                            </span>
+                                        </div>
+                                        <div className="h-5 w-px bg-slate-200 dark:bg-slate-800" />
+                                        <span className="text-foreground/60 font-display font-bold uppercase tracking-[0.2em] text-[9px]">
+                                            {reviewsCount === 0 ? 'Sin opiniones' : reviewsCount === 1 ? 'Basado en 1 Opinión' : `Basado en ${reviewsCount} Opiniones`}
+                                        </span>
+                                    </div>
+                                );
+                            })()}
 
                             <p className="text-base lg:text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium mb-10 max-w-xl">
                                 {product.descripcion || 'Una fórmula de alto rendimiento diseñada para transformar tus espacios con elegancia y durabilidad extrema.'}
@@ -342,7 +389,12 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
                 </div>
 
                 <RoomSimulator productName={product.nombre} productColor={getProductColor()} />
-                <ReviewSection productId={product.id} />
+                <ReviewSection 
+                    productId={product.id} 
+                    reviews={reviews} 
+                    isLoading={isLoadingReviews} 
+                    onReviewAdded={fetchReviews} 
+                />
                 <RelatedProducts currentProductId={productId} categoryId={product.categoria_id} />
             </div>
         </div>

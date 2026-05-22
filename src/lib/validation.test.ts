@@ -1,4 +1,4 @@
-import { productSchema, cartItemSchema, loginSchema, safeValidate, searchParamsSchema } from './validation';
+import { productSchema, loginSchema, safeValidate, searchParamsSchema } from './validation';
 
 describe('Validation Schemas', () => {
   describe('productSchema', () => {
