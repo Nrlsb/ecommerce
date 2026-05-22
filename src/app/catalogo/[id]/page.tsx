@@ -9,7 +9,7 @@ interface Props {
 async function getProduct(id: string) {
   const { data, error } = await supabase
     .from('productos')
-    .select('*, categorias(nombre)')
+    .select('*, categorias:categoria_id(nombre)')
     .eq('id', id)
     .single();
 
