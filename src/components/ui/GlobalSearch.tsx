@@ -51,6 +51,8 @@ export function GlobalSearch() {
                 .from('productos')
                 .select('id, nombre, precio, marca, imagen_url, slug')
                 .or(`nombre.ilike.%${debouncedQuery}%,marca.ilike.%${debouncedQuery}%,tags.ilike.%${debouncedQuery}%`)
+                .not('imagen_url', 'is', null)
+                .neq('imagen_url', '')
                 .limit(5);
 
             if (!error && data) {

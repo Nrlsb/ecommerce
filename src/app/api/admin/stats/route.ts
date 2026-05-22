@@ -61,6 +61,18 @@ export async function GET() {
       supabase.from('usuarios').select('*', { count: 'exact', head: true }),
     ]);
 
+    // 5. Productos sin imagen
+    // Hacemos una consulta y filtramos en memoria de forma segura
+    const { data: allProducts, error: productsError } = await supabase
+      .from('productos')
+      .select('id, nombre, marca, codigo_externo, imagen_url');
+
+    if (productsError) throw productsError;
+
+    const noImageProducts = (allProducts || []).filter(
+      (p: any) => !p.imagen_url || p.imagen_url.trim() === ''
+    );
+
     return NextResponse.json({
       stats: {
         totalProducts: totalProducts || 0,
@@ -69,7 +81,8 @@ export async function GET() {
       },
       salesByBrand,
       lowStock: lowStock || [],
-      topSearches: topSearches || []
+      topSearches: topSearches || [],
+      noImageProducts: noImageProducts || []
     });
 
   } catch (error) {

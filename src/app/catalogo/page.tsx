@@ -95,7 +95,9 @@ function CatalogoContent() {
 
       let query = supabase
         .from('productos')
-        .select(selectString, { count: 'exact' });
+        .select(selectString, { count: 'exact' })
+        .not('imagen_url', 'is', null)
+        .neq('imagen_url', '');
 
       if (activeCategory !== 'todos') {
         // Buscamos los IDs que corresponden a este slug (puede ser de categoría o subcategoría)

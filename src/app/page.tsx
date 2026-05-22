@@ -60,6 +60,8 @@ export default function Home() {
           .from('productos')
           .select('*')
           .eq('destacado', true)
+          .not('imagen_url', 'is', null)
+          .neq('imagen_url', '')
           .limit(4);
 
         if (error) throw error;
@@ -71,6 +73,8 @@ export default function Home() {
           const { data: latestData, error: latestError } = await supabase
             .from('productos')
             .select('*')
+            .not('imagen_url', 'is', null)
+            .neq('imagen_url', '')
             .order('id', { ascending: false })
             .limit(4);
           

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, Check, Loader2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import ProductCalculator from '@/components/products/ProductCalculator';
 import RoomSimulator from '@/components/products/RoomSimulator';
 import ReviewSection from '@/components/products/ReviewSection';
@@ -24,6 +25,7 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({ productId, initialProduct }: ProductDetailClientProps) {
+    const { profile } = useAuth();
     const [product, setProduct] = useState<any>(productCache.get(productId) || initialProduct);
     const [variants, setVariants] = useState<any[]>(variantsCache.get(productId) || []);
     const [quantity, setQuantity] = useState(1);
@@ -201,11 +203,15 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
         );
     }
 
-    if (!product) {
+    const hasImage = product && product.imagen_url && product.imagen_url.trim() !== '';
+    const isAdmin = profile?.rol === 'admin';
+
+    if (!product || (!hasImage && !isAdmin)) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-                <h2 className="text-2xl font-bold">Producto no encontrado</h2>
-                <Link href="/catalogo" className="text-primary hover:underline">Volver al catálogo</Link>
+            <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
+                <h2 className="text-2xl font-black text-foreground">Producto no disponible</h2>
+                <p className="text-foreground/60 text-sm max-w-md">Este producto no está disponible para su visualización o compra en este momento.</p>
+                <Link href="/catalogo" className="text-primary hover:underline font-bold">Volver al catálogo</Link>
             </div>
         );
     }

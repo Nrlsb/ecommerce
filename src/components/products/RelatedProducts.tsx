@@ -22,6 +22,8 @@ export default function RelatedProducts({ currentProductId, categoryId }: Relate
           .select('*')
           .eq('categoria_id', categoryId)
           .neq('id', currentProductId)
+          .not('imagen_url', 'is', null)
+          .neq('imagen_url', '')
           .limit(4);
 
         if (!error && data) {

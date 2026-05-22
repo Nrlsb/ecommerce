@@ -25,6 +25,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { data: products } = await supabase
       .from('productos')
       .select('id')
+      .not('imagen_url', 'is', null)
+      .neq('imagen_url', '')
       .limit(1000);
 
     const productRoutes = (products || []).map((p) => ({

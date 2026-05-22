@@ -143,6 +143,7 @@ export default function AdminDashboard() {
         { label: 'Productos', value: statsData?.stats?.totalProducts || '...', icon: Package, color: 'text-blue-600', bg: 'bg-blue-100', href: '#' },
         { label: 'Usuarios', value: statsData?.stats?.totalUsers || '...', icon: Users, color: 'text-green-600', bg: 'bg-green-100', href: '/admin/usuarios' },
         { label: 'Pedidos', value: statsData?.stats?.totalOrders || '...', icon: ShoppingBag, color: 'text-purple-600', bg: 'bg-purple-100', href: '/admin/pedidos' },
+        { label: 'Sin Imagen', value: statsData?.noImageProducts?.length ?? '...', icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-100', href: '#no-image-section' },
     ];
 
     return (
@@ -180,7 +181,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                     {stats.map((stat, idx) => (
                         <Link key={idx} href={stat.href}>
                             <motion.div
@@ -271,6 +272,45 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                     
+                    {/* Products Without Image */}
+                    <div id="no-image-section" className="bg-card p-8 rounded-2xl border border-border shadow-sm">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <AlertTriangle size={22} className="text-red-500" />
+                                Productos sin Imagen
+                            </h2>
+                            <span className="text-xs font-bold px-2.5 py-1 bg-red-500/10 text-red-600 rounded-full">
+                                {statsData?.noImageProducts?.length || 0} Ocultos
+                            </span>
+                        </div>
+                        <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-thin">
+                            {isLoadingStats ? (
+                                Array(3).fill(0).map((_, i) => <div key={i} className="h-14 bg-muted animate-pulse rounded-xl" />)
+                            ) : statsData?.noImageProducts?.length > 0 ? (
+                                statsData.noImageProducts.map((prod: any, idx: number) => (
+                                    <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 transition-all">
+                                        <div className="min-w-0 flex-1 mr-4">
+                                            <p className="font-bold text-sm text-foreground truncate">{prod.nombre}</p>
+                                            <p className="text-xs text-foreground/60 truncate">
+                                                {prod.marca || 'Sin Marca'} {prod.codigo_externo ? `• Cód: ${prod.codigo_externo}` : ''}
+                                            </p>
+                                        </div>
+                                        <Link 
+                                            href={`/catalogo/${prod.id}`}
+                                            className="text-xs font-bold text-red-600 hover:text-red-700 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+                                        >
+                                            Ver Detalle
+                                        </Link>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-10 text-foreground/40 italic">
+                                    ¡Todos los productos tienen imagen! No hay productos ocultos.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Top Searches */}
                     <div className="bg-card p-8 rounded-2xl border border-border shadow-sm">
                         <div className="flex items-center justify-between mb-6">
