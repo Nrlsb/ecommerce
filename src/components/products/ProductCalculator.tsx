@@ -125,7 +125,7 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                                                         value={wall.width}
                                                         onChange={(e) => updateWall(wall.id, 'width', e.target.value)}
                                                         placeholder="Ancho (m)"
-                                                        className="flex-1 px-3 py-2 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 outline-none transition-all font-display font-bold text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                        className="flex-1 min-w-0 w-full px-3 py-2 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 outline-none transition-all font-display font-bold text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                     />
                                                     
                                                     <span className="text-foreground/30 font-bold text-xs shrink-0">×</span>
@@ -135,7 +135,7 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                                                         value={wall.height}
                                                         onChange={(e) => updateWall(wall.id, 'height', e.target.value)}
                                                         placeholder="Alto (m)"
-                                                        className="flex-1 px-3 py-2 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 outline-none transition-all font-display font-bold text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                        className="flex-1 min-w-0 w-full px-3 py-2 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 outline-none transition-all font-display font-bold text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                     />
                                                 </div>
                                             </div>
