@@ -376,8 +376,23 @@ export default function CarritoPage() {
                         ) : (
                             items.map((item: any) => (
                                 <div key={item.id} className="bg-card border border-border p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 shadow-sm">
-                                    <div className="w-full sm:w-24 h-24 bg-gradient-to-tr from-secondary to-muted rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <span className="text-foreground/30 font-bold uppercase text-xs">{item.brand}</span>
+                                    <div className="w-full sm:w-24 h-24 bg-muted dark:bg-slate-900/50 rounded-xl flex items-center justify-center flex-shrink-0 p-2 relative overflow-hidden">
+                                        {item.imagen_url ? (
+                                            <img 
+                                                src={item.imagen_url} 
+                                                alt={item.name} 
+                                                className="w-full h-full object-contain rounded-lg" 
+                                            />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center text-center">
+                                                <img 
+                                                    src="/images/logos/logomercurio.png" 
+                                                    alt="Sin imagen" 
+                                                    className="w-12 h-auto opacity-20 mb-1" 
+                                                />
+                                                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/30">{item.brand || 'Mercurio'}</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex-1">
