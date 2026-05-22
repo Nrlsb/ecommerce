@@ -112,48 +112,45 @@ const ProductCalculator: FC<ProductCalculatorProps> = ({ defaultYield = 10, onAp
                                         animate={{ opacity: 1, height: 'auto', y: 0 }}
                                         exit={{ opacity: 0, height: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
-                                        className="flex items-center gap-3 p-3 bg-white/30 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 relative group/wall overflow-hidden"
+                                        className="p-3 bg-white/30 dark:bg-slate-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 relative group/wall overflow-hidden"
                                     >
-                                        <span className="text-[10px] font-display font-black text-primary/80 shrink-0 w-16 uppercase tracking-wider pl-1">
-                                            Pared {index + 1}
-                                        </span>
-                                        
-                                        <div className="flex-1 flex items-center gap-2">
-                                            <div className="relative flex-1">
-                                                <input
-                                                    type="number"
-                                                    value={wall.width}
-                                                    onChange={(e) => updateWall(wall.id, 'width', e.target.value)}
-                                                    placeholder="Ancho"
-                                                    className="w-full pl-3 pr-7 py-2 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 outline-none transition-all font-display font-bold text-sm"
-                                                />
-                                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-foreground/40 uppercase">m</span>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex-1 space-y-1.5">
+                                                <span className="block text-[9px] font-display font-black text-primary/80 uppercase tracking-wider pl-1">
+                                                    Pared {index + 1}
+                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="number"
+                                                        value={wall.width}
+                                                        onChange={(e) => updateWall(wall.id, 'width', e.target.value)}
+                                                        placeholder="Ancho (m)"
+                                                        className="flex-1 px-3 py-2 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 outline-none transition-all font-display font-bold text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                    />
+                                                    
+                                                    <span className="text-foreground/30 font-bold text-xs shrink-0">×</span>
+                                                    
+                                                    <input
+                                                        type="number"
+                                                        value={wall.height}
+                                                        onChange={(e) => updateWall(wall.id, 'height', e.target.value)}
+                                                        placeholder="Alto (m)"
+                                                        className="flex-1 px-3 py-2 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 outline-none transition-all font-display font-bold text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                    />
+                                                </div>
                                             </div>
-                                            
-                                            <span className="text-foreground/30 font-bold text-xs shrink-0">×</span>
-                                            
-                                            <div className="relative flex-1">
-                                                <input
-                                                    type="number"
-                                                    value={wall.height}
-                                                    onChange={(e) => updateWall(wall.id, 'height', e.target.value)}
-                                                    placeholder="Alto"
-                                                    className="w-full pl-3 pr-7 py-2 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm border border-slate-300/50 dark:border-slate-800/50 rounded-xl focus:border-primary/50 outline-none transition-all font-display font-bold text-sm"
-                                                />
-                                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-foreground/40 uppercase">m</span>
-                                            </div>
-                                        </div>
 
-                                        {walls.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => removeWall(wall.id)}
-                                                className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-all shrink-0"
-                                                title="Eliminar pared"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
-                                        )}
+                                            {walls.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeWall(wall.id)}
+                                                    className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-all shrink-0 self-end mb-[2px]"
+                                                    title="Eliminar pared"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                            )}
+                                        </div>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
