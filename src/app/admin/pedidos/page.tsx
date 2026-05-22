@@ -285,7 +285,7 @@ export default function OrderManagement() {
                                                                 <div key={item.id} className="bg-card border border-border p-3 rounded-xl flex items-center gap-4">
                                                                     <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                                                                         {item.producto?.imagen_url ? (
-                                                                            <img src={item.producto.imagen_url} alt={item.producto.nombre} className="w-full h-full object-cover" />
+                                                                            <img src={item.producto.imagen_url} alt={item.producto.nombre} className="w-full h-full object-contain p-1" />
                                                                         ) : (
                                                                             <ShoppingBag size={20} className="text-foreground/20" />
                                                                         )}

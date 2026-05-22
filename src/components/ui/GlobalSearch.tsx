@@ -128,7 +128,7 @@ export function GlobalSearch() {
                                         >
                                             <div className="w-12 h-12 bg-background border border-border rounded-lg overflow-hidden flex-shrink-0 relative flex items-center justify-center">
                                                 {product.imagen_url ? (
-                                                    <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-cover" />
+                                                    <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain p-1" />
                                                 ) : (
                                                     <span className="text-[10px] font-bold text-foreground/20">{product.marca}</span>
                                                 )}

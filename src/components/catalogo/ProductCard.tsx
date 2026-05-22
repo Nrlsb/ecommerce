@@ -52,7 +52,7 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
             className="absolute bottom-3 right-3 w-14 h-auto opacity-[0.12] pointer-events-none z-10" 
           />
           {product.imagen_url ? (
-            <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-700" />
+            <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain rounded-xl group-hover:scale-110 transition-transform duration-700" />
           ) : (
             <div className="flex flex-col items-center gap-4">
               <img 

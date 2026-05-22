@@ -123,7 +123,7 @@ export default function PedidosPage() {
                                             <div key={item.id} className="flex items-center gap-4">
                                                 <div className="w-12 h-12 bg-muted rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden border border-border">
                                                     {item.productos?.imagen_url ? (
-                                                        <img src={item.productos.imagen_url} alt={item.productos.nombre} className="w-full h-full object-cover" />
+                                                        <img src={item.productos.imagen_url} alt={item.productos.nombre} className="w-full h-full object-contain p-1" />
                                                     ) : (
                                                         <Package className="w-6 h-6 text-foreground/20" />
                                                     )}
