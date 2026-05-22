@@ -51,6 +51,7 @@ function CatalogoContent() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -71,6 +72,8 @@ function CatalogoContent() {
         setCategories(allCategories);
       } catch (error) {
         console.error('Error general cargando categorías:', error);
+      } finally {
+        setCategoriesLoaded(true);
       }
     };
     fetchCategories();
@@ -192,10 +195,11 @@ function CatalogoContent() {
   };
 
   useEffect(() => {
+    if (!categoriesLoaded) return;
     setPage(0);
     setHasMore(true);
     fetchProducts(0, true);
-  }, [activeCategory, activeSort, searchQuery, priceRange]);
+  }, [activeCategory, activeSort, searchQuery, priceRange, categoriesLoaded]);
 
   // Sincronizar con cambios en la URL
   useEffect(() => {
