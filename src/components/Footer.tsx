@@ -10,6 +10,28 @@ export default function Footer() {
             <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-mercurio-pink/5 rounded-full blur-3xl"></div>
 
             <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+                {/* Newsletter Section */}
+                <div className="pb-12 mb-16 border-b border-white/10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 relative z-10">
+                    <div className="max-w-md">
+                        <h4 className="text-white text-lg font-black tracking-tight mb-2">Suscribite a nuestro Newsletter</h4>
+                        <p className="text-slate-400 text-sm font-light leading-relaxed">Recibí ofertas exclusivas, guías de color y tendencias directamente en tu email.</p>
+                    </div>
+                    <form className="w-full lg:w-auto flex flex-col sm:flex-row gap-3 min-w-[300px] md:min-w-[450px]">
+                        <input 
+                            type="email" 
+                            placeholder="Tu correo electrónico" 
+                            className="flex-1 px-5 py-3.5 bg-slate-900/60 border border-white/10 rounded-2xl text-white text-sm focus:outline-none focus:border-mercurio-pink transition-all placeholder:text-slate-500"
+                            required
+                        />
+                        <button 
+                            type="submit" 
+                            className="px-8 py-3.5 bg-gradient-to-r from-mercurio-blue to-mercurio-pink hover:from-mercurio-pink hover:to-mercurio-yellow text-white text-sm font-bold rounded-2xl transition-all duration-500 hover:scale-[1.02] shadow-lg shadow-mercurio-pink/10 hover:shadow-mercurio-pink/35 active:scale-95 cursor-pointer whitespace-nowrap"
+                        >
+                            Suscribirme
+                        </button>
+                    </form>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-y-16 gap-x-12">
                     {/* Logo & Brand Column */}
                     <div className="lg:col-span-1 space-y-6">
@@ -129,8 +151,9 @@ export default function Footer() {
                 <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8">
                     {/* Botón de Arrepentimiento */}
                     <div className="flex flex-col items-start gap-2">
-                        <Link href="/arrepentimiento" className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all group shadow-sm">
-                            <span className="text-sm font-bold text-white uppercase tracking-wider group-hover:text-mercurio-pink transition-colors">
+                        <Link href="/arrepentimiento" className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all group shadow-sm relative overflow-hidden">
+                            <span className="absolute inset-0 bg-gradient-to-r from-mercurio-blue via-mercurio-pink to-mercurio-yellow opacity-0 group-hover:opacity-10 transition-opacity duration-500"></span>
+                            <span className="text-sm font-bold text-white uppercase tracking-wider group-hover:text-mercurio-pink transition-colors relative z-10">
                                 Botón de Arrepentimiento
                             </span>
                         </Link>
@@ -142,7 +165,6 @@ export default function Footer() {
                     {/* Data Fiscal ARCA/AFIP */}
                     <div className="flex items-center gap-4">
                         <a href="#" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity bg-white p-1 rounded-md" title="Data Fiscal">
-                            {/* Reemplazar src con la URL real o imagen local del código QR de Data Fiscal */}
                             <img src="https://www.afip.gob.ar/images/f960/DATAWEB.jpg" alt="Data Fiscal" className="w-10 h-auto object-contain" />
                         </a>
                     </div>
@@ -170,11 +192,15 @@ function SocialLink({ href, icon, label, hoverColor }: { href: string; icon: Rea
             target="_blank"
             rel="noopener noreferrer"
             aria-label={label}
-            className={`w-12 h-12 flex items-center justify-center bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-xl text-white transition-all duration-500 ${hoverColor} hover:scale-110 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] group`}
+            className={`w-12 h-12 flex items-center justify-center bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-xl text-white transition-all duration-500 ${hoverColor} hover:scale-110 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] group relative`}
         >
-            <div className="transform group-hover:scale-110 transition-transform duration-500">
+            <div className="transform group-hover:scale-110 transition-transform duration-500 z-10">
                 {icon}
             </div>
+            {/* Tooltip */}
+            <span className="absolute -top-10 scale-0 group-hover:scale-100 transition-all duration-300 bg-slate-900 border border-white/10 text-white text-[10px] font-bold px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 whitespace-nowrap shadow-xl">
+                {label}
+            </span>
         </a>
     );
 }

@@ -180,3 +180,10 @@ h1, h2, h3, h4, h5, h6, .font-display {
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
+
+/* Premium Focus Indicators */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--mercurio-pink);
+  transition: box-shadow 0.2s ease-in-out;
+}
