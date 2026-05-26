@@ -115,6 +115,10 @@ export default function Navbar() {
                             Ofertas
                             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full transition-all duration-300 group-hover/link:w-8" />
                         </Link>
+                        <Link href="/servicios" className="text-foreground/50 hover:text-primary transition-all font-display font-bold text-[12px] uppercase tracking-[0.25em] relative group/link py-2">
+                            Servicios
+                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full transition-all duration-300 group-hover/link:w-8" />
+                        </Link>
                         {isAdmin && (
                             <Link href="/admin" className="group flex items-center gap-2 text-[11px] font-display font-bold uppercase tracking-widest bg-primary text-white px-5 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
                                 <ShieldCheck size={16} className="group-hover:rotate-12 transition-transform" />
@@ -271,6 +275,15 @@ export default function Navbar() {
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     Ofertas
+                                </Link>
+                            </motion.div>
+                            <motion.div variants={linkVariants} className="w-full">
+                                <Link 
+                                    href="/servicios" 
+                                    className="block py-4 text-2xl font-display font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors border-b border-border/50" 
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Servicios
                                 </Link>
                             </motion.div>
                             <motion.div variants={linkVariants} className="w-full">
