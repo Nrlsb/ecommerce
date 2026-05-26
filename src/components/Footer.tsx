@@ -1,40 +1,131 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion, Variants } from 'framer-motion';
+import { 
+    Mail, 
+    Clock, 
+    ArrowRight, 
+    Phone, 
+    ShieldCheck, 
+    Sparkles, 
+    ExternalLink,
+    DollarSign
+} from 'lucide-react';
 
 export default function Footer() {
+    const containerVariants: Variants = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants: Variants = {
+        hidden: { opacity: 0, y: 30 },
+        show: { 
+            opacity: 1, 
+            y: 0, 
+            transition: { 
+                type: 'spring', 
+                stiffness: 80, 
+                damping: 15 
+            } 
+        }
+    };
+
+    const footerLinks = [
+        { name: 'Sobre Mercurio', href: '/sobre-mercurio' },
+        { name: 'Sucursales', href: '/sucursales' },
+        { name: 'Unidades de Negocio', href: '/unidades-de-negocio' },
+        { name: 'Servicios', href: '/servicios' },
+        { name: 'Contacto', href: '/contacto' },
+        { name: 'Términos y condiciones', href: '/terminos' },
+        { name: 'Preguntas Frecuentes', href: '/preguntas-frecuentes' },
+    ];
+
+    const paymentMethods = [
+        { name: 'VISA', color: 'group-hover:text-blue-400 group-hover:border-blue-500/30' },
+        { name: 'MASTERCARD', color: 'group-hover:text-orange-400 group-hover:border-orange-500/30' },
+        { name: 'AMEX', color: 'group-hover:text-cyan-400 group-hover:border-cyan-500/30' },
+        { name: 'NARANJAX', color: 'group-hover:text-amber-500 group-hover:border-amber-500/30' },
+        { name: 'BANELCO', color: 'group-hover:text-red-400 group-hover:border-red-500/30' }
+    ];
+
     return (
-        <footer className="relative bg-[#0f172a] text-white pt-24 pb-12 overflow-hidden">
-            {/* Background Decorative Elements */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-mercurio-blue via-mercurio-pink to-mercurio-yellow opacity-70"></div>
-            <div className="absolute -top-24 -right-24 w-96 h-96 bg-mercurio-blue/10 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-mercurio-pink/5 rounded-full blur-3xl"></div>
+        <footer className="relative bg-[#020617] text-white pt-28 pb-12 overflow-hidden border-t border-white/5">
+            {/* Background Decorative Gradient Elements */}
+            <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-mercurio-blue via-mercurio-pink to-mercurio-yellow opacity-85"></div>
+            
+            {/* Decorative Glow Spots */}
+            <div className="absolute -top-32 right-10 w-[500px] h-[500px] bg-mercurio-blue/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute top-1/2 left-10 w-[400px] h-[400px] bg-mercurio-pink/5 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute -bottom-32 right-1/4 w-[600px] h-[600px] bg-mercurio-yellow/5 rounded-full blur-[140px] pointer-events-none"></div>
 
             <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+                
                 {/* Newsletter Section */}
-                <div className="pb-12 mb-16 border-b border-white/10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 relative z-10">
-                    <div className="max-w-md">
-                        <h4 className="text-white text-lg font-black tracking-tight mb-2">Suscribite a nuestro Newsletter</h4>
-                        <p className="text-slate-400 text-sm font-light leading-relaxed">Recibí ofertas exclusivas, guías de color y tendencias directamente en tu email.</p>
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="relative pb-16 mb-20 border-b border-white/10 z-10"
+                >
+                    <div className="glass dark:bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-12 flex flex-col lg:flex-row justify-between items-center gap-10 shadow-2xl relative overflow-hidden group">
+                        {/* Decorative internal card light */}
+                        <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-gradient-to-tr from-mercurio-pink/10 to-mercurio-blue/5 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity duration-1000 pointer-events-none"></div>
+                        
+                        <div className="max-w-xl text-center lg:text-left space-y-3 relative z-10">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-mercurio-blue/20 to-mercurio-pink/20 border border-white/10 text-mercurio-pink">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                Novedades y Tendencias
+                            </span>
+                            <h4 className="text-white text-2xl md:text-3xl font-black tracking-tight font-display">
+                                Suscribite a nuestro Newsletter
+                            </h4>
+                            <p className="text-slate-400 text-sm md:text-base font-light leading-relaxed">
+                                Recibí ofertas exclusivas, guías de combinación de color y tendencias directamente en tu correo electrónico.
+                            </p>
+                        </div>
+                        
+                        <form className="w-full lg:w-auto flex flex-col sm:flex-row gap-3 min-w-full sm:min-w-[400px] md:min-w-[500px] relative z-10">
+                            <div className="relative flex-1 group/input">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within/input:text-mercurio-pink transition-colors" />
+                                <input 
+                                    type="email" 
+                                    placeholder="Tu correo electrónico" 
+                                    className="w-full pl-12 pr-5 py-4 bg-slate-950/80 border border-white/10 rounded-2xl text-white text-sm focus:outline-none focus:border-mercurio-pink focus:ring-1 focus:ring-mercurio-pink transition-all placeholder:text-slate-500 shadow-inner"
+                                    required
+                                />
+                            </div>
+                            <motion.button 
+                                type="submit" 
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="px-8 py-4 bg-gradient-to-r from-mercurio-blue via-mercurio-pink to-mercurio-yellow bg-[length:200%_auto] hover:bg-right text-white text-sm font-bold rounded-2xl transition-all duration-500 shadow-xl shadow-mercurio-pink/10 hover:shadow-mercurio-pink/30 cursor-pointer whitespace-nowrap"
+                            >
+                                Suscribirme
+                            </motion.button>
+                        </form>
                     </div>
-                    <form className="w-full lg:w-auto flex flex-col sm:flex-row gap-3 min-w-[300px] md:min-w-[450px]">
-                        <input 
-                            type="email" 
-                            placeholder="Tu correo electrónico" 
-                            className="flex-1 px-5 py-3.5 bg-slate-900/60 border border-white/10 rounded-2xl text-white text-sm focus:outline-none focus:border-mercurio-pink transition-all placeholder:text-slate-500"
-                            required
-                        />
-                        <button 
-                            type="submit" 
-                            className="px-8 py-3.5 bg-gradient-to-r from-mercurio-blue to-mercurio-pink hover:from-mercurio-pink hover:to-mercurio-yellow text-white text-sm font-bold rounded-2xl transition-all duration-500 hover:scale-[1.02] shadow-lg shadow-mercurio-pink/10 hover:shadow-mercurio-pink/35 active:scale-95 cursor-pointer whitespace-nowrap"
-                        >
-                            Suscribirme
-                        </button>
-                    </form>
-                </div>
+                </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-y-16 gap-x-12">
+                {/* Footer Main Links Grid */}
+                <motion.div 
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true }}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-y-16 gap-x-12 relative z-10"
+                >
                     {/* Logo & Brand Column */}
-                    <div className="lg:col-span-1 space-y-6">
+                    <motion.div variants={itemVariants} className="lg:col-span-1 space-y-6">
                         <Link href="/" className="inline-block group transition-transform duration-300 hover:scale-105">
                             <Image
                                 src="/images/logos/logomercurio.png"
@@ -46,138 +137,181 @@ export default function Footer() {
                             />
                         </Link>
                         <p className="text-slate-400 text-sm leading-relaxed font-light">
-                            Expertos en color y soluciones para tus proyectos. Transformando espacios desde 2021.
+                            Expertos en color y soluciones para transformar y dar vida a tus proyectos. Inspirando hogares desde 2021.
                         </p>
-                    </div>
+                    </motion.div>
 
                     {/* Somos Mercurio Column */}
-                    <div>
-                        <h3 className="text-white font-semibold text-sm mb-8 uppercase tracking-[0.2em] relative inline-block">
+                    <motion.div variants={itemVariants}>
+                        <h3 className="text-white font-bold text-xs mb-8 uppercase tracking-[0.2em] relative inline-block">
                             Somos Mercurio
-                            <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-mercurio-yellow"></span>
+                            <span className="absolute -bottom-2.5 left-0 w-8 h-[2px] bg-mercurio-yellow"></span>
                         </h3>
                         <ul className="space-y-4 text-sm">
-                            {[
-                                { name: 'Sobre Mercurio', href: '/sobre-mercurio' },
-                                { name: 'Sucursales', href: '/sucursales' },
-                                { name: 'Unidades de Negocio', href: '/unidades-de-negocio' },
-                                { name: 'Servicios', href: '/servicios' },
-                                { name: 'Contacto', href: '/contacto' },
-                                { name: 'Términos y condiciones', href: '/terminos' },
-                                { name: 'Preguntas Frecuentes', href: '/preguntas-frecuentes' },
-                            ].map((item) => (
+                            {footerLinks.map((item) => (
                                 <li key={item.name}>
-                                    <Link href={item.href} className="text-slate-400 hover:text-mercurio-yellow transition-all duration-300 flex items-center group">
-                                        <span className="w-0 group-hover:w-2 h-[1px] bg-mercurio-yellow mr-0 group-hover:mr-2 transition-all duration-300"></span>
-                                        {item.name}
+                                    <Link href={item.href} className="text-slate-400 hover:text-mercurio-yellow transition-all duration-300 flex items-center group/link">
+                                        <span className="w-0 group-hover/link:w-2 h-[2px] bg-mercurio-yellow mr-0 group-hover/link:mr-2.5 transition-all duration-300 rounded-full"></span>
+                                        <span className="group-hover/link:translate-x-0.5 transition-transform duration-300">{item.name}</span>
                                     </Link>
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </motion.div>
 
                     {/* Atención al Cliente Column */}
-                    <div>
-                        <h3 className="text-white font-semibold text-sm mb-8 uppercase tracking-[0.2em] relative inline-block">
+                    <motion.div variants={itemVariants}>
+                        <h3 className="text-white font-bold text-xs mb-8 uppercase tracking-[0.2em] relative inline-block">
                             Atención al Cliente
-                            <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-mercurio-pink"></span>
+                            <span className="absolute -bottom-2.5 left-0 w-8 h-[2px] bg-mercurio-pink"></span>
                         </h3>
                         <div className="space-y-6 text-sm">
-                            <a href="mailto:consultas@pintureriamercurio.com.ar" className="block text-slate-300 hover:text-white transition-colors">
-                                <span className="block text-slate-500 mb-1 text-[10px] uppercase tracking-widest font-bold">Email</span>
-                                <span className="text-sm font-medium border-b border-white/10 pb-1">consultas@pintureriamercurio.com.ar</span>
+                            <a href="mailto:consultas@pintureriamercurio.com.ar" className="flex items-start gap-3 text-slate-400 hover:text-white transition-colors group/item">
+                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5 group-hover/item:border-mercurio-pink/30 group-hover/item:text-mercurio-pink transition-colors">
+                                    <Mail className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                    <span className="block text-slate-500 text-[10px] uppercase tracking-widest font-bold">Email</span>
+                                    <span className="text-sm font-medium border-b border-transparent group-hover/item:border-white/20 pb-0.5 transition-all truncate block max-w-[180px] lg:max-w-none">
+                                        consultas@pintureriamercurio.com.ar
+                                    </span>
+                                </div>
                             </a>
-                            <div className="space-y-2">
-                                <span className="block text-slate-500 text-[10px] uppercase tracking-widest font-bold">Horarios</span>
-                                <p className="text-slate-300 font-light">Lunes a Viernes</p>
-                                <p className="text-white font-semibold text-lg">08:00 a 17:00 hs</p>
+                            
+                            <div className="flex items-start gap-3 text-slate-400">
+                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5">
+                                    <Clock className="w-4 h-4 text-slate-400" />
+                                </div>
+                                <div>
+                                    <span className="block text-slate-500 text-[10px] uppercase tracking-widest font-bold">Horarios</span>
+                                    <p className="text-slate-300 font-light">Lunes a Viernes</p>
+                                    <p className="text-white font-bold text-base mt-0.5">08:00 a 17:00 hs</p>
+                                </div>
                             </div>
+
+                            <a href="https://wa.me/5491122334455" target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 text-slate-400 hover:text-white transition-colors group/item">
+                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5 group-hover/item:border-mercurio-green/30 group-hover/item:text-mercurio-green transition-colors relative">
+                                    <Phone className="w-4 h-4" />
+                                    <span className="absolute top-0 right-0 w-2 h-2 bg-[#25D366] rounded-full animate-ping"></span>
+                                    <span className="absolute top-0 right-0 w-2 h-2 bg-[#25D366] rounded-full"></span>
+                                </div>
+                                <div>
+                                    <span className="block text-slate-500 text-[10px] uppercase tracking-widest font-bold">WhatsApp Ventas</span>
+                                    <span className="text-sm font-medium border-b border-transparent group-hover/item:border-white/20 pb-0.5 transition-all">
+                                        +54 9 11 2233-4455
+                                    </span>
+                                </div>
+                            </a>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Medios de Pago Column */}
-                    <div>
-                        <h3 className="text-white font-semibold text-sm mb-8 uppercase tracking-[0.2em] relative inline-block">
+                    <motion.div variants={itemVariants}>
+                        <h3 className="text-white font-bold text-xs mb-8 uppercase tracking-[0.2em] relative inline-block">
                             Medios de Pago
-                            <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-mercurio-blue"></span>
+                            <span className="absolute -bottom-2.5 left-0 w-8 h-[2px] bg-mercurio-blue"></span>
                         </h3>
                         <div className="space-y-6">
-                            <div className="flex flex-wrap gap-2 items-center">
-                                {['VISA', 'MASTERCARD', 'AMEX', 'NARANJAX', 'BANELCO'].map((card) => (
-                                    <div key={card} className="bg-slate-800/50 backdrop-blur-sm border border-white/5 px-3 py-1.5 rounded-md">
-                                        <span className="text-[10px] font-bold tracking-tighter text-slate-300">{card}</span>
-                                    </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                {paymentMethods.map((card) => (
+                                    <motion.div 
+                                        key={card.name} 
+                                        whileHover={{ y: -3, scale: 1.02 }}
+                                        className="group bg-slate-900/60 hover:bg-slate-900 border border-white/5 hover:border-white/10 p-2.5 rounded-xl text-center transition-all cursor-default shadow-sm"
+                                    >
+                                        <span className={`text-[10px] font-black tracking-wider text-slate-400 transition-colors ${card.color}`}>
+                                            {card.name}
+                                        </span>
+                                    </motion.div>
                                 ))}
                             </div>
-                            <Link href="/promociones" className="inline-flex items-center text-xs font-medium text-mercurio-yellow hover:text-white transition-colors group">
+                            <Link href="/promociones" className="inline-flex items-center text-xs font-semibold text-mercurio-yellow hover:text-white transition-colors group/promo">
+                                <DollarSign className="w-3.5 h-3.5 mr-1" />
                                 Ver promociones bancarias
-                                <svg className="ml-2 w-3 h-3 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
+                                <ArrowRight className="ml-1.5 w-3.5 h-3.5 transform group-hover/promo:translate-x-1.5 transition-transform" />
                             </Link>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Seguinos Column */}
-                    <div>
-                        <h3 className="text-white font-semibold text-sm mb-8 uppercase tracking-[0.2em] relative inline-block">
+                    <motion.div variants={itemVariants}>
+                        <h3 className="text-white font-bold text-xs mb-8 uppercase tracking-[0.2em] relative inline-block">
                             Seguinos En
-                            <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-mercurio-green"></span>
+                            <span className="absolute -bottom-2.5 left-0 w-8 h-[2px] bg-mercurio-green"></span>
                         </h3>
                         <div className="flex gap-4">
                             <SocialLink
                                 href="https://www.facebook.com/pintureriasmercurio/"
                                 icon={<FacebookIcon />}
                                 label="Facebook"
-                                hoverColor="hover:bg-[#1877F2]"
+                                hoverColor="hover:bg-[#1877F2] hover:border-[#1877F2]/30 hover:shadow-[#1877F2]/20"
                             />
                             <SocialLink
                                 href="https://www.instagram.com/pint_mercurio/"
                                 icon={<InstagramIcon />}
                                 label="Instagram"
-                                hoverColor="hover:bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]"
+                                hoverColor="hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] hover:border-pink-500/30 hover:shadow-pink-500/20"
                             />
                             <SocialLink
                                 href="https://www.youtube.com/channel/UCRMyNc7T6iKYVT-7WQgLS7w"
                                 icon={<YoutubeIcon />}
                                 label="YouTube"
-                                hoverColor="hover:bg-[#FF0000]"
+                                hoverColor="hover:bg-[#FF0000] hover:border-[#FF0000]/30 hover:shadow-[#FF0000]/20"
                             />
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
                 {/* Marco Legal y Fiscal */}
-                <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="mt-20 pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10"
+                >
                     {/* Botón de Arrepentimiento */}
-                    <div className="flex flex-col items-start gap-2">
-                        <Link href="/arrepentimiento" className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all group shadow-sm relative overflow-hidden">
-                            <span className="absolute inset-0 bg-gradient-to-r from-mercurio-blue via-mercurio-pink to-mercurio-yellow opacity-0 group-hover:opacity-10 transition-opacity duration-500"></span>
-                            <span className="text-sm font-bold text-white uppercase tracking-wider group-hover:text-mercurio-pink transition-colors relative z-10">
+                    <div className="flex flex-col items-center md:items-start gap-3">
+                        <Link href="/arrepentimiento" className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-slate-900 hover:bg-slate-950 border border-white/10 rounded-2xl transition-all duration-300 group shadow-md relative overflow-hidden">
+                            <span className="absolute inset-0 bg-gradient-to-r from-mercurio-pink/10 to-mercurio-yellow/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+                            <ShieldCheck className="w-4 h-4 text-mercurio-pink group-hover:scale-110 transition-transform relative z-10" />
+                            <span className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-mercurio-pink transition-colors relative z-10">
                                 Botón de Arrepentimiento
                             </span>
                         </Link>
-                        <span className="text-[10px] text-slate-500 font-medium">
-                            Defensa de las y los Consumidores. Para reclamos ingrese <a href="https://autogestion.produccion.gob.ar/consumidor" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">aquí</a>.
+                        <span className="text-[10px] text-slate-500 font-medium text-center md:text-left leading-relaxed">
+                            Defensa de las y los Consumidores. Para reclamos ingrese{' '}
+                            <a href="https://autogestion.produccion.gob.ar/consumidor" target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition-colors inline-flex items-center gap-0.5">
+                                aquí <ExternalLink className="w-2.5 h-2.5" />
+                            </a>.
                         </span>
                     </div>
 
                     {/* Data Fiscal ARCA/AFIP */}
                     <div className="flex items-center gap-4">
-                        <a href="#" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity bg-white p-1 rounded-md" title="Data Fiscal">
+                        <motion.a 
+                            href="#" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            className="transition-all bg-white p-2 rounded-2xl shadow-lg border border-white/10 block" 
+                            title="Data Fiscal"
+                        >
                             <img src="https://www.afip.gob.ar/images/f960/DATAWEB.jpg" alt="Data Fiscal" className="w-10 h-auto object-contain" />
-                        </a>
+                        </motion.a>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Copyright */}
-                <div className="mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-[10px] font-medium tracking-[0.2em] text-slate-500 uppercase">
-                        © 2021-{new Date().getFullYear()} | MERCURIO PINTRURERÍAS
+                <div className="mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                    <p className="text-[10px] font-semibold tracking-[0.2em] text-slate-600 uppercase text-center md:text-left">
+                        © 2021-{new Date().getFullYear()} | MERCURIO PINTRURERÍAS. Todos los derechos reservados.
                     </p>
                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-medium tracking-[0.2em] text-slate-500 uppercase">Desarrollado por</span>
-                        <a href="#" className="text-[10px] font-bold text-white hover:text-mercurio-yellow transition-colors">Pinturerias Mercurio</a>
+                        <span className="text-[10px] font-semibold tracking-[0.2em] text-slate-600 uppercase">Desarrollado por</span>
+                        <a href="#" className="text-[10px] font-black text-slate-400 hover:text-mercurio-yellow transition-colors tracking-wide">
+                            Pinturerías Mercurio
+                        </a>
                     </div>
                 </div>
             </div>
@@ -185,23 +319,32 @@ export default function Footer() {
     );
 }
 
-function SocialLink({ href, icon, label, hoverColor }: { href: string; icon: React.ReactNode; label: string; hoverColor: string }) {
+interface SocialLinkProps {
+    href: string;
+    icon: React.ReactNode;
+    label: string;
+    hoverColor: string;
+}
+
+function SocialLink({ href, icon, label, hoverColor }: SocialLinkProps) {
     return (
-        <a
+        <motion.a
             href={href}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={label}
-            className={`w-12 h-12 flex items-center justify-center bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-xl text-white transition-all duration-500 ${hoverColor} hover:scale-110 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] group relative`}
+            whileHover={{ scale: 1.1, rotate: 3 }}
+            whileTap={{ scale: 0.95 }}
+            className={`w-12 h-12 flex items-center justify-center bg-slate-900 border border-white/5 rounded-2xl text-white transition-all duration-300 ${hoverColor} hover:shadow-lg group relative`}
         >
-            <div className="transform group-hover:scale-110 transition-transform duration-500 z-10">
+            <div className="transform group-hover:scale-105 transition-transform duration-300 z-10">
                 {icon}
             </div>
             {/* Tooltip */}
-            <span className="absolute -top-10 scale-0 group-hover:scale-100 transition-all duration-300 bg-slate-900 border border-white/10 text-white text-[10px] font-bold px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 whitespace-nowrap shadow-xl">
+            <span className="absolute -top-10 scale-0 group-hover:scale-100 transition-all duration-300 bg-slate-950 border border-white/10 text-white text-[10px] font-black px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap shadow-xl pointer-events-none z-50">
                 {label}
             </span>
-        </a>
+        </motion.a>
     );
 }
 
