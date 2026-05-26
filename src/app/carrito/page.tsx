@@ -43,15 +43,87 @@ export default function CarritoPage() {
         address: '',
         city: '',
         zipCode: '',
+        provincia: '',
         notes: ''
     });
     const [showShippingForm, setShowShippingForm] = useState(false);
+
+    // Estado para facturación
+    const [billingData, setBillingData] = useState({
+        tipo: 'Consumidor Final',
+        nombre: '',
+        documento: ''
+    });
+
+    // Costo de envío dinámico
+    const [shippingCost, setShippingCost] = useState(0);
+    const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+
+    // Calcular descuento y precio final
+    let discountAmount = 0;
+    if (appliedCoupon) {
+        if (Number(appliedCoupon.descuento_porcentual) > 0) {
+            discountAmount = Number(((totalPrice * Number(appliedCoupon.descuento_porcentual)) / 100).toFixed(2));
+        } else if (Number(appliedCoupon.descuento_fijo) > 0) {
+            discountAmount = Math.min(Number(appliedCoupon.descuento_fijo), totalPrice);
+        }
+    }
+    const finalPrice = Math.max(0, totalPrice - discountAmount);
 
     useEffect(() => {
         setIsMounted(true);
         // Generar un Session ID único para Cybersource al cargar
         setSessionId(`sess_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`);
     }, []);
+
+    // Efecto para calcular costo de envío dinámico
+    useEffect(() => {
+        const fetchShippingCost = async () => {
+            if (deliveryMethod === 'retiro') {
+                setShippingCost(0);
+                return;
+            }
+
+            const finalPriceBase = totalPrice - discountAmount;
+            if (finalPriceBase >= 50000) {
+                setShippingCost(0);
+                return;
+            }
+
+            if (!shippingData.provincia) {
+                setShippingCost(0);
+                return;
+            }
+
+            setIsCalculatingShipping(true);
+            try {
+                const response = await fetch('/api/shipping-cost', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        items: items.map(item => ({ id: item.id, quantity: item.quantity })),
+                        provincia: shippingData.provincia,
+                        totalCompra: finalPriceBase
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setShippingCost(data.costoEnvio || 0);
+                } else {
+                    console.error('Error calculando costo de envío');
+                    setShippingCost(8500); // Fallback
+                }
+            } catch (err) {
+                console.error('Error al conectar con API de envío:', err);
+                setShippingCost(8500); // Fallback
+            } finally {
+                setIsCalculatingShipping(false);
+            }
+        };
+
+        fetchShippingCost();
+    }, [deliveryMethod, shippingData.provincia, items, totalPrice, discountAmount]);
 
     const handleApplyCoupon = async () => {
         if (!couponCode.trim()) return;
@@ -96,17 +168,6 @@ export default function CarritoPage() {
         setCouponError(null);
     };
 
-    // Calcular descuento y precio final
-    let discountAmount = 0;
-    if (appliedCoupon) {
-        if (Number(appliedCoupon.descuento_porcentual) > 0) {
-            discountAmount = Number(((totalPrice * Number(appliedCoupon.descuento_porcentual)) / 100).toFixed(2));
-        } else if (Number(appliedCoupon.descuento_fijo) > 0) {
-            discountAmount = Math.min(Number(appliedCoupon.descuento_fijo), totalPrice);
-        }
-    }
-    const finalPrice = Math.max(0, totalPrice - discountAmount);
-
     const handleCheckout = async () => {
         if (!showShippingForm) {
             setShowShippingForm(true);
@@ -116,9 +177,24 @@ export default function CarritoPage() {
         }
 
         // Validar datos de envío
-        if (!shippingData.fullName || !shippingData.email || !shippingData.phone || (deliveryMethod === 'envio' && !shippingData.address)) {
-            alert('Por favor, complete todos los campos obligatorios de envío.');
+        if (!shippingData.fullName || !shippingData.email || !shippingData.phone) {
+            alert('Por favor, complete todos los campos obligatorios de contacto.');
             return;
+        }
+
+        if (deliveryMethod === 'envio') {
+            if (!shippingData.address || !shippingData.provincia) {
+                alert('Por favor, complete la dirección y provincia de entrega.');
+                return;
+            }
+        }
+
+        // Validar datos de facturación
+        if (billingData.tipo !== 'Consumidor Final') {
+            if (!billingData.nombre || !billingData.documento) {
+                alert('Por favor, complete la razón social y CUIT/documento de facturación.');
+                return;
+            }
         }
 
         if (paymentMethod === 'mercadopago') {
@@ -139,11 +215,21 @@ export default function CarritoPage() {
                     cliente_nombre: shippingData.fullName,
                     cliente_email: shippingData.email,
                     cliente_telefono: shippingData.phone,
-                    envio: {
-                        metodo: deliveryMethod,
-                        ...shippingData
-                    },
-                    total: finalPrice,
+                    
+                    // Datos de Envío / Entrega
+                    metodo_entrega: deliveryMethod,
+                    envio_direccion: shippingData.address,
+                    envio_ciudad: shippingData.city,
+                    envio_codigo_postal: shippingData.zipCode,
+                    envio_provincia: shippingData.provincia,
+                    envio_notas: shippingData.notes,
+                    envio_costo: shippingCost,
+
+                    // Datos de Facturación
+                    facturacion_tipo: billingData.tipo,
+                    facturacion_nombre: billingData.tipo === 'Consumidor Final' ? shippingData.fullName : billingData.nombre,
+                    facturacion_documento: billingData.tipo === 'Consumidor Final' ? '' : billingData.documento,
+
                     metodo_pago: 'mercadopago',
                     cupon_codigo: appliedCoupon ? appliedCoupon.codigo : null
                 })
@@ -246,11 +332,21 @@ export default function CarritoPage() {
                     cliente_nombre: shippingData.fullName || cardData.cardHolderName || 'Cliente Web',
                     cliente_email: shippingData.email || 'cliente@ejemplo.com',
                     cliente_telefono: shippingData.phone,
-                    envio: {
-                        metodo: deliveryMethod,
-                        ...shippingData
-                    },
-                    total: finalPrice,
+                    
+                    // Datos de Envío / Entrega
+                    metodo_entrega: deliveryMethod,
+                    envio_direccion: shippingData.address,
+                    envio_ciudad: shippingData.city,
+                    envio_codigo_postal: shippingData.zipCode,
+                    envio_provincia: shippingData.provincia,
+                    envio_notas: shippingData.notes,
+                    envio_costo: shippingCost,
+
+                    // Datos de Facturación
+                    facturacion_tipo: billingData.tipo,
+                    facturacion_nombre: billingData.tipo === 'Consumidor Final' ? (shippingData.fullName || cardData.cardHolderName) : billingData.nombre,
+                    facturacion_documento: billingData.tipo === 'Consumidor Final' ? '' : billingData.documento,
+
                     metodo_pago: 'payway',
                     payway_token: token,
                     bin: bin,
@@ -401,6 +497,41 @@ export default function CarritoPage() {
                                                     placeholder="Calle 123, Piso 1, Depto A"
                                                 />
                                             </div>
+                                            <div className="col-span-1 md:col-span-2">
+                                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Provincia *</label>
+                                                <select
+                                                    required
+                                                    className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                                    value={shippingData.provincia}
+                                                    onChange={(e) => setShippingData({...shippingData, provincia: e.target.value})}
+                                                >
+                                                    <option value="">Selecciona tu provincia...</option>
+                                                    <option value="caba">CABA (Ciudad Autónoma de Buenos Aires)</option>
+                                                    <option value="buenos_aires">Buenos Aires (Provincia)</option>
+                                                    <option value="catamarca">Catamarca</option>
+                                                    <option value="chaco">Chaco</option>
+                                                    <option value="chubut">Chubut</option>
+                                                    <option value="cordoba">Córdoba</option>
+                                                    <option value="corrientes">Corrientes</option>
+                                                    <option value="entre_rios">Entre Ríos</option>
+                                                    <option value="formosa">Formosa</option>
+                                                    <option value="jujuy">Jujuy</option>
+                                                    <option value="la_pampa">La Pampa</option>
+                                                    <option value="la_rioja">La Rioja</option>
+                                                    <option value="mendoza">Mendoza</option>
+                                                    <option value="misiones">Misiones</option>
+                                                    <option value="neuquen">Neuquén</option>
+                                                    <option value="rio_negro">Río Negro</option>
+                                                    <option value="salta">Salta</option>
+                                                    <option value="san_juan">San Juan</option>
+                                                    <option value="san_luis">San Luis</option>
+                                                    <option value="santa_cruz">Santa Cruz</option>
+                                                    <option value="santa_fe">Santa Fe</option>
+                                                    <option value="santiago_del_estero">Santiago del Estero</option>
+                                                    <option value="tierra_del_fuego">Tierra del Fuego</option>
+                                                    <option value="tucuman">Tucumán</option>
+                                                </select>
+                                            </div>
                                             <div>
                                                 <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Ciudad</label>
                                                 <input 
@@ -408,7 +539,7 @@ export default function CarritoPage() {
                                                     className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
                                                     value={shippingData.city}
                                                     onChange={(e) => setShippingData({...shippingData, city: e.target.value})}
-                                                    placeholder="CABA"
+                                                    placeholder="Ej. CABA / Tandil"
                                                 />
                                             </div>
                                             <div>
@@ -433,6 +564,56 @@ export default function CarritoPage() {
                                             onChange={(e) => setShippingData({...shippingData, notes: e.target.value})}
                                             placeholder="Indicaciones para el repartidor..."
                                         />
+                                    </div>
+                                </div>
+
+                                {/* Datos de Facturación */}
+                                <div className="border-t border-border pt-6 mt-6">
+                                    <h3 className="text-lg font-bold text-foreground mb-4">Datos de Facturación</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="col-span-1 md:col-span-2">
+                                            <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Tipo de Factura</label>
+                                            <select
+                                                className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                                value={billingData.tipo}
+                                                onChange={(e) => setBillingData({...billingData, tipo: e.target.value})}
+                                            >
+                                                <option value="Consumidor Final">Consumidor Final</option>
+                                                <option value="Factura A">Factura A (Responsable Inscripto)</option>
+                                                <option value="Factura B">Factura B</option>
+                                            </select>
+                                        </div>
+                                        
+                                        {billingData.tipo !== 'Consumidor Final' && (
+                                            <>
+                                                <div>
+                                                    <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">
+                                                        {billingData.tipo === 'Factura A' ? 'Razón Social *' : 'Nombre Completo / Razón Social *'}
+                                                    </label>
+                                                    <input 
+                                                        type="text" 
+                                                        required
+                                                        className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                                        value={billingData.nombre}
+                                                        onChange={(e) => setBillingData({...billingData, nombre: e.target.value})}
+                                                        placeholder="Ej. Pinturerías Mercurio S.A."
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">
+                                                        {billingData.tipo === 'Factura A' ? 'CUIT *' : 'CUIT / CUIL / DNI *'}
+                                                    </label>
+                                                    <input 
+                                                        type="text" 
+                                                        required
+                                                        className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl outline-none focus:border-primary transition-colors"
+                                                        value={billingData.documento}
+                                                        onChange={(e) => setBillingData({...billingData, documento: e.target.value})}
+                                                        placeholder="30-12345678-9"
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>
@@ -683,7 +864,7 @@ export default function CarritoPage() {
                                 )}
                             </div>
 
-                            <h2 className="text-lg font-bold border-t border-border pt-4 mb-4">Resumen</h2>
+                              <h2 className="text-lg font-bold border-t border-border pt-4 mb-4">Resumen</h2>
                             <div className="space-y-3 mb-6">
                                 <div className="flex justify-between text-foreground/80">
                                     <span>Subtotal</span>
@@ -697,8 +878,14 @@ export default function CarritoPage() {
                                 )}
                                 <div className="flex justify-between text-foreground/80">
                                     <span>Envío</span>
-                                    <span className={finalPrice > 50000 ? 'text-green-600 font-medium' : ''}>
-                                        {finalPrice > 50000 ? 'Gratis' : 'Calculado'}
+                                    <span className={finalPrice >= 50000 || deliveryMethod === 'retiro' ? 'text-green-600 font-medium' : ''}>
+                                        {deliveryMethod === 'retiro' ? 'Gratis (Retiro)' : (
+                                            finalPrice >= 50000 ? 'Gratis' : (
+                                                isCalculatingShipping ? 'Calculando...' : (
+                                                    shippingCost > 0 ? `$${shippingCost.toLocaleString('es-AR')}` : 'Selecciona provincia'
+                                                )
+                                            )
+                                        )}
                                     </span>
                                 </div>
                             </div>
@@ -706,21 +893,22 @@ export default function CarritoPage() {
                             <div className="border-t border-border pt-4 mb-6">
                                 <div className="flex justify-between items-end">
                                     <span className="text-lg font-bold">Total</span>
-                                    <span className="text-3xl font-black text-primary">${finalPrice.toLocaleString('es-AR')}</span>
+                                    <span className="text-3xl font-black text-primary">
+                                        ${(finalPrice + shippingCost).toLocaleString('es-AR')}
+                                    </span>
                                 </div>
                             </div>
-
                             <button
                                 onClick={handleCheckout}
-                                disabled={isProcessing}
+                                disabled={isProcessing || isCalculatingShipping}
                                 className="w-full bg-accent text-accent-foreground hover:bg-accent/90 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50"
                             >
-                                {isProcessing ? 'Procesando...' : (!showShippingForm ? 'Continuar con el envío' : (
+                                {isProcessing ? 'Procesando...' : (isCalculatingShipping ? 'Calculando envío...' : (!showShippingForm ? 'Continuar con el envío' : (
                                     <>
                                         {paymentMethod === 'mercadopago' ? <ShieldCheck className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
                                         {paymentMethod === 'mercadopago' ? 'Pagar con Mercado Pago' : 'Pagar de forma segura'}
                                     </>
-                                ))}
+                                )))}
                             </button>
                         </div>
                     </div>

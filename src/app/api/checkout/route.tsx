@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { sendOrderConfirmationEmail } from '@/lib/email';
+import { calculateShippingCost } from '@/lib/shipping';
 
 // Configuración de MercadoPago
 const mpClient = new MercadoPagoConfig({ 
@@ -12,7 +13,33 @@ const mpClient = new MercadoPagoConfig({
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { items, cliente_nombre, cliente_email, metodo_pago = 'mercadopago', payway_token, bin, payment_method_id, installments = 1, device_unique_identifier, cupon_codigo } = body;
+        const { 
+            items, 
+            cliente_nombre, 
+            cliente_email, 
+            cliente_telefono,
+            metodo_pago = 'mercadopago', 
+            payway_token, 
+            bin, 
+            payment_method_id, 
+            installments = 1, 
+            device_unique_identifier, 
+            cupon_codigo,
+            
+            // Datos de Envío / Entrega
+            metodo_entrega = 'envio',
+            envio_direccion,
+            envio_ciudad,
+            envio_codigo_postal,
+            envio_provincia,
+            envio_telefono,
+            envio_notas,
+            
+            // Datos de Facturación
+            facturacion_tipo = 'Consumidor Final',
+            facturacion_nombre,
+            facturacion_documento
+        } = body;
 
         if (!items || items.length === 0) {
             return NextResponse.json({ error: 'El carrito está vacío' }, { status: 400 });
@@ -69,7 +96,25 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const totalFinal = Math.max(0, totalValidado - descuento);
+        const totalProductosConDescuento = Math.max(0, totalValidado - descuento);
+
+        // --- CÁLCULO SEGURO DEL COSTO DE ENVÍO EN EL SERVIDOR ---
+        let finalShippingCost = 0;
+        if (metodo_entrega === 'envio' && envio_provincia) {
+            try {
+                const shippingResult = await calculateShippingCost({
+                    items: validatedItems.map((item: any) => ({ id: item.id, quantity: item.quantity })),
+                    provincia: envio_provincia,
+                    totalCompra: totalProductosConDescuento
+                });
+                finalShippingCost = shippingResult.costoEnvio;
+            } catch (err) {
+                console.error('Error calculando costo de envío en backend checkout:', err);
+                finalShippingCost = 8500; // Tarifa de contingencia
+            }
+        }
+
+        const totalFinal = totalProductosConDescuento + finalShippingCost;
 
         // 1. Crear el pedido en la tabla "pedidos"
         const { data: pedido, error: pedidoError } = await supabaseAdmin
@@ -82,7 +127,22 @@ export async function POST(request: NextRequest) {
                     estado: 'pendiente',
                     metodo_pago,
                     cupon_aplicado: cuponAplicado,
-                    descuento_aplicado: descuento
+                    descuento_aplicado: descuento,
+                    
+                    // Datos de envío
+                    metodo_entrega,
+                    envio_costo: finalShippingCost,
+                    envio_direccion: metodo_entrega === 'envio' ? envio_direccion : null,
+                    envio_ciudad: metodo_entrega === 'envio' ? envio_ciudad : null,
+                    envio_codigo_postal: metodo_entrega === 'envio' ? envio_codigo_postal : null,
+                    envio_provincia: metodo_entrega === 'envio' ? envio_provincia : null,
+                    envio_telefono: cliente_telefono || envio_telefono || null,
+                    envio_notas: metodo_entrega === 'envio' ? envio_notas : null,
+                    
+                    // Datos de facturación
+                    facturacion_tipo,
+                    facturacion_nombre: facturacion_nombre || cliente_nombre,
+                    facturacion_documento: facturacion_documento || null
                 }
             ])
             .select()
@@ -116,16 +176,31 @@ export async function POST(request: NextRequest) {
         if (metodo_pago === 'mercadopago') {
             const mpPreference = new Preference(mpClient);
             
-            const discountFactor = totalValidado > 0 ? (totalFinal / totalValidado) : 1;
+            const discountFactor = totalValidado > 0 ? (totalProductosConDescuento / totalValidado) : 1;
+            
+            // Mapear los ítems descontados
+            const mpItems = validatedItems.map((item: any) => ({
+                id: String(item.id),
+                title: String(item.name || item.nombre || 'Producto'),
+                quantity: parseInt(item.quantity) || 1,
+                unit_price: parseFloat((item.price * discountFactor).toFixed(2)),
+                currency_id: 'ARS'
+            }));
+
+            // Si hay costo de envío, lo agregamos como un ítem en la preferencia de Mercado Pago
+            if (finalShippingCost > 0) {
+                mpItems.push({
+                    id: 'costo_envio',
+                    title: 'Costo de Envío a Domicilio',
+                    quantity: 1,
+                    unit_price: parseFloat(finalShippingCost.toFixed(2)),
+                    currency_id: 'ARS'
+                });
+            }
+
             const preferenceData = {
                 body: {
-                    items: validatedItems.map((item: any) => ({
-                        id: String(item.id),
-                        title: String(item.name || item.nombre || 'Producto'),
-                        quantity: parseInt(item.quantity) || 1,
-                        unit_price: parseFloat((item.price * discountFactor).toFixed(2)),
-                        currency_id: 'ARS'
-                    })),
+                    items: mpItems,
                     back_urls: {
                         success: `${baseUrl}/checkout/success`,
                         failure: `${baseUrl}/checkout/failure`,
@@ -183,15 +258,15 @@ export async function POST(request: NextRequest) {
                     send_to_cs: true,
                     device_unique_identifier: device_unique_identifier || "device_fallback_123",
                     bill_to: {
-                        city: "Buenos Aires",
+                        city: metodo_entrega === 'envio' ? (envio_ciudad || "Buenos Aires") : "Buenos Aires",
                         country: "AR",
                         customer_id: String(pedido.id),
                         email: cliente_email || "cliente@ejemplo.com",
                         first_name: cliente_nombre || "Cliente",
                         last_name: "Web",
-                        phone_number: "1111111111",
-                        postal_code: "1000",
-                        state: "C"
+                        phone_number: cliente_telefono || "1111111111",
+                        postal_code: metodo_entrega === 'envio' ? (envio_codigo_postal || "1000") : "1000",
+                        state: metodo_entrega === 'envio' ? (envio_provincia || "C") : "C"
                     },
                     purchase_totals: {
                         currency: "ARS",
@@ -199,15 +274,15 @@ export async function POST(request: NextRequest) {
                     },
                     retail_transaction_data: {
                         ship_to: {
-                            city: "Buenos Aires",
+                            city: metodo_entrega === 'envio' ? (envio_ciudad || "Buenos Aires") : "Buenos Aires",
                             country: "AR",
                             customer_id: String(pedido.id),
                             email: cliente_email || "cliente@ejemplo.com",
                             first_name: cliente_nombre || "Cliente",
                             last_name: "Web",
-                            phone_number: "1111111111",
-                            postal_code: "1000",
-                            state: "C"
+                            phone_number: cliente_telefono || "1111111111",
+                            postal_code: metodo_entrega === 'envio' ? (envio_codigo_postal || "1000") : "1000",
+                            state: metodo_entrega === 'envio' ? (envio_provincia || "C") : "C"
                         },
                         items: items.map((item: any) => ({
                             product_code: String(item.id).substring(0, 50),
@@ -233,7 +308,7 @@ export async function POST(request: NextRequest) {
             const decidirData = await response.json();
 
             if (!response.ok) {
-                // Registrar fallo en base de datos si es necesario
+                // Registrar fallo en base de datos
                 await supabaseAdmin
                     .from('pedidos')
                     .update({ estado: 'cancelado' })
@@ -252,6 +327,8 @@ export async function POST(request: NextRequest) {
             // Pago aprobado por Decidir
             if (decidirData.status === 'approved') {
                 // Actualizar pedido a pagado y persistir IDs de auditoría
+                // NOTA: El disparador (trigger) trigger_deducir_stock_pedido en la BD
+                // descontará el stock e incrementará 'comprados' de forma segura e inmediata.
                 await supabaseAdmin
                     .from('pedidos')
                     .update({ 
@@ -272,7 +349,7 @@ export async function POST(request: NextRequest) {
                         message: 'Pago con Payway procesado exitosamente', 
                         pedidoId: pedido.id,
                         status: 'approved',
-                        redirectUrl: `${baseUrl}/checkout/success`
+                        redirectUrl: `${baseUrl}/checkout/success?pedido_id=${pedido.id}`
                     },
                     { status: 201 }
                 );
@@ -303,3 +380,4 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+
