@@ -7,7 +7,7 @@ import { ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck, Check, Loader2 } fro
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import ProductCalculator from '@/components/products/ProductCalculator';
-import RoomSimulator from '@/components/products/RoomSimulator';
+// import RoomSimulator from '@/components/products/RoomSimulator';
 import ReviewSection from '@/components/products/ReviewSection';
 import VariantSelector from '@/components/products/VariantSelector';
 import RelatedProducts from '@/components/products/RelatedProducts';
@@ -216,6 +216,7 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
         );
     }
 
+    /* Ocultado temporalmente junto con el simulador
     const getProductColor = () => {
         if (product.hex_color) return product.hex_color;
         const name = product.nombre.toLowerCase();
@@ -227,6 +228,7 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
         if (name.includes('blanco')) return '#f9fafb';
         return '#3b82f6';
     };
+    */
 
     return (
         <div className="min-h-screen bg-background pb-32">
@@ -394,7 +396,9 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
                     </div>
                 </div>
 
+                {/* Ocultado temporalmente por el momento
                 <RoomSimulator productName={product.nombre} productColor={getProductColor()} />
+                */}
                 <ReviewSection 
                     productId={product.id} 
                     reviews={reviews} 
