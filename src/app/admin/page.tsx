@@ -11,6 +11,7 @@ import {
     Search, UserCog, Link as LinkIcon
 } from 'lucide-react';
 import Link from 'next/link';
+import { MapPin } from 'lucide-react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
     ResponsiveContainer, PieChart, Pie, Cell, Legend 
@@ -360,8 +361,8 @@ export default function AdminDashboard() {
                             Operaciones y Gestión
                         </h2>
                         <div className="grid grid-cols-1 gap-4">
-                            <div className="flex gap-4">
-                                <Link href="/admin/usuarios" className="flex-1 p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <Link href="/admin/usuarios" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
                                     <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
                                         <UserCog size={20} />
                                     </div>
@@ -370,11 +371,21 @@ export default function AdminDashboard() {
                                         <p className="text-xs text-foreground/60">Administra roles y permisos.</p>
                                     </div>
                                 </Link>
+
+                                <Link href="/admin/sucursales" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
+                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
+                                        <MapPin size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold group-hover:text-primary transition-colors">Gestión de Sucursales</p>
+                                        <p className="text-xs text-foreground/60">Carga sucursales y edita el mapa.</p>
+                                    </div>
+                                </Link>
                                 
                                 <button 
                                     onClick={handleExport}
                                     disabled={exporting}
-                                    className="flex-1 p-4 rounded-xl border border-green-500/20 bg-green-500/5 hover:border-green-500/50 hover:bg-green-500/10 transition-all group flex items-center gap-4 disabled:opacity-50"
+                                    className="p-4 rounded-xl border border-green-500/20 bg-green-500/5 hover:border-green-500/50 hover:bg-green-500/10 transition-all group flex items-center gap-4 disabled:opacity-50 text-left w-full h-full"
                                 >
                                     <div className="p-3 bg-green-500/10 text-green-600 rounded-lg group-hover:scale-110 transition-transform">
                                         {exporting ? <Loader2 className="animate-spin" size={20} /> : <FileDown size={20} />}
