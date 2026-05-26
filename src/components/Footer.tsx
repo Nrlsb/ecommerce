@@ -47,6 +47,7 @@ export default function Footer() {
         { name: 'Contacto', href: '/contacto' },
         { name: 'Términos y condiciones', href: '/terminos' },
         { name: 'Preguntas Frecuentes', href: '/preguntas-frecuentes' },
+        { name: 'Medios de Pago', href: '/medios-de-pago' },
     ];
 
     const paymentMethods = [
@@ -225,9 +226,9 @@ export default function Footer() {
                                     </motion.div>
                                 ))}
                             </div>
-                            <Link href="/promociones" className="inline-flex items-center text-xs font-semibold text-mercurio-yellow hover:text-white transition-colors group/promo">
+                            <Link href="/medios-de-pago" className="inline-flex items-center text-xs font-semibold text-mercurio-yellow hover:text-white transition-colors group/promo">
                                 <DollarSign className="w-3.5 h-3.5 mr-1" />
-                                Ver promociones bancarias
+                                Ver promociones y cuotas
                                 <ArrowRight className="ml-1.5 w-3.5 h-3.5 transform group-hover/promo:translate-x-1.5 transition-transform" />
                             </Link>
                         </div>
