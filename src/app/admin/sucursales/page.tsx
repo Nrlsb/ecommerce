@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    MapPin, Phone, Clock, Plus, Edit2, Trash2, Loader2, 
+    MapPin, Plus, Edit2, Trash2, Loader2, 
     ArrowLeft, Save, Map, X, CheckCircle2, AlertCircle 
 } from 'lucide-react';
 import Link from 'next/link';
