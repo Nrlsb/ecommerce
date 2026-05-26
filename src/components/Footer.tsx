@@ -14,11 +14,11 @@ export default function Footer() {
                     {/* Logo & Brand Column */}
                     <div className="lg:col-span-1 space-y-6">
                         <Link href="/" className="inline-block group transition-transform duration-300 hover:scale-105">
-                            <Image 
-                                src="/images/logos/logomercurio.png" 
-                                alt="Mercurio Pinturerías" 
-                                width={180} 
-                                height={60} 
+                            <Image
+                                src="/images/logos/logomercurio.png"
+                                alt="Mercurio Pinturerías"
+                                width={180}
+                                height={60}
                                 className="h-auto w-auto max-w-[200px] drop-shadow-2xl"
                                 priority
                             />
@@ -103,21 +103,21 @@ export default function Footer() {
                             <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-mercurio-green"></span>
                         </h3>
                         <div className="flex gap-4">
-                            <SocialLink 
-                                href="https://www.facebook.com/pintureriasmercurio/" 
-                                icon={<FacebookIcon />} 
+                            <SocialLink
+                                href="https://www.facebook.com/pintureriasmercurio/"
+                                icon={<FacebookIcon />}
                                 label="Facebook"
                                 hoverColor="hover:bg-[#1877F2]"
                             />
-                            <SocialLink 
-                                href="https://www.instagram.com/pint_mercurio/" 
-                                icon={<InstagramIcon />} 
+                            <SocialLink
+                                href="https://www.instagram.com/pint_mercurio/"
+                                icon={<InstagramIcon />}
                                 label="Instagram"
                                 hoverColor="hover:bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]"
                             />
-                            <SocialLink 
-                                href="https://www.youtube.com/channel/UCRMyNc7T6iKYVT-7WQgLS7w" 
-                                icon={<YoutubeIcon />} 
+                            <SocialLink
+                                href="https://www.youtube.com/channel/UCRMyNc7T6iKYVT-7WQgLS7w"
+                                icon={<YoutubeIcon />}
                                 label="YouTube"
                                 hoverColor="hover:bg-[#FF0000]"
                             />
@@ -155,7 +155,7 @@ export default function Footer() {
                     </p>
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] font-medium tracking-[0.2em] text-slate-500 uppercase">Desarrollado por</span>
-                        <a href="#" className="text-[10px] font-bold text-white hover:text-mercurio-yellow transition-colors">DIA8PUBLICIDAD</a>
+                        <a href="#" className="text-[10px] font-bold text-white hover:text-mercurio-yellow transition-colors">Pinturerias Mercurio</a>
                     </div>
                 </div>
             </div>
@@ -165,10 +165,10 @@ export default function Footer() {
 
 function SocialLink({ href, icon, label, hoverColor }: { href: string; icon: React.ReactNode; label: string; hoverColor: string }) {
     return (
-        <a 
-            href={href} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+        <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label={label}
             className={`w-12 h-12 flex items-center justify-center bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-xl text-white transition-all duration-500 ${hoverColor} hover:scale-110 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] group`}
         >
