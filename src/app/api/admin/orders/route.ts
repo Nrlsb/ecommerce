@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { MercadoPagoConfig, PaymentRefund } from 'mercadopago';
 import { z } from 'zod';
+import { sendOrderConfirmationEmail, sendOrderDispatchedEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,6 +120,17 @@ export async function PATCH(request: NextRequest) {
             .eq('id', id);
 
         if (updateError) throw updateError;
+
+        // Enviar notificaciones por correo según el nuevo estado
+        if (estado === 'enviado') {
+            sendOrderDispatchedEmail(id).catch(err => {
+                console.error('Error al enviar correo de despacho:', err);
+            });
+        } else if (estado === 'pagado' && pedido.estado !== 'pagado') {
+            sendOrderConfirmationEmail(id).catch(err => {
+                console.error('Error al enviar correo de confirmación (marcado manual):', err);
+            });
+        }
 
         return NextResponse.json({ 
             message: `Pedido ${id} actualizado a ${estado} correctamente.`,

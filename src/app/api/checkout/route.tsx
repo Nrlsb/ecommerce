@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { sendOrderConfirmationEmail } from '@/lib/email';
 
 // Configuración de MercadoPago
 const mpClient = new MercadoPagoConfig({ 
@@ -11,7 +12,7 @@ const mpClient = new MercadoPagoConfig({
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { items, cliente_nombre, cliente_email, metodo_pago = 'mercadopago', payway_token, bin, payment_method_id, installments = 1, device_unique_identifier } = body;
+        const { items, cliente_nombre, cliente_email, metodo_pago = 'mercadopago', payway_token, bin, payment_method_id, installments = 1, device_unique_identifier, cupon_codigo } = body;
 
         if (!items || items.length === 0) {
             return NextResponse.json({ error: 'El carrito está vacío' }, { status: 400 });
@@ -40,6 +41,36 @@ export async function POST(request: NextRequest) {
         });
         // --- FIN DE VALIDACIÓN DE PRECIOS ---
 
+        // --- VALIDACIÓN DE CUPÓN EN EL SERVIDOR ---
+        let descuento = 0;
+        let cuponAplicado = null;
+
+        if (cupon_codigo) {
+            const { data: cupon } = await supabaseAdmin
+                .from('cupones')
+                .select('*')
+                .eq('codigo', cupon_codigo.toUpperCase().trim())
+                .eq('activo', true)
+                .single();
+
+            if (cupon) {
+                const ahora = new Date();
+                const vencimiento = cupon.fecha_expiracion ? new Date(cupon.fecha_expiracion) : null;
+                const expirado = vencimiento && ahora > vencimiento;
+
+                if (!expirado && totalValidado >= Number(cupon.compra_minima)) {
+                    if (Number(cupon.descuento_porcentual) > 0) {
+                        descuento = Number(((totalValidado * Number(cupon.descuento_porcentual)) / 100).toFixed(2));
+                    } else if (Number(cupon.descuento_fijo) > 0) {
+                        descuento = Math.min(Number(cupon.descuento_fijo), totalValidado);
+                    }
+                    cuponAplicado = cupon.codigo;
+                }
+            }
+        }
+
+        const totalFinal = Math.max(0, totalValidado - descuento);
+
         // 1. Crear el pedido en la tabla "pedidos"
         const { data: pedido, error: pedidoError } = await supabaseAdmin
             .from('pedidos')
@@ -47,9 +78,11 @@ export async function POST(request: NextRequest) {
                 { 
                     cliente_nombre, 
                     cliente_email, 
-                    total: totalValidado, 
+                    total: totalFinal, 
                     estado: 'pendiente',
-                    metodo_pago
+                    metodo_pago,
+                    cupon_aplicado: cuponAplicado,
+                    descuento_aplicado: descuento
                 }
             ])
             .select()
@@ -83,13 +116,14 @@ export async function POST(request: NextRequest) {
         if (metodo_pago === 'mercadopago') {
             const mpPreference = new Preference(mpClient);
             
+            const discountFactor = totalValidado > 0 ? (totalFinal / totalValidado) : 1;
             const preferenceData = {
                 body: {
                     items: validatedItems.map((item: any) => ({
                         id: String(item.id),
                         title: String(item.name || item.nombre || 'Producto'),
                         quantity: parseInt(item.quantity) || 1,
-                        unit_price: parseFloat(item.price) || 0,
+                        unit_price: parseFloat((item.price * discountFactor).toFixed(2)),
                         currency_id: 'ARS'
                     })),
                     back_urls: {
@@ -130,7 +164,7 @@ export async function POST(request: NextRequest) {
             if (installments === 3) recargoMult = 1.15; // 15% de recargo
             if (installments === 6) recargoMult = 1.30; // 30% de recargo
             if (installments === 12) recargoMult = 1.60; // 60% de recargo
-            const amountTotal = Math.round(totalValidado * recargoMult);
+            const amountTotal = Math.round(totalFinal * recargoMult);
 
             // Requerimientos mínimos para el pago V2
             const decidirPayload = {
@@ -227,6 +261,11 @@ export async function POST(request: NextRequest) {
                         payway_auth_code: decidirData.status_details?.card_authorization_code || ''
                     })
                     .eq('id', pedido.id);
+
+                // Enviar correo de confirmación de forma asíncrona
+                sendOrderConfirmationEmail(pedido.id).catch(err => {
+                    console.error('Error al enviar correo de confirmación de pedido Payway:', err);
+                });
 
                 return NextResponse.json(
                     { 

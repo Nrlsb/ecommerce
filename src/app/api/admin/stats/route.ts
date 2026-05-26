@@ -50,7 +50,7 @@ export async function GET() {
         console.error('Search error:', searchError);
     }
 
-    // 4. Totales generales
+    // 4. Totales generales de tablas
     const [
       { count: totalProducts },
       { count: totalOrders },
@@ -61,8 +61,41 @@ export async function GET() {
       supabase.from('usuarios').select('*', { count: 'exact', head: true }),
     ]);
 
-    // 5. Productos sin imagen
-    // Hacemos una consulta y filtramos en memoria de forma segura
+    // 5. Ventas y Facturación (Pedidos pagados o enviados)
+    const { data: ordersData, error: ordersDataError } = await supabase
+      .from('pedidos')
+      .select('total, estado, created_at')
+      .in('estado', ['pagado', 'enviado']);
+
+    if (ordersDataError) throw ordersDataError;
+
+    let totalRevenue = 0;
+    const monthlySalesMap: Record<string, number> = {};
+
+    // Ordenar cronológicamente
+    const sortedOrders = (ordersData || []).sort(
+      (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    sortedOrders.forEach((order: any) => {
+      const orderTotal = Number(order.total) || 0;
+      totalRevenue += orderTotal;
+
+      // Agrupar por mes
+      const date = new Date(order.created_at);
+      const monthYear = date.toLocaleString('es-AR', { month: 'short', year: 'numeric' });
+      monthlySalesMap[monthYear] = (monthlySalesMap[monthYear] || 0) + orderTotal;
+    });
+
+    const paidOrdersCount = ordersData?.length || 0;
+    const averageOrderValue = paidOrdersCount > 0 ? (totalRevenue / paidOrdersCount) : 0;
+
+    const salesEvolution = Object.entries(monthlySalesMap).map(([month, amount]) => ({
+      month,
+      amount
+    }));
+
+    // 6. Productos sin imagen
     const { data: allProducts, error: productsError } = await supabase
       .from('productos')
       .select('id, nombre, marca, codigo_externo, imagen_url');
@@ -78,11 +111,15 @@ export async function GET() {
         totalProducts: totalProducts || 0,
         totalOrders: totalOrders || 0,
         totalUsers: totalUsers || 0,
+        totalRevenue,
+        averageOrderValue,
+        paidOrdersCount
       },
       salesByBrand,
       lowStock: lowStock || [],
       topSearches: topSearches || [],
-      noImageProducts: noImageProducts || []
+      noImageProducts: noImageProducts || [],
+      salesEvolution
     });
 
   } catch (error) {

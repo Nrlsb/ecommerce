@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sendEmail, getContactConfirmationTemplate } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -50,7 +51,17 @@ export async function POST(request: Request) {
       console.warn('Error al intentar guardar el mensaje en la base de datos:', dbError);
     }
 
-    // Aquí se podría integrar el envío de emails por SMTP, Resend, etc.
+    // Envío de email de confirmación
+    try {
+      const emailHtml = getContactConfirmationTemplate(name, subject, message);
+      await sendEmail({
+        to: email,
+        subject: `Recibimos tu consulta: ${subject || 'Contacto Mercurio'}`,
+        html: emailHtml
+      });
+    } catch (emailErr) {
+      console.error('Error al enviar correo de confirmación de contacto:', emailErr);
+    }
     
     return NextResponse.json({
       success: true,

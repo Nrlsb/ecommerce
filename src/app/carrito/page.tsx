@@ -6,12 +6,19 @@ import { useCart } from '@/context/CartContext';
 import { Trash2, Plus, Minus, ArrowLeft, CreditCard, ShieldCheck, Truck } from 'lucide-react';
 import Script from 'next/script';
 import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 export default function CarritoPage() {
     const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'payway'>('mercadopago');
+
+    // Coupon states
+    const [couponCode, setCouponCode] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+    const [couponError, setCouponError] = useState<string | null>(null);
+    const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
     // Estado para formulario Payway (Decidir)
     const [cardData, setCardData] = useState({
@@ -45,6 +52,60 @@ export default function CarritoPage() {
         // Generar un Session ID único para Cybersource al cargar
         setSessionId(`sess_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`);
     }, []);
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) return;
+        setIsApplyingCoupon(true);
+        setCouponError(null);
+        try {
+            const { data, error } = await supabase
+                .from('cupones')
+                .select('*')
+                .eq('codigo', couponCode.toUpperCase().trim())
+                .eq('activo', true)
+                .single();
+
+            if (error || !data) {
+                setCouponError('Cupón inválido o inactivo.');
+                setAppliedCoupon(null);
+            } else {
+                const ahora = new Date();
+                const vencimiento = data.fecha_expiracion ? new Date(data.fecha_expiracion) : null;
+                if (vencimiento && ahora > vencimiento) {
+                    setCouponError('El cupón ha vencido.');
+                    setAppliedCoupon(null);
+                } else if (totalPrice < Number(data.compra_minima)) {
+                    setCouponError(`Compra mínima requerida: $${Number(data.compra_minima).toLocaleString('es-AR')}`);
+                    setAppliedCoupon(null);
+                } else {
+                    setAppliedCoupon(data);
+                    setCouponError(null);
+                }
+            }
+        } catch (err) {
+            console.error('Error applying coupon:', err);
+            setCouponError('Error al validar el cupón.');
+        } finally {
+            setIsApplyingCoupon(false);
+        }
+    };
+
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponCode('');
+        setCouponError(null);
+    };
+
+    // Calcular descuento y precio final
+    let discountAmount = 0;
+    if (appliedCoupon) {
+        if (Number(appliedCoupon.descuento_porcentual) > 0) {
+            discountAmount = Number(((totalPrice * Number(appliedCoupon.descuento_porcentual)) / 100).toFixed(2));
+        } else if (Number(appliedCoupon.descuento_fijo) > 0) {
+            discountAmount = Math.min(Number(appliedCoupon.descuento_fijo), totalPrice);
+        }
+    }
+    const finalPrice = Math.max(0, totalPrice - discountAmount);
 
     const handleCheckout = async () => {
         if (!showShippingForm) {
@@ -82,8 +143,9 @@ export default function CarritoPage() {
                         metodo: deliveryMethod,
                         ...shippingData
                     },
-                    total: totalPrice,
-                    metodo_pago: 'mercadopago'
+                    total: finalPrice,
+                    metodo_pago: 'mercadopago',
+                    cupon_codigo: appliedCoupon ? appliedCoupon.codigo : null
                 })
             });
 
@@ -188,13 +250,14 @@ export default function CarritoPage() {
                         metodo: deliveryMethod,
                         ...shippingData
                     },
-                    total: totalPrice,
+                    total: finalPrice,
                     metodo_pago: 'payway',
                     payway_token: token,
                     bin: bin,
                     payment_method_id: paymentMethodId,
                     installments: installments,
-                    device_unique_identifier: deviceId
+                    device_unique_identifier: deviceId,
+                    cupon_codigo: appliedCoupon ? appliedCoupon.codigo : null
                 })
             });
 
@@ -574,16 +637,68 @@ export default function CarritoPage() {
                                 </div>
                             )}
 
+                            {/* Coupon Input */}
+                            <div className="border-t border-border pt-4 mb-4">
+                                <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Cupón de Descuento</label>
+                                {appliedCoupon ? (
+                                    <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 text-green-700 dark:text-green-400 p-3 rounded-xl">
+                                        <div>
+                                            <p className="text-sm font-bold">{appliedCoupon.codigo}</p>
+                                            <p className="text-xs">
+                                                {appliedCoupon.descuento_porcentual > 0 
+                                                    ? `${appliedCoupon.descuento_porcentual}% OFF` 
+                                                    : `$${Number(appliedCoupon.descuento_fijo).toLocaleString('es-AR')} OFF`
+                                                }
+                                            </p>
+                                        </div>
+                                        <button 
+                                            type="button"
+                                            onClick={handleRemoveCoupon}
+                                            className="text-xs font-bold uppercase tracking-widest text-red-500 hover:underline hover:scale-105 active:scale-95 transition-all"
+                                        >
+                                            Quitar
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Ingresa tu cupón" 
+                                            className="flex-1 px-3 py-2 bg-background border border-border rounded-xl text-sm uppercase outline-none focus:border-primary transition-colors"
+                                            value={couponCode}
+                                            onChange={(e) => setCouponCode(e.target.value)}
+                                        />
+                                        <button 
+                                            type="button"
+                                            onClick={handleApplyCoupon}
+                                            disabled={isApplyingCoupon}
+                                            className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all"
+                                        >
+                                            {isApplyingCoupon ? '...' : 'Aplicar'}
+                                        </button>
+                                    </div>
+                                )}
+                                {couponError && (
+                                    <p className="text-red-500 text-xs mt-2 font-medium">{couponError}</p>
+                                )}
+                            </div>
+
                             <h2 className="text-lg font-bold border-t border-border pt-4 mb-4">Resumen</h2>
                             <div className="space-y-3 mb-6">
                                 <div className="flex justify-between text-foreground/80">
                                     <span>Subtotal</span>
                                     <span>${totalPrice.toLocaleString('es-AR')}</span>
                                 </div>
+                                {discountAmount > 0 && (
+                                    <div className="flex justify-between text-green-600 font-bold">
+                                        <span>Descuento ({appliedCoupon?.codigo})</span>
+                                        <span>-${discountAmount.toLocaleString('es-AR')}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-foreground/80">
                                     <span>Envío</span>
-                                    <span className={totalPrice > 50000 ? 'text-green-600 font-medium' : ''}>
-                                        {totalPrice > 50000 ? 'Gratis' : 'Calculado'}
+                                    <span className={finalPrice > 50000 ? 'text-green-600 font-medium' : ''}>
+                                        {finalPrice > 50000 ? 'Gratis' : 'Calculado'}
                                     </span>
                                 </div>
                             </div>
@@ -591,7 +706,7 @@ export default function CarritoPage() {
                             <div className="border-t border-border pt-4 mb-6">
                                 <div className="flex justify-between items-end">
                                     <span className="text-lg font-bold">Total</span>
-                                    <span className="text-3xl font-black text-primary">${totalPrice.toLocaleString('es-AR')}</span>
+                                    <span className="text-3xl font-black text-primary">${finalPrice.toLocaleString('es-AR')}</span>
                                 </div>
                             </div>
 

@@ -16,6 +16,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
     ResponsiveContainer, PieChart, Pie, Cell, Legend 
 } from 'recharts';
+import { AreaChart, Area } from 'recharts';
 
 export default function AdminDashboard() {
     const { user, profile, loading } = useAuth();
@@ -203,6 +204,88 @@ export default function AdminDashboard() {
                     ))}
                 </div>
 
+                {/* Financial Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div className="bg-card p-6 rounded-2xl border border-border shadow-sm flex items-center gap-5 hover:scale-[1.02] transition-all">
+                        <div className="p-4 rounded-xl bg-green-500/10 text-green-600">
+                            <TrendingUp size={28} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Facturación Total</p>
+                            <p className="text-3xl font-black text-foreground">
+                                ${statsData?.stats?.totalRevenue ? Number(statsData.stats.totalRevenue).toLocaleString('es-AR') : '0'}
+                            </p>
+                            <p className="text-[10px] text-green-500 font-semibold mt-1">Ventas aprobadas y despachadas</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-card p-6 rounded-2xl border border-border shadow-sm flex items-center gap-5 hover:scale-[1.02] transition-all">
+                        <div className="p-4 rounded-xl bg-blue-500/10 text-blue-600">
+                            <CheckCircle2 size={28} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Ticket Promedio</p>
+                            <p className="text-3xl font-black text-foreground">
+                                ${statsData?.stats?.averageOrderValue ? Math.round(Number(statsData.stats.averageOrderValue)).toLocaleString('es-AR') : '0'}
+                            </p>
+                            <p className="text-[10px] text-blue-500 font-semibold mt-1">Monto medio por compra</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-card p-6 rounded-2xl border border-border shadow-sm flex items-center gap-5 hover:scale-[1.02] transition-all">
+                        <div className="p-4 rounded-xl bg-purple-500/10 text-purple-600">
+                            <ShoppingBag size={28} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Pedidos Pagados</p>
+                            <p className="text-3xl font-black text-foreground">
+                                {statsData?.stats?.paidOrdersCount || '0'}
+                            </p>
+                            <p className="text-[10px] text-purple-500 font-semibold mt-1">Órdenes cobradas con éxito</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sales Evolution Chart */}
+                <div className="bg-card p-8 rounded-2xl border border-border shadow-sm mb-10">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold flex items-center gap-2">
+                            <TrendingUp size={22} className="text-primary" />
+                            Evolución Mensual de Ventas
+                        </h2>
+                        <span className="text-xs font-bold px-2 py-1 bg-green-500/10 text-green-600 rounded-full uppercase">Ingresos ($)</span>
+                    </div>
+                    <div className="h-72 w-full">
+                        {isLoadingStats ? (
+                            <div className="h-full w-full flex items-center justify-center"><Loader2 className="animate-spin text-muted-foreground" /></div>
+                        ) : statsData?.salesEvolution?.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={statsData.salesEvolution}>
+                                    <defs>
+                                        <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                    <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val.toLocaleString('es-AR')}`} />
+                                    <Tooltip 
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                                        formatter={(val: any) => [`$${Number(val).toLocaleString('es-AR')}`, 'Ventas']}
+                                    />
+                                    <Area type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full w-full flex flex-col items-center justify-center text-foreground/40 italic">
+                                <BarChart3 size={40} className="mb-2 opacity-20" />
+                                No hay datos de facturación disponibles
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 {/* Charts & Real-time Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                     {/* Sales by Brand Chart */}
@@ -361,7 +444,16 @@ export default function AdminDashboard() {
                             Operaciones y Gestión
                         </h2>
                         <div className="grid grid-cols-1 gap-4">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <Link href="/admin/productos" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
+                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
+                                        <Package size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold group-hover:text-primary transition-colors">Edición Masiva</p>
+                                        <p className="text-xs text-foreground/60">Actualiza precio y stock.</p>
+                                    </div>
+                                </Link>
                                 <Link href="/admin/usuarios" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
                                     <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
                                         <UserCog size={20} />
