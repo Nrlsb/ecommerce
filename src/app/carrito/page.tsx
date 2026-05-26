@@ -7,9 +7,11 @@ import { Trash2, Plus, Minus, ArrowLeft, CreditCard, ShieldCheck, Truck } from '
 import Script from 'next/script';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 
 export default function CarritoPage() {
     const { items, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
+    const { user } = useAuth();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'payway'>('mercadopago');
@@ -69,6 +71,45 @@ export default function CarritoPage() {
         }
     }
     const finalPrice = Math.max(0, totalPrice - discountAmount);
+
+    // Pre-cargar datos del usuario y dirección del último pedido si tiene la sesión iniciada
+    useEffect(() => {
+        if (user) {
+            setShippingData(prev => ({
+                ...prev,
+                email: user.email || prev.email,
+                fullName: user.nombre || prev.fullName
+            }));
+
+            const fetchLastOrderShipping = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('pedidos')
+                        .select('cliente_nombre, envio_telefono, envio_direccion, envio_ciudad, envio_codigo_postal, envio_provincia')
+                        .eq('cliente_email', user.email)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (data && !error) {
+                        setShippingData(prev => ({
+                            ...prev,
+                            fullName: data.cliente_nombre || prev.fullName,
+                            phone: data.envio_telefono || prev.phone,
+                            address: data.envio_direccion || prev.address,
+                            city: data.envio_ciudad || prev.city,
+                            zipCode: data.envio_codigo_postal || prev.zipCode,
+                            provincia: data.envio_provincia || prev.provincia,
+                        }));
+                    }
+                } catch (err) {
+                    console.error('Error al cargar datos de envío previos:', err);
+                }
+            };
+
+            fetchLastOrderShipping();
+        }
+    }, [user]);
 
     useEffect(() => {
         setIsMounted(true);
