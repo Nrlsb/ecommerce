@@ -72,42 +72,50 @@ export default function CarritoPage() {
     }
     const finalPrice = Math.max(0, totalPrice - discountAmount);
 
-    // Pre-cargar datos del usuario y dirección del último pedido si tiene la sesión iniciada
+    // Pre-cargar datos del usuario y dirección del perfil o del último pedido si tiene la sesión iniciada
     useEffect(() => {
         if (user) {
             setShippingData(prev => ({
                 ...prev,
                 email: user.email || prev.email,
-                fullName: user.nombre || prev.fullName
+                fullName: user.nombre || prev.fullName,
+                phone: user.telefono || prev.phone,
+                address: user.direccion || prev.address,
+                city: user.ciudad || prev.city,
+                zipCode: user.codigo_postal || prev.zipCode,
+                provincia: user.provincia || prev.provincia
             }));
 
-            const fetchLastOrderShipping = async () => {
-                try {
-                    const { data, error } = await supabase
-                        .from('pedidos')
-                        .select('cliente_nombre, envio_telefono, envio_direccion, envio_ciudad, envio_codigo_postal, envio_provincia')
-                        .eq('cliente_email', user.email)
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .maybeSingle();
+            // Si faltan datos en el perfil, buscar como fallback en el último pedido realizado
+            if (!user.telefono || !user.direccion || !user.provincia) {
+                const fetchLastOrderShipping = async () => {
+                    try {
+                        const { data, error } = await supabase
+                            .from('pedidos')
+                            .select('cliente_nombre, envio_telefono, envio_direccion, envio_ciudad, envio_codigo_postal, envio_provincia')
+                            .eq('cliente_email', user.email)
+                            .order('created_at', { ascending: false })
+                            .limit(1)
+                            .maybeSingle();
 
-                    if (data && !error) {
-                        setShippingData(prev => ({
-                            ...prev,
-                            fullName: data.cliente_nombre || prev.fullName,
-                            phone: data.envio_telefono || prev.phone,
-                            address: data.envio_direccion || prev.address,
-                            city: data.envio_ciudad || prev.city,
-                            zipCode: data.envio_codigo_postal || prev.zipCode,
-                            provincia: data.envio_provincia || prev.provincia,
-                        }));
+                        if (data && !error) {
+                            setShippingData(prev => ({
+                                ...prev,
+                                fullName: prev.fullName || data.cliente_nombre,
+                                phone: prev.phone || data.envio_telefono,
+                                address: prev.address || data.envio_direccion,
+                                city: prev.city || data.envio_ciudad,
+                                zipCode: prev.zipCode || data.envio_codigo_postal,
+                                provincia: prev.provincia || data.envio_provincia,
+                            }));
+                        }
+                    } catch (err) {
+                        console.error('Error al cargar datos de envío previos del pedido:', err);
                     }
-                } catch (err) {
-                    console.error('Error al cargar datos de envío previos:', err);
-                }
-            };
+                };
 
-            fetchLastOrderShipping();
+                fetchLastOrderShipping();
+            }
         }
     }, [user]);
 

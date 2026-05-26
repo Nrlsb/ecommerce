@@ -9,6 +9,7 @@ interface AuthContextType {
     signUp: (email: string, password: string, nombre?: string) => Promise<{ error?: any }>;
     signIn: (email: string, password: string) => Promise<{ error?: any }>;
     signOut: () => Promise<void>;
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,12 +19,27 @@ const AuthContext = createContext<AuthContextType>({
     signUp: async () => ({}),
     signIn: async () => ({}),
     signOut: async () => {},
+    refreshProfile: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+
+    const refreshProfile = async () => {
+        try {
+            const res = await fetch('/api/auth/me');
+            if (res.ok) {
+                const data = await res.json();
+                setUser(data.user);
+                setProfile(data.user);
+                localStorage.setItem('auth_user', JSON.stringify(data.user));
+            }
+        } catch (error) {
+            console.error('Error refreshing profile:', error);
+        }
+    };
 
     useEffect(() => {
         const loadSession = async () => {
@@ -120,7 +136,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut }}>
+        <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut, refreshProfile }}>
             {children}
         </AuthContext.Provider>
     );

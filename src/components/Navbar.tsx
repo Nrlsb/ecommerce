@@ -141,9 +141,13 @@ export default function Navbar() {
 
                         {user ? (
                             <div className="flex items-center gap-6">
-                                <span className="text-xs font-display font-bold text-foreground/30 hidden lg:inline-block max-w-[150px] truncate uppercase tracking-widest">
-                                    {user.email}
-                                </span>
+                                <Link 
+                                    href="/perfil"
+                                    className="flex items-center gap-2 text-xs font-display font-bold text-foreground/50 hover:text-primary transition-colors max-w-[170px] truncate uppercase tracking-widest group"
+                                >
+                                    <User size={14} className="group-hover:scale-110 transition-transform" />
+                                    {user.nombre || user.email.split('@')[0]}
+                                </Link>
                                 <button
                                     onClick={async () => {
                                         await signOut();
@@ -295,6 +299,51 @@ export default function Navbar() {
                                     Contacto
                                 </Link>
                             </motion.div>
+
+                            {user ? (
+                                <>
+                                    <motion.div variants={linkVariants} className="w-full">
+                                        <Link 
+                                            href="/perfil" 
+                                            className="block py-4 text-2xl font-display font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors border-b border-border/50" 
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            Mi Perfil
+                                        </Link>
+                                    </motion.div>
+                                    <motion.div variants={linkVariants} className="w-full">
+                                        <Link 
+                                            href="/perfil/pedidos" 
+                                            className="block py-4 text-2xl font-display font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors border-b border-border/50" 
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            Mis Pedidos
+                                        </Link>
+                                    </motion.div>
+                                    <motion.div variants={linkVariants} className="w-full">
+                                        <button
+                                            onClick={async () => {
+                                                setIsMobileMenuOpen(false);
+                                                await signOut();
+                                                router.push('/');
+                                            }}
+                                            className="block w-full py-4 text-2xl font-display font-bold uppercase tracking-widest text-destructive hover:text-destructive/80 transition-colors border-b border-border/50 text-center" 
+                                        >
+                                            Cerrar Sesión
+                                        </button>
+                                    </motion.div>
+                                </>
+                            ) : (
+                                <motion.div variants={linkVariants} className="w-full">
+                                    <Link 
+                                        href="/login" 
+                                        className="block py-4 text-2xl font-display font-bold uppercase tracking-widest text-primary hover:underline transition-colors border-b border-border/50" 
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        Iniciar Sesión
+                                    </Link>
+                                </motion.div>
+                            )}
 
                             {isAdmin && (
                                 <motion.div variants={linkVariants} className="w-full">
