@@ -136,7 +136,13 @@ export default function PedidosPage() {
                                         ))}
                                     </div>
                                     
-                                    <div className="mt-6 pt-6 border-t border-border flex justify-end">
+                                    <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 justify-between items-center">
+                                        <Link 
+                                            href={`/arrepentimiento?pedido_id=${order.id}&nombre=${encodeURIComponent(order.cliente_nombre || '')}&email=${encodeURIComponent(order.cliente_email || '')}&telefono=${encodeURIComponent(order.envio_telefono || '')}`}
+                                            className="text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-600 hover:underline transition-colors flex items-center gap-1"
+                                        >
+                                            Solicitar Devolución / Arrepentimiento
+                                        </Link>
                                         <button className="text-xs font-bold uppercase tracking-widest text-primary hover:underline">Ver detalle completo</button>
                                     </div>
                                 </div>

@@ -437,40 +437,42 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    {/* Operations Management */}
+                </div>
+
+                {/* Operations Management */}
                     <div className="bg-card p-8 rounded-2xl border border-border shadow-sm">
                         <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                             <Settings size={22} className="text-primary" />
                             Operaciones y Gestión
                         </h2>
                         <div className="grid grid-cols-1 gap-4">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <Link href="/admin/productos" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
-                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
+                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
                                         <Package size={20} />
                                     </div>
-                                    <div>
-                                        <p className="font-bold group-hover:text-primary transition-colors">Edición Masiva</p>
-                                        <p className="text-xs text-foreground/60">Actualiza precio y stock.</p>
+                                    <div className="min-w-0">
+                                        <p className="font-bold group-hover:text-primary transition-colors truncate">Edición Masiva</p>
+                                        <p className="text-xs text-foreground/60 truncate">Actualiza precio y stock.</p>
                                     </div>
                                 </Link>
                                 <Link href="/admin/usuarios" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
-                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
+                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
                                         <UserCog size={20} />
                                     </div>
-                                    <div>
-                                        <p className="font-bold group-hover:text-primary transition-colors">Gestión de Usuarios</p>
-                                        <p className="text-xs text-foreground/60">Administra roles y permisos.</p>
+                                    <div className="min-w-0">
+                                        <p className="font-bold group-hover:text-primary transition-colors truncate">Gestión de Usuarios</p>
+                                        <p className="text-xs text-foreground/60 truncate">Administra roles y permisos.</p>
                                     </div>
                                 </Link>
 
                                 <Link href="/admin/sucursales" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
-                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
+                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
                                         <MapPin size={20} />
                                     </div>
-                                    <div>
-                                        <p className="font-bold group-hover:text-primary transition-colors">Gestión de Sucursales</p>
-                                        <p className="text-xs text-foreground/60">Carga sucursales y edita el mapa.</p>
+                                    <div className="min-w-0">
+                                        <p className="font-bold group-hover:text-primary transition-colors truncate">Gestión de Sucursales</p>
+                                        <p className="text-xs text-foreground/60 truncate">Carga sucursales y edita el mapa.</p>
                                     </div>
                                 </Link>
                                 
@@ -479,12 +481,12 @@ export default function AdminDashboard() {
                                     disabled={exporting}
                                     className="p-4 rounded-xl border border-green-500/20 bg-green-500/5 hover:border-green-500/50 hover:bg-green-500/10 transition-all group flex items-center gap-4 disabled:opacity-50 text-left w-full h-full"
                                 >
-                                    <div className="p-3 bg-green-500/10 text-green-600 rounded-lg group-hover:scale-110 transition-transform">
+                                    <div className="p-3 bg-green-500/10 text-green-600 rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
                                         {exporting ? <Loader2 className="animate-spin" size={20} /> : <FileDown size={20} />}
                                     </div>
-                                    <div>
-                                        <p className="font-bold group-hover:text-green-700 transition-colors">Exportar Inventario</p>
-                                        <p className="text-xs text-foreground/60">Descarga a Excel (.xlsx)</p>
+                                    <div className="min-w-0">
+                                        <p className="font-bold group-hover:text-green-700 transition-colors truncate">Exportar Inventario</p>
+                                        <p className="text-xs text-foreground/60 truncate">Descarga a Excel (.xlsx)</p>
                                     </div>
                                 </button>
                             </div>
@@ -510,17 +512,17 @@ export default function AdminDashboard() {
                             </div>
 
                             <Link href="/admin/productos/agrupar" className="w-full p-4 rounded-xl border border-primary/20 bg-primary/5 hover:border-primary/50 hover:bg-primary/10 transition-all group flex items-center justify-center gap-4">
-                                <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform">
+                                <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
                                     <LinkIcon size={20} />
                                 </div>
-                                <div className="text-left">
-                                    <p className="font-bold group-hover:text-primary transition-colors">Agrupador de Variantes</p>
-                                    <p className="text-xs text-foreground/60">Gestionar grupos de color y tamaño manualmente.</p>
+                                <div className="text-left min-w-0">
+                                    <p className="font-bold group-hover:text-primary transition-colors truncate">Agrupador de Variantes</p>
+                                    <p className="text-xs text-foreground/60 truncate">Gestionar grupos de color y tamaño manualmente.</p>
                                 </div>
                             </Link>
                         </div>
                     </div>
-                </div>
+
             </div>
         </div>
     );

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowLeft, Send, ShieldCheck, AlertCircle } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { ArrowLeft, Send, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
-export default function ArrepentimientoPage() {
+function ArrepentimientoForm() {
+    const searchParams = useSearchParams();
     const [formData, setFormData] = useState({
         orderNumber: '',
         name: '',
@@ -14,6 +16,21 @@ export default function ArrepentimientoPage() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+
+    useEffect(() => {
+        const orderId = searchParams.get('pedido_id') || searchParams.get('order_id') || '';
+        const name = searchParams.get('nombre') || searchParams.get('name') || '';
+        const email = searchParams.get('email') || '';
+        const phone = searchParams.get('telefono') || searchParams.get('phone') || '';
+
+        setFormData({
+            orderNumber: orderId,
+            name: name,
+            email: email,
+            phone: phone,
+            reason: ''
+        });
+    }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -148,3 +165,16 @@ export default function ArrepentimientoPage() {
         </div>
     );
 }
+
+export default function ArrepentimientoPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-muted/20 py-20 flex items-center justify-center">
+                <Loader2 className="animate-spin text-primary" size={48} />
+            </div>
+        }>
+            <ArrepentimientoForm />
+        </Suspense>
+    );
+}
+
