@@ -873,10 +873,10 @@ export default function CarritoPage() {
                             <div className="border-t border-border pt-4 mb-4">
                                 <label className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2 block">Cupón de Descuento</label>
                                 {appliedCoupon ? (
-                                    <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 text-green-700 dark:text-green-400 p-3 rounded-xl">
+                                    <div className="flex items-center justify-between bg-mercurio-green/10 border border-mercurio-green/20 text-slate-900 dark:text-slate-100 p-3 rounded-xl">
                                         <div>
                                             <p className="text-sm font-bold">{appliedCoupon.codigo}</p>
-                                            <p className="text-xs">
+                                            <p className="text-xs text-foreground/70">
                                                 {appliedCoupon.descuento_porcentual > 0 
                                                     ? `${appliedCoupon.descuento_porcentual}% OFF` 
                                                     : `$${Number(appliedCoupon.descuento_fijo).toLocaleString('es-AR')} OFF`
@@ -950,7 +950,7 @@ export default function CarritoPage() {
                             <button
                                 onClick={handleCheckout}
                                 disabled={isProcessing || isCalculatingShipping}
-                                className="w-full bg-accent text-accent-foreground hover:bg-accent/90 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50"
+                                className="w-full bg-primary text-primary-foreground hover:bg-primary/95 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/10 hover:shadow-primary/20 disabled:opacity-50"
                             >
                                 {isProcessing ? 'Procesando...' : (isCalculatingShipping ? 'Calculando envío...' : (!showShippingForm ? 'Continuar con el envío' : (
                                     <>

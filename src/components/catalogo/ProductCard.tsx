@@ -9,6 +9,8 @@ interface Product {
   precio: number;
   marca?: string;
   imagen_url?: string;
+  precio_con_descuento?: number;
+  descuento_porcentual?: number;
 }
 
 interface ProductCardProps {
@@ -70,17 +72,26 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
             <span className="text-[9px] font-display font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">Garantía Mercurio</span>
           </div>
 
+          {/* Badge de Oferta con Rosa Mercurio */}
+          {product.descuento_porcentual && Number(product.descuento_porcentual) > 0 && (
+            <div className="absolute top-12 left-4 z-20 px-3 py-1 bg-mercurio-pink border border-mercurio-pink/30 rounded-full flex items-center gap-1 shadow-lg shadow-mercurio-pink/20">
+              <span className="text-[9px] font-display font-black uppercase tracking-wider text-white">
+                {Math.round(Number(product.descuento_porcentual))}% OFF
+              </span>
+            </div>
+          )}
+
           {/* Shimmer light effect inside the card */}
           <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 ease-out pointer-events-none z-10" />
         </div>
         
-        {/* Wishlist Button */}
+        {/* Wishlist Button con Rosa Mercurio */}
         <button 
           onClick={toggleWishlist}
           className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md border transition-all z-20 ${
             isWishlisted 
-              ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-200' 
-              : 'bg-white/50 border-white/20 text-foreground/40 hover:text-red-500 hover:bg-white'
+              ? 'bg-mercurio-pink border-mercurio-pink text-white shadow-lg shadow-mercurio-pink/20 hover:scale-110' 
+              : 'bg-white/50 border-white/20 text-foreground/40 hover:text-mercurio-pink hover:border-mercurio-pink/30 hover:bg-white hover:scale-110'
           }`}
         >
           <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} strokeWidth={2.5} />
@@ -98,9 +109,22 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
         </Link>
 
         <div className="mt-auto pt-4 flex items-center justify-between">
-          <span className="font-black text-2xl text-primary">
-            ${Number(product.precio).toLocaleString('es-AR')}
-          </span>
+          <div className="flex flex-col">
+            {product.precio_con_descuento && Number(product.precio_con_descuento) < Number(product.precio) ? (
+              <>
+                <span className="text-xs text-foreground/40 line-through font-semibold">
+                  ${Number(product.precio).toLocaleString('es-AR')}
+                </span>
+                <span className="font-black text-2xl text-primary">
+                  ${Number(product.precio_con_descuento).toLocaleString('es-AR')}
+                </span>
+              </>
+            ) : (
+              <span className="font-black text-2xl text-primary">
+                ${Number(product.precio).toLocaleString('es-AR')}
+              </span>
+            )}
+          </div>
           <button
             onClick={() => onAddToCart(product)}
             className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-all duration-300 shadow-sm cursor-pointer flex items-center gap-2 group/btn hover:px-4"

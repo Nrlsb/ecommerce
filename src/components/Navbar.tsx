@@ -86,8 +86,14 @@ export default function Navbar() {
 
     return (
         <nav className={`sticky top-0 z-50 w-full glass transition-all duration-500 ${isScrolled ? 'py-0.5 shadow-lg bg-background/90 backdrop-blur-2xl border-b border-border/40' : 'py-2 shadow-premium'}`}>
+            {/* Top Announcement Bar with Amarillo Mercurio */}
+            <div className="bg-mercurio-yellow text-slate-900 text-[9px] sm:text-xs font-display font-black tracking-[0.18em] text-center py-2 px-4 uppercase relative z-50 flex items-center justify-center gap-2 select-none shadow-sm">
+                <span>¡3 Cuotas sin interés hoy! 💳</span>
+                <span className="opacity-40">|</span>
+                <span>Envíos rápidos a todo el país 🚚</span>
+            </div>
             {/* Top accent line with brand colors */}
-            <div className="h-1 w-full flex absolute top-0 left-0 right-0">
+            <div className="h-1 w-full flex relative">
                 <div className="h-full flex-1 bg-mercurio-blue" />
                 <div className="h-full flex-1 bg-mercurio-yellow" />
                 <div className="h-full flex-1 bg-mercurio-green" />
@@ -95,9 +101,9 @@ export default function Navbar() {
             </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-1">
                 <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'h-14' : 'h-16'}`}>
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center gap-4 group">
-                        <div className="relative flex items-center justify-center">
+                    {/* Logo con Área de Interferencia del 10% */}
+                    <Link href="/" className="flex items-center gap-4 group mr-6 md:mr-8 pl-1">
+                        <div className="relative flex items-center justify-center py-2 px-1">
                             <img 
                                 src="/images/logos/logomercurio.png" 
                                 alt="Mercurio Pinturerías" 
