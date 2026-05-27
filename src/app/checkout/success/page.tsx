@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { CheckCircle2, ShoppingBag, ArrowRight, Loader2, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabase';
 
 function SuccessPageContent() {
     const { clearCart } = useCart();
@@ -24,14 +23,14 @@ function SuccessPageContent() {
         
         async function fetchPedido() {
             if (pedidoId) {
-                const { data, error } = await supabase
-                    .from('pedidos')
-                    .select('*')
-                    .eq('id', pedidoId)
-                    .single();
-                    
-                if (data && !error) {
-                    setPedido(data);
+                try {
+                    const response = await fetch(`/api/pedidos/detalle?id=${pedidoId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setPedido(data);
+                    }
+                } catch (err) {
+                    console.error('Error fetching order details:', err);
                 }
             }
             setLoading(false);

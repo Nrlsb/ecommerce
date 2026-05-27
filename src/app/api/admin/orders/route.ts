@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { MercadoPagoConfig, PaymentRefund } from 'mercadopago';
 import { z } from 'zod';
 import { sendOrderConfirmationEmail, sendOrderDispatchedEmail } from '@/lib/email';
@@ -17,7 +17,7 @@ const updateOrderSchema = z.object({
 // GET /api/admin/orders - Listar todos los pedidos con sus ítems
 export async function GET() {
     try {
-        const { data: orders, error } = await supabase
+        const { data: orders, error } = await supabaseAdmin
             .from('pedidos')
             .select(`
                 *,
@@ -60,7 +60,7 @@ export async function PATCH(request: NextRequest) {
         });
 
         // 1. Obtener el pedido actual para ver si tiene payment_id
-        const { data: pedido, error: pedidoError } = await supabase
+        const { data: pedido, error: pedidoError } = await supabaseAdmin
             .from('pedidos')
             .select('*')
             .eq('id', id)
@@ -114,7 +114,7 @@ export async function PATCH(request: NextRequest) {
         }
 
         // 3. Actualizar el estado en la base de datos
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabaseAdmin
             .from('pedidos')
             .update({ estado })
             .eq('id', id);

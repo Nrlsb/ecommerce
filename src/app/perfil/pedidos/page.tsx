@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabase';
 import { Package, Calendar, ChevronRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -17,13 +16,11 @@ export default function PedidosPage() {
             if (!user) return;
             
             try {
-                const { data, error } = await supabase
-                    .from('pedidos')
-                    .select('*, pedido_items(*, productos(nombre, imagen_url))')
-                    .eq('cliente_email', user.email)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
+                const response = await fetch('/api/pedidos');
+                if (!response.ok) {
+                    throw new Error('Error al obtener pedidos');
+                }
+                const data = await response.json();
                 setOrders(data || []);
             } catch (err) {
                 console.error('Error fetching orders:', err);

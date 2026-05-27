@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,7 +7,7 @@ export async function GET() {
   try {
     // 1. Obtener ventas por marca (Joins)
     // Nota: Dado que pedido_items no tiene 'marca', unimos con 'productos'
-    const { data: salesByBrandData, error: salesError } = await supabase
+    const { data: salesByBrandData, error: salesError } = await supabaseAdmin
       .from('pedido_items')
       .select(`
         cantidad,
@@ -30,7 +30,7 @@ export async function GET() {
     })).sort((a, b) => b.value - a.value).slice(0, 5);
 
     // 2. Productos con stock bajo
-    const { data: lowStock, error: stockError } = await supabase
+    const { data: lowStock, error: stockError } = await supabaseAdmin
       .from('productos')
       .select('nombre, stock, marca')
       .lt('stock', 10)
@@ -40,7 +40,7 @@ export async function GET() {
     if (stockError) throw stockError;
 
     // 3. Búsquedas populares
-    const { data: topSearches, error: searchError } = await supabase
+    const { data: topSearches, error: searchError } = await supabaseAdmin
       .from('busquedas_stats')
       .select('query, conteo')
       .order('conteo', { ascending: false })
@@ -56,13 +56,13 @@ export async function GET() {
       { count: totalOrders },
       { count: totalUsers }
     ] = await Promise.all([
-      supabase.from('productos').select('*', { count: 'exact', head: true }),
-      supabase.from('pedidos').select('*', { count: 'exact', head: true }),
-      supabase.from('usuarios').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('productos').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('pedidos').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('usuarios').select('*', { count: 'exact', head: true }),
     ]);
 
     // 5. Ventas y Facturación (Pedidos pagados o enviados)
-    const { data: ordersData, error: ordersDataError } = await supabase
+    const { data: ordersData, error: ordersDataError } = await supabaseAdmin
       .from('pedidos')
       .select('total, estado, created_at')
       .in('estado', ['pagado', 'enviado']);
@@ -96,7 +96,7 @@ export async function GET() {
     }));
 
     // 6. Productos sin imagen
-    const { data: allProducts, error: productsError } = await supabase
+    const { data: allProducts, error: productsError } = await supabaseAdmin
       .from('productos')
       .select('id, nombre, marca, codigo_externo, imagen_url');
 
