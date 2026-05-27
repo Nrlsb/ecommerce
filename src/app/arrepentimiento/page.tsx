@@ -16,6 +16,7 @@ function ArrepentimientoForm() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const orderId = searchParams.get('pedido_id') || searchParams.get('order_id') || '';
@@ -35,12 +36,37 @@ function ArrepentimientoForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError('');
         
-        // Simular envío a la API (luego conectar con backend/Supabase)
-        setTimeout(() => {
+        try {
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            const isUuid = uuidRegex.test(formData.orderNumber);
+
+            const res = await fetch('/api/arrepentimiento', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pedidoId: isUuid ? formData.orderNumber : null,
+                    pedidoNumero: formData.orderNumber,
+                    nombre: formData.name,
+                    email: formData.email,
+                    telefono: formData.phone,
+                    motivo: formData.reason
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setSubmitted(true);
+            } else {
+                throw new Error(data.error || 'Error al procesar la solicitud');
+            }
+        } catch (err: any) {
+            setError(err.message || 'Ocurrió un error inesperado al enviar la solicitud.');
+        } finally {
             setIsSubmitting(false);
-            setSubmitted(true);
-        }, 1500);
+        }
     };
 
     if (submitted) {
@@ -146,6 +172,13 @@ function ArrepentimientoForm() {
                                 className="w-full px-4 py-3 bg-background border border-border rounded-xl outline-none focus:border-primary transition-colors font-medium resize-none"
                             />
                         </div>
+
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl p-4 flex items-center gap-3 text-sm font-bold">
+                                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                                {error}
+                            </div>
+                        )}
 
                         <button
                             type="submit"

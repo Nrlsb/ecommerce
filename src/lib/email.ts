@@ -258,3 +258,108 @@ export async function sendOrderDispatchedEmail(orderId: string): Promise<boolean
         return false;
     }
 }
+
+// Plantilla de Email de Arrepentimiento para el Cliente
+export function getArrepentimientoClientTemplate(name: string, orderNumber: string): string {
+    return `
+        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
+            <!-- Header Accent -->
+            <div style="height: 6px; background: linear-gradient(90deg, #1e3773 0%, #ffc107 50%, #4caf50 100%); border-top-left-radius: 16px; border-top-right-radius: 16px; margin: -20px -20px 20px -20px;"></div>
+            
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h1 style="color: #1e3773; font-size: 24px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 1px;">Pinturerías Mercurio</h1>
+                <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">Botón de Arrepentimiento</p>
+            </div>
+            
+            <h2 style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">Hola ${name},</h2>
+            
+            <p style="font-size: 14px; line-height: 1.6; color: #334155; margin-bottom: 16px;">
+                Hemos recibido tu solicitud de arrepentimiento/devolución para el pedido <strong>#${orderNumber}</strong>.
+            </p>
+            
+            <div style="background-color: #f8fafc; border-left: 4px solid #ffc107; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">
+                    Nuestro equipo administrativo y de postventa ya está procesando tu solicitud. Nos pondremos en contacto contigo en un plazo máximo de <strong>48 horas hábiles</strong> para coordinar el retiro o devolución sin cargo, según corresponda.
+                </p>
+            </div>
+            
+            <p style="font-size: 13px; line-height: 1.5; color: #64748b; margin-bottom: 24px;">
+                Si tienes alguna duda adicional, puedes responder directamente a este correo.
+            </p>
+            
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 16px; text-align: center;">
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">© ${new Date().getFullYear()} Pinturerías Mercurio. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    `;
+}
+
+// Plantilla de Email de Arrepentimiento para el Administrador
+export function getArrepentimientoAdminTemplate(name: string, email: string, phone: string, orderNumber: string, reason: string): string {
+    return `
+        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
+            <!-- Header Accent -->
+            <div style="height: 6px; background: #ef4444; border-top-left-radius: 16px; border-top-right-radius: 16px; margin: -20px -20px 20px -20px;"></div>
+            
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h1 style="color: #ef4444; font-size: 20px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 1px;">⚠️ Nueva Solicitud de Arrepentimiento</h1>
+                <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">Alerta de Sistema</p>
+            </div>
+            
+            <p style="font-size: 14px; line-height: 1.6; color: #334155; margin-bottom: 16px;">
+                Se ha registrado una solicitud de arrepentimiento/devolución de compra a través del sitio web. A continuación los detalles:
+            </p>
+            
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; margin-bottom: 24px; space-y: 8px;">
+                <p style="font-size: 13px; color: #334155; margin: 4px 0;"><strong>Pedido:</strong> #${orderNumber}</p>
+                <p style="font-size: 13px; color: #334155; margin: 4px 0;"><strong>Cliente:</strong> ${name}</p>
+                <p style="font-size: 13px; color: #334155; margin: 4px 0;"><strong>Email:</strong> ${email}</p>
+                <p style="font-size: 13px; color: #334155; margin: 4px 0;"><strong>Teléfono:</strong> ${phone}</p>
+                <p style="font-size: 13px; color: #334155; margin: 4px 0;"><strong>Motivo especificado:</strong> ${reason || 'No especificado'}</p>
+            </div>
+            
+            <p style="font-size: 13px; line-height: 1.5; color: #64748b; margin-bottom: 24px;">
+                Por favor, ingresa al panel de administración para procesar o gestionar esta solicitud a la brevedad.
+            </p>
+            
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 16px; text-align: center;">
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">© Pinturerías Mercurio - Alertas del Administrador.</p>
+            </div>
+        </div>
+    `;
+}
+
+// Función para enviar los correos correspondientes
+export async function sendArrepentimientoEmails(
+    name: string, 
+    email: string, 
+    phone: string, 
+    orderNumber: string, 
+    reason: string
+): Promise<boolean> {
+    try {
+        const adminEmail = process.env.ADMIN_EMAIL || 'info@pintureriasmercurio.com.ar';
+        
+        // 1. Correo al cliente
+        const clientHtml = getArrepentimientoClientTemplate(name, orderNumber);
+        await sendEmail({
+            to: email,
+            subject: `Recibimos tu solicitud de arrepentimiento - Pedido #${orderNumber}`,
+            html: clientHtml
+        });
+
+        // 2. Correo al administrador
+        const adminHtml = getArrepentimientoAdminTemplate(name, email, phone, orderNumber, reason);
+        await sendEmail({
+            to: adminEmail,
+            subject: `⚠️ SOLICITUD DE ARREPENTIMIENTO - Pedido #${orderNumber}`,
+            html: adminHtml
+        });
+
+        return true;
+    } catch (e) {
+        console.error('Error en sendArrepentimientoEmails:', e);
+        return false;
+    }
+}
+

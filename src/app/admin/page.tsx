@@ -8,15 +8,13 @@ import {
     LayoutDashboard, Package, Users, ShoppingBag, Settings, 
     ArrowLeft, RefreshCw, Tags, CheckCircle2, AlertCircle, 
     Loader2, FileDown, TrendingUp, BarChart3, AlertTriangle, 
-    Search, UserCog, Link as LinkIcon
+    Search, UserCog, Link as LinkIcon, Undo2, MapPin
 } from 'lucide-react';
 import Link from 'next/link';
-import { MapPin } from 'lucide-react';
 import { 
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
-    ResponsiveContainer, PieChart, Pie, Cell, Legend 
+    ResponsiveContainer, PieChart, Pie, Cell, Legend,
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar
 } from 'recharts';
-import { AreaChart, Area } from 'recharts';
 
 export default function AdminDashboard() {
     const { user, profile, loading } = useAuth();
@@ -417,6 +415,7 @@ export default function AdminDashboard() {
                                                 innerRadius={60}
                                                 outerRadius={80}
                                                 paddingAngle={5}
+
                                                 dataKey="conteo"
                                                 nameKey="query"
                                             >
@@ -440,23 +439,23 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Operations Management */}
-                    <div className="bg-card p-8 rounded-2xl border border-border shadow-sm">
-                        <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                            <Settings size={22} className="text-primary" />
-                            Operaciones y Gestión
-                        </h2>
-                        <div className="grid grid-cols-1 gap-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <Link href="/admin/productos" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
-                                    <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
-                                        <Package size={20} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="font-bold group-hover:text-primary transition-colors truncate">Edición Masiva</p>
-                                        <p className="text-xs text-foreground/60 truncate">Actualiza precio y stock.</p>
-                                    </div>
-                                </Link>
-                                <Link href="/admin/usuarios" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
+                <div className="bg-card p-8 rounded-2xl border border-border shadow-sm">
+                    <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <Settings size={22} className="text-primary" />
+                        Operaciones y Gestión
+                    </h2>
+                    <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <Link href="/admin/productos" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
+                                <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
+                                    <Package size={20} />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="font-bold group-hover:text-primary transition-colors truncate">Edición Masiva</p>
+                                    <p className="text-xs text-foreground/60 truncate">Actualiza precio y stock.</p>
+                                </div>
+                            </Link>
+                            <Link href="/admin/usuarios" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
                                     <div className="p-3 bg-primary/10 text-primary rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
                                         <UserCog size={20} />
                                     </div>
@@ -489,6 +488,16 @@ export default function AdminDashboard() {
                                         <p className="text-xs text-foreground/60 truncate">Descarga a Excel (.xlsx)</p>
                                     </div>
                                 </button>
+
+                                <Link href="/admin/arrepentimientos" className="p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center gap-4">
+                                    <div className="p-3 bg-red-100 dark:bg-red-950/30 text-red-600 rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
+                                        <Undo2 size={20} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-bold group-hover:text-primary transition-colors truncate">Arrepentimiento</p>
+                                        <p className="text-xs text-foreground/60 truncate">Solicitudes de devoluciones.</p>
+                                    </div>
+                                </Link>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -522,8 +531,7 @@ export default function AdminDashboard() {
                             </Link>
                         </div>
                     </div>
-
+                </div>
             </div>
-        </div>
     );
 }
