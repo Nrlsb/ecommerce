@@ -134,10 +134,12 @@ export default function CarritoPage() {
             }
 
             const finalPriceBase = totalPrice - discountAmount;
+            /*
             if (finalPriceBase >= 50000) {
                 setShippingCost(0);
                 return;
             }
+            */
 
             if (!shippingData.provincia) {
                 setShippingCost(0);
@@ -927,12 +929,10 @@ export default function CarritoPage() {
                                 )}
                                 <div className="flex justify-between text-foreground/80">
                                     <span>Envío</span>
-                                    <span className={finalPrice >= 50000 || deliveryMethod === 'retiro' ? 'text-green-600 font-medium' : ''}>
+                                    <span className={deliveryMethod === 'retiro' ? 'text-green-600 font-medium' : ''}>
                                         {deliveryMethod === 'retiro' ? 'Gratis (Retiro)' : (
-                                            finalPrice >= 50000 ? 'Gratis' : (
-                                                isCalculatingShipping ? 'Calculando...' : (
-                                                    shippingCost > 0 ? `$${shippingCost.toLocaleString('es-AR')}` : 'Selecciona provincia'
-                                                )
+                                            isCalculatingShipping ? 'Calculando...' : (
+                                                shippingCost > 0 ? `$${shippingCost.toLocaleString('es-AR')}` : 'Selecciona provincia'
                                             )
                                         )}
                                     </span>

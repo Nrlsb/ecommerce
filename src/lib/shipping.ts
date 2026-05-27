@@ -44,7 +44,7 @@ export const PROVINCIA_MAP: Record<string, { code: string; localizacion: string 
 };
 
 export const DEFAULT_FALLBACK_COST = 8500;
-export const FREE_SHIPPING_THRESHOLD = 50000;
+// export const FREE_SHIPPING_THRESHOLD = 50000;
 
 /**
  * Calcula el costo de envío de manera unificada y segura en el servidor.
@@ -52,16 +52,17 @@ export const FREE_SHIPPING_THRESHOLD = 50000;
 export async function calculateShippingCost({
     items,
     provincia,
-    totalCompra
 }: {
     items: CartItem[];
     provincia: string;
     totalCompra?: number;
 }): Promise<{ costoEnvio: number; esGratis: boolean; pesoTotal: number }> {
-    // 1. Validar umbral de envío gratis
+    // 1. Validar umbral de envío gratis (Deshabilitado)
+    /*
     if (totalCompra && totalCompra >= FREE_SHIPPING_THRESHOLD) {
         return { costoEnvio: 0, esGratis: true, pesoTotal: 0 };
     }
+    */
 
     const key = provincia.toLowerCase().trim();
     const provMapping = PROVINCIA_MAP[key];
