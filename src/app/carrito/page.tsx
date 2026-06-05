@@ -34,7 +34,6 @@ export default function CarritoPage() {
     });
     const [installments, setInstallments] = useState(1);
     const [paywayError, setPaywayError] = useState<string | null>(null);
-    const [sessionId, setSessionId] = useState('');
 
     // Estado para envío/retiro
     const [deliveryMethod, setDeliveryMethod] = useState<'envio' | 'retiro'>('envio');
@@ -121,8 +120,6 @@ export default function CarritoPage() {
 
     useEffect(() => {
         setIsMounted(true);
-        // Generar un Session ID único para Cybersource al cargar
-        setSessionId(`sess_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`);
     }, []);
 
     // Efecto para calcular costo de envío dinámico
@@ -356,10 +353,8 @@ export default function CarritoPage() {
             }, async (status: number, response: any) => {
                 if (status === 200 || status === 201) {
                     const paymentMethodId = getPaymentMethodId(response.bin || cardNumber.substring(0, 6));
-                    // Usar el sessionId generado para Cybersource como device_unique_identifier
-                    const deviceUniqueId = sessionId || `fallback_${Date.now()}`;
                         
-                    await sendPaywayPayment(response.id, response.bin || cardNumber.substring(0, 6), paymentMethodId, deviceUniqueId);
+                    await sendPaywayPayment(response.id, response.bin || cardNumber.substring(0, 6), paymentMethodId);
                 } else {
                     console.error("Error al tokenizar con Payway:", response);
                     setPaywayError(response.error?.[0]?.error?.message || 'Verifique los datos ingresados.');
@@ -373,7 +368,7 @@ export default function CarritoPage() {
         }
     };
 
-    const sendPaywayPayment = async (token: string, bin: string, paymentMethodId: number, deviceId: string) => {
+    const sendPaywayPayment = async (token: string, bin: string, paymentMethodId: number) => {
         try {
             const response = await fetch('/api/checkout', {
                 method: 'POST',
@@ -403,7 +398,6 @@ export default function CarritoPage() {
                     bin: bin,
                     payment_method_id: paymentMethodId,
                     installments: installments,
-                    device_unique_identifier: deviceId,
                     cupon_codigo: appliedCoupon ? appliedCoupon.codigo : null
                 })
             });
@@ -449,12 +443,6 @@ export default function CarritoPage() {
                 src="https://ventasonline.payway.com.ar/static/v2.6.4/decidir.js" 
                 strategy="lazyOnload" 
             />
-            {sessionId && (
-                <Script 
-                    src={`https://h.online-metrix.net/fp/tags.js?org_id=${process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production' ? '1s449316' : '62nz9otd'}&session_id=${process.env.NEXT_PUBLIC_PAYWAY_MERCHANT_ID || ''}${sessionId}`} 
-                    strategy="lazyOnload" 
-                />
-            )}
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">

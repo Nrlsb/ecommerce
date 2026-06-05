@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
             bin, 
             payment_method_id, 
             installments = 1, 
-            device_unique_identifier, 
             cupon_codigo,
             
             // Datos de Envío / Entrega
@@ -253,47 +252,7 @@ export async function POST(request: NextRequest) {
                 description: `Compra Ecommerce - Pedido #${pedido.id}`,
                 payment_type: "single",
                 establishment_name: "ECOMMERCE",
-                sub_payments: [],
-                fraud_detection: {
-                    send_to_cs: true,
-                    device_unique_identifier: device_unique_identifier || "device_fallback_123",
-                    bill_to: {
-                        city: metodo_entrega === 'envio' ? (envio_ciudad || "Buenos Aires") : "Buenos Aires",
-                        country: "AR",
-                        customer_id: String(pedido.id),
-                        email: cliente_email || "cliente@ejemplo.com",
-                        first_name: cliente_nombre || "Cliente",
-                        last_name: "Web",
-                        phone_number: cliente_telefono || "1111111111",
-                        postal_code: metodo_entrega === 'envio' ? (envio_codigo_postal || "1000") : "1000",
-                        state: metodo_entrega === 'envio' ? (envio_provincia || "C") : "C"
-                    },
-                    purchase_totals: {
-                        currency: "ARS",
-                        amount: amountTotal
-                    },
-                    retail_transaction_data: {
-                        ship_to: {
-                            city: metodo_entrega === 'envio' ? (envio_ciudad || "Buenos Aires") : "Buenos Aires",
-                            country: "AR",
-                            customer_id: String(pedido.id),
-                            email: cliente_email || "cliente@ejemplo.com",
-                            first_name: cliente_nombre || "Cliente",
-                            last_name: "Web",
-                            phone_number: cliente_telefono || "1111111111",
-                            postal_code: metodo_entrega === 'envio' ? (envio_codigo_postal || "1000") : "1000",
-                            state: metodo_entrega === 'envio' ? (envio_provincia || "C") : "C"
-                        },
-                        items: items.map((item: any) => ({
-                            product_code: String(item.id).substring(0, 50),
-                            product_description: String(item.name || 'Producto').substring(0, 255),
-                            product_sku: String(item.id).substring(0, 255),
-                            total_amount: Math.round(item.price * item.quantity),
-                            quantity: item.quantity,
-                            unit_price: Math.round(item.price)
-                        }))
-                    }
-                }
+                sub_payments: []
             };
 
             const response = await fetch(decidirApiUrl, {
