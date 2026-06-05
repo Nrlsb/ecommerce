@@ -332,12 +332,19 @@ export default function CarritoPage() {
                 return;
             }
 
+            const publicKey = process.env.NEXT_PUBLIC_PAYWAY_PUBLIC_KEY;
+            if (!publicKey) {
+                setPaywayError('La clave pública de Payway no está configurada en el servidor/Vercel (NEXT_PUBLIC_PAYWAY_PUBLIC_KEY).');
+                setIsProcessing(false);
+                return;
+            }
+
             const decidirEnvUrl = process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production' 
                 ? 'https://ventasonline.payway.com.ar/api/v2' 
                 : 'https://developers-ventasonline.payway.com.ar/api/v2';
 
             const dec = new (window as any).Decidir(decidirEnvUrl);
-            dec.setPublishableKey(process.env.NEXT_PUBLIC_PAYWAY_PUBLIC_KEY || '');
+            dec.setPublishableKey(publicKey);
             dec.setTimeout(10000);
 
             // Crear un formulario virtual en memoria ya que decidir.js requiere un objeto con querySelectorAll

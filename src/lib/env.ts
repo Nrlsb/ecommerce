@@ -9,13 +9,26 @@ export const env = {
 } as const;
 
 // Validación para asegurar que las variables están presentes
-if (!env.supabaseUrl || !env.supabaseAnonKey) {
-  const errorMsg = '❌ Error: NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY no están definidas.';
-  console.error(errorMsg);
-} else {
-  console.log('✅ Supabase configurado:', env.supabaseUrl.substring(0, 20) + '...');
-}
+if (typeof window === 'undefined') {
+  // Validación del lado del Servidor
+  if (!env.supabaseUrl || !env.supabaseAnonKey || !env.supabaseServiceRoleKey) {
+    console.error('❌ Error: Variables de Supabase incompletas en el servidor.');
+  } else {
+    console.log('✅ Supabase configurado en el servidor:', env.supabaseUrl.substring(0, 20) + '...');
+  }
 
-if (!env.paywayPublicKey || !env.paywayPrivateKey) {
-  console.warn('⚠️ Advertencia: Variables de Payway incompletas.');
+  if (!env.paywayPublicKey || !env.paywayPrivateKey) {
+    console.warn('⚠️ Advertencia: Variables de Payway (pública o privada) incompletas en el servidor.');
+  }
+} else {
+  // Validación del lado del Cliente (Navegador)
+  if (!env.supabaseUrl || !env.supabaseAnonKey) {
+    console.error('❌ Error: Variables de Supabase incompletas en el navegador.');
+  } else {
+    console.log('✅ Supabase configurado en el navegador:', env.supabaseUrl.substring(0, 20) + '...');
+  }
+
+  if (!env.paywayPublicKey) {
+    console.warn('⚠️ Advertencia: NEXT_PUBLIC_PAYWAY_PUBLIC_KEY no está configurada en el cliente.');
+  }
 }
