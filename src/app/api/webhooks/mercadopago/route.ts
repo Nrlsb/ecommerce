@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
         } catch (error) {
             // El body puede estar vacío si los parámetros vienen por URL
         }
-        const type = url.searchParams.get('type') || body.type;
-        const id = url.searchParams.get('data.id') || body.data?.id;
+        const type = url.searchParams.get('type') || body.type || url.searchParams.get('topic') || body.topic;
+        const id = url.searchParams.get('data.id') || body.data?.id || url.searchParams.get('id') || body.id;
 
         console.log(`Webhook MP recibido: tipo=${type}, id=${id}, query=${url.searchParams.toString()}, body=${JSON.stringify(body)}`);
 
