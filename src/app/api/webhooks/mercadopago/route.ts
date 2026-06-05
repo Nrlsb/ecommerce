@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         const type = url.searchParams.get('type') || body.type;
         const id = url.searchParams.get('data.id') || body.data?.id;
 
-        console.log(`Webhook MP recibido: tipo=${type}, id=${id}`);
+        console.log(`Webhook MP recibido: tipo=${type}, id=${id}, query=${url.searchParams.toString()}, body=${JSON.stringify(body)}`);
 
         if (type === 'payment' && id) {
             const payment = new Payment(client);
