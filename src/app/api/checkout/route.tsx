@@ -313,6 +313,12 @@ export async function POST(request: NextRequest) {
                     { status: 201 }
                 );
             } else {
+                // Registrar fallo en base de datos para evitar pedidos huérfanos/pendientes
+                await supabaseAdmin
+                    .from('pedidos')
+                    .update({ estado: 'cancelado' })
+                    .eq('id', pedido.id);
+
                 return NextResponse.json(
                     { error: `El pago fue rechazado. Estado: ${decidirData.status}` },
                     { status: 400 }

@@ -340,17 +340,24 @@ export default function CarritoPage() {
             dec.setPublishableKey(process.env.NEXT_PUBLIC_PAYWAY_PUBLIC_KEY || '');
             dec.setTimeout(10000);
 
-            dec.createToken({
-                card_number: cardNumber,
-                card_expiration_month: cardData.cardExpirationMonth,
-                card_expiration_year: cardData.cardExpirationYear,
-                security_code: cardData.securityCode,
-                card_holder_name: cardData.cardHolderName,
-                card_holder_identification: {
-                    type: cardData.cardHolderIdentificationType,
-                    number: cardData.cardHolderIdentificationNumber
-                }
-            }, async (status: number, response: any) => {
+            // Crear un formulario virtual en memoria ya que decidir.js requiere un objeto con querySelectorAll
+            const formElement = document.createElement('form');
+            const appendField = (name: string, value: string) => {
+                const input = document.createElement('input');
+                input.setAttribute('data-decidir', name);
+                input.value = value || '';
+                formElement.appendChild(input);
+            };
+
+            appendField('card_number', cardNumber);
+            appendField('card_expiration_month', cardData.cardExpirationMonth);
+            appendField('card_expiration_year', cardData.cardExpirationYear);
+            appendField('security_code', cardData.securityCode);
+            appendField('card_holder_name', cardData.cardHolderName);
+            appendField('card_holder_doc_type', cardData.cardHolderIdentificationType);
+            appendField('card_holder_doc_number', cardData.cardHolderIdentificationNumber);
+
+            dec.createToken(formElement, async (status: number, response: any) => {
                 if (status === 200 || status === 201) {
                     const paymentMethodId = getPaymentMethodId(response.bin || cardNumber.substring(0, 6));
                         
