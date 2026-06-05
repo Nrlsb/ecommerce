@@ -11,8 +11,14 @@ const client = new MercadoPagoConfig({
 export async function POST(request: NextRequest) {
     try {
         const url = new URL(request.url);
-        const type = url.searchParams.get('type') || (await request.json()).type;
-        const id = url.searchParams.get('data.id') || (await request.json()).data?.id;
+        let body: any = {};
+        try {
+            body = await request.json();
+        } catch (error) {
+            // El body puede estar vacío si los parámetros vienen por URL
+        }
+        const type = url.searchParams.get('type') || body.type;
+        const id = url.searchParams.get('data.id') || body.data?.id;
 
         console.log(`Webhook MP recibido: tipo=${type}, id=${id}`);
 
