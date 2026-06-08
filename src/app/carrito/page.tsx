@@ -309,9 +309,17 @@ export default function CarritoPage() {
     };
 
     const getPaymentMethodId = (bin: string) => {
-        if (bin.startsWith('4')) return 1; // Visa
-        if (bin.startsWith('5')) return 15; // Mastercard
-        if (bin.startsWith('3')) return 65; // Amex
+        // Mapeo específico para tarjetas de prueba de Payway (según su planilla Excel)
+        if (bin.startsWith('451772')) return 31; // Visa Débito
+        if (bin.startsWith('450799') || bin.startsWith('454640') || bin.startsWith('425821')) return 1; // Visa Crédito
+        
+        if (bin.startsWith('529991') || bin.startsWith('545533') || bin.startsWith('520423')) return 104; // MasterCard Payway
+        if (bin.startsWith('589657')) return 63; // Cabal Payway
+
+        // Fallbacks genéricos por si no coincide con las tarjetas de prueba
+        if (bin.startsWith('4')) return 1; // Visa Crédito genérico
+        if (bin.startsWith('5')) return 15; // Mastercard genérico
+        if (bin.startsWith('3')) return 65; // Amex genérico
         return 1; // default
     };
 
