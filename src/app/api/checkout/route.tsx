@@ -255,6 +255,11 @@ export async function POST(request: NextRequest) {
                 sub_payments: []
             };
 
+            console.log('--- ENVIANDO DATOS A PAYWAY ---');
+            console.log('URL:', decidirApiUrl);
+            console.log('Payload:', JSON.stringify(decidirPayload, null, 2));
+            console.log('Headers: { Content-Type: application/json, apikey: ' + (process.env.PAYWAY_PRIVATE_KEY ? 'CONFIGURADA (Longitud: ' + process.env.PAYWAY_PRIVATE_KEY.length + ')' : 'NO CONFIGURADA') + ' }');
+
             const response = await fetch(decidirApiUrl, {
                 method: 'POST',
                 headers: {
@@ -265,6 +270,10 @@ export async function POST(request: NextRequest) {
             });
 
             const decidirData = await response.json();
+
+            console.log('--- RESPUESTA DE PAYWAY ---');
+            console.log('Status HTTP:', response.status);
+            console.log('Response Body:', JSON.stringify(decidirData, null, 2));
 
             if (!response.ok) {
                 // Registrar fallo en base de datos
