@@ -301,10 +301,18 @@ export default function CarritoPage() {
     };
 
     const isValidLuhn = (num: string) => {
-        let arr = (num + '').replace(/\s/g, '').split('').reverse().map(x => parseInt(x, 10));
-        let lastDigit = arr.splice(0, 1)[0];
-        let sum = arr.reduce((acc, val, i) => (i % 2 !== 0 ? acc + val : acc + ((val * 2) % 9) || 9), 0);
-        sum += lastDigit;
+        let sum = 0;
+        let shouldDouble = false;
+        // Loop from right to left
+        for (let i = num.length - 1; i >= 0; i--) {
+            let digit = parseInt(num.charAt(i), 10);
+            if (shouldDouble) {
+                digit *= 2;
+                if (digit > 9) digit -= 9;
+            }
+            sum += digit;
+            shouldDouble = !shouldDouble;
+        }
         return sum % 10 === 0;
     };
 
