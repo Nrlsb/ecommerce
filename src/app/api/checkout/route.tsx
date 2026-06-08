@@ -251,7 +251,7 @@ export async function POST(request: NextRequest) {
                 installments: installments || 1,
                 description: `Compra Ecommerce - Pedido #${pedido.id}`,
                 payment_type: "single",
-                establishment_name: "ECOMMERCE",
+                establishment_name: "PINTURERIA MERCURIO",
                 sub_payments: []
             };
 
