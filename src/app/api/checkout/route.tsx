@@ -283,7 +283,7 @@ export async function POST(request: NextRequest) {
                     .eq('id', pedido.id);
 
                 // Mapear errores de validación de Payway
-                const paywayErrors = decidirData.validation_errors?.map((err: any) => err.param + ': ' + err.error).join(', ');
+                const paywayErrors = decidirData.validation_errors?.map((err: any) => err.param + ': ' + (err.error || err.code || 'inválido')).join(', ');
                 const errorMessage = decidirData.message || paywayErrors || 'Pago rechazado o denegado por el emisor';
                 
                 return NextResponse.json(
