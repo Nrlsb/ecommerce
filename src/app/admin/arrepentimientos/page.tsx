@@ -25,6 +25,7 @@ interface Solicitud {
     created_at: string;
     pedido?: {
         id: string;
+        nro_pedido?: number;
         cliente_nombre: string;
         cliente_email: string;
         total: number;
@@ -297,8 +298,12 @@ export default function ArrepentimientoManagement() {
                                                                 {sol.pedido ? (
                                                                     <div className="bg-card border border-border p-4 rounded-xl text-sm space-y-2">
                                                                         <div className="flex justify-between items-center">
+                                                                            <span className="font-medium text-foreground/60">Nro Pedido:</span>
+                                                                            <span className="font-bold text-foreground">#{sol.pedido.nro_pedido || sol.pedido.id.substring(0, 8)}</span>
+                                                                        </div>
+                                                                        <div className="flex justify-between items-center">
                                                                             <span className="font-medium text-foreground/60">ID Interno:</span>
-                                                                            <span className="font-mono text-xs">{sol.pedido.id}</span>
+                                                                            <span className="font-mono text-[10px] text-foreground/40">{sol.pedido.id}</span>
                                                                         </div>
                                                                         <div className="flex justify-between items-center">
                                                                             <span className="font-medium text-foreground/60">Total original:</span>

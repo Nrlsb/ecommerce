@@ -215,7 +215,7 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<boole
         }));
 
         const html = getOrderConfirmationTemplate(
-            order.id,
+            order.nro_pedido ? String(order.nro_pedido) : order.id,
             order.cliente_nombre,
             formattedItems,
             order.total,
@@ -224,7 +224,7 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<boole
 
         return await sendEmail({
             to: order.cliente_email,
-            subject: `Pinturerías Mercurio - Confirmación de Pedido #${order.id.substring(0, 8)}`,
+            subject: `Pinturerías Mercurio - Confirmación de Pedido #${order.nro_pedido || order.id.substring(0, 8)}`,
             html
         });
     } catch (e) {
@@ -246,11 +246,14 @@ export async function sendOrderDispatchedEmail(orderId: string): Promise<boolean
             return false;
         }
 
-        const html = getOrderDispatchedTemplate(order.id, order.cliente_nombre);
+        const html = getOrderDispatchedTemplate(
+            order.nro_pedido ? String(order.nro_pedido) : order.id,
+            order.cliente_nombre
+        );
 
         return await sendEmail({
             to: order.cliente_email,
-            subject: `¡Tu pedido #${order.id.substring(0, 8)} ha sido despachado! - Pinturerías Mercurio`,
+            subject: `¡Tu pedido #${order.nro_pedido || order.id.substring(0, 8)} ha sido despachado! - Pinturerías Mercurio`,
             html
         });
     } catch (e) {

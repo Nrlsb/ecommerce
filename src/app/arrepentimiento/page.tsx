@@ -19,7 +19,7 @@ function ArrepentimientoForm() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const orderId = searchParams.get('pedido_id') || searchParams.get('order_id') || '';
+        const orderId = searchParams.get('pedido_nro') || searchParams.get('pedido_id') || searchParams.get('order_id') || '';
         const name = searchParams.get('nombre') || searchParams.get('name') || '';
         const email = searchParams.get('email') || '';
         const phone = searchParams.get('telefono') || searchParams.get('phone') || '';

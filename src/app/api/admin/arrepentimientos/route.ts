@@ -20,6 +20,7 @@ export async function GET() {
                 *,
                 pedido:pedido_id (
                     id,
+                    nro_pedido,
                     cliente_nombre,
                     cliente_email,
                     total,

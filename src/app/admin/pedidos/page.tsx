@@ -28,6 +28,7 @@ interface OrderItem {
 
 interface Order {
     id: string;
+    nro_pedido?: number;
     cliente_nombre: string;
     cliente_email: string;
     total: number;
@@ -212,8 +213,8 @@ export default function OrderManagement() {
                                                         {expandedOrder === order.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                                     </button>
                                                     <div>
-                                                        <p className="text-xs font-mono font-bold text-foreground/40 truncate w-24" title={order.id}>
-                                                            {order.id.split('-')[0]}...
+                                                        <p className="text-xs font-mono font-bold text-foreground" title={order.id}>
+                                                            #{order.nro_pedido || order.id.split('-')[0]}
                                                         </p>
                                                         <p className="text-xs text-foreground/60 flex items-center gap-1 mt-1">
                                                             <Calendar size={12} /> {new Date(order.created_at).toLocaleDateString()}

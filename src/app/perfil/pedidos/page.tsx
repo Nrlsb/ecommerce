@@ -111,7 +111,7 @@ export default function PedidosPage() {
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-[10px] font-mono text-foreground/30">ID: {order.id.substring(0, 8)}</p>
+                                    <p className="text-[10px] font-mono text-foreground/30">Pedido #{order.nro_pedido || order.id.substring(0, 8)}</p>
                                 </div>
 
                                 <div className="p-6">
@@ -135,7 +135,7 @@ export default function PedidosPage() {
                                     
                                     <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 justify-between items-center">
                                         <Link 
-                                            href={`/arrepentimiento?pedido_id=${order.id}&nombre=${encodeURIComponent(order.cliente_nombre || '')}&email=${encodeURIComponent(order.cliente_email || '')}&telefono=${encodeURIComponent(order.envio_telefono || '')}`}
+                                            href={`/arrepentimiento?pedido_id=${order.id}&pedido_nro=${order.nro_pedido || ''}&nombre=${encodeURIComponent(order.cliente_nombre || '')}&email=${encodeURIComponent(order.cliente_email || '')}&telefono=${encodeURIComponent(order.envio_telefono || '')}`}
                                             className="text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-600 hover:underline transition-colors flex items-center gap-1"
                                         >
                                             Solicitar Devolución / Arrepentimiento

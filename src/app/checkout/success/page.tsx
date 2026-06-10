@@ -78,7 +78,7 @@ function SuccessPageContent() {
                     <div className="bg-muted/50 rounded-2xl p-4 mb-8 text-left border border-border">
                         <h3 className="font-bold flex items-center gap-2 mb-3 border-b border-border/50 pb-2">
                             <Package className="w-4 h-4 text-primary" />
-                            Detalle del Pedido #{pedido.id}
+                            Detalle del Pedido #{pedido.nro_pedido || pedido.id}
                         </h3>
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
