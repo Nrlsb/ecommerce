@@ -182,10 +182,13 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
 
     const handleAddToCart = () => {
         if (!product) return;
+        const finalPrice = product.precio_con_descuento && Number(product.precio_con_descuento) < Number(product.precio)
+            ? Number(product.precio_con_descuento)
+            : Number(product.precio);
         addToCart({
             ...product,
             name: product.nombre,
-            price: product.precio,
+            price: finalPrice,
             brand: product.marca
         }, quantity);
         setAdded(true);
@@ -334,10 +337,27 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
                             <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 mb-10 relative">
                                 <div className="space-y-1">
                                     <span className="text-[10px] text-foreground/40 font-display font-bold uppercase tracking-[0.3em] block">Inversión Profesional</span>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-4xl lg:text-5xl font-display font-bold text-primary tracking-tighter">${Number(product.precio).toLocaleString('es-AR')}</span>
-                                        <span className="text-xs font-display font-bold text-foreground/60 uppercase tracking-widest">ARS</span>
-                                    </div>
+                                    {product.precio_con_descuento && Number(product.precio_con_descuento) < Number(product.precio) ? (
+                                        <div className="flex flex-col">
+                                            <span className="text-sm text-foreground/40 line-through font-semibold mb-1">
+                                                ${Number(product.precio).toLocaleString('es-AR')} ARS
+                                            </span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-4xl lg:text-5xl font-display font-bold text-primary tracking-tighter">${Number(product.precio_con_descuento).toLocaleString('es-AR')}</span>
+                                                <span className="text-xs font-display font-bold text-foreground/60 uppercase tracking-widest">ARS</span>
+                                                {product.descuento_porcentual && Number(product.descuento_porcentual) > 0 && (
+                                                    <span className="ml-2 text-xs font-bold text-white bg-mercurio-pink px-2.5 py-1 rounded-full">
+                                                        {Math.round(Number(product.descuento_porcentual))}% OFF
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-4xl lg:text-5xl font-display font-bold text-primary tracking-tighter">${Number(product.precio).toLocaleString('es-AR')}</span>
+                                            <span className="text-xs font-display font-bold text-foreground/60 uppercase tracking-widest">ARS</span>
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 <div className="flex items-center bg-white/50 dark:bg-slate-950/50 backdrop-blur-md border border-white/20 dark:border-white/5 rounded-3xl p-2 shadow-sm">

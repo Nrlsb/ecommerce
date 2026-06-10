@@ -23,6 +23,8 @@ interface Product {
   imagen_url?: string;
   categoria_id?: string;
   categorias?: { slug: string };
+  precio_con_descuento?: number;
+  descuento_porcentual?: number;
 }
 
 const PAGE_SIZE = 20;
@@ -220,10 +222,13 @@ function CatalogoContent() {
   };
 
   const handleAddToCart = (product: Product) => {
+    const finalPrice = product.precio_con_descuento && Number(product.precio_con_descuento) < Number(product.precio)
+      ? Number(product.precio_con_descuento)
+      : Number(product.precio);
     addToCart({
       ...product,
       name: product.nombre,
-      price: product.precio,
+      price: finalPrice,
       brand: product.marca,
       quantity: 1,
     });

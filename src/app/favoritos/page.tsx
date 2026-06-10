@@ -11,10 +11,13 @@ export default function FavoritosPage() {
     const { addToCart } = useCart();
 
     const handleAddToCart = (product: any) => {
+        const finalPrice = product.precio_con_descuento && Number(product.precio_con_descuento) < Number(product.precio)
+            ? Number(product.precio_con_descuento)
+            : Number(product.precio);
         addToCart({
             ...product,
             name: product.nombre,
-            price: product.precio,
+            price: finalPrice,
             brand: product.marca,
             quantity: 1,
         });
