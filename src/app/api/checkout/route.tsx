@@ -238,7 +238,8 @@ export async function POST(request: NextRequest) {
             if (installments === 3) recargoMult = 1.15; // 15% de recargo
             if (installments === 6) recargoMult = 1.30; // 30% de recargo
             if (installments === 12) recargoMult = 1.60; // 60% de recargo
-            const amountTotal = Math.round(totalFinal * recargoMult);
+            // Payway (Decidir) requiere el monto expresado en centavos (multiplicado por 100)
+            const amountTotal = Math.round(totalFinal * recargoMult * 100);
 
             // Requerimientos mínimos para el pago V2
             const decidirPayload = {
