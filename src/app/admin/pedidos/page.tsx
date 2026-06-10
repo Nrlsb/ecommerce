@@ -9,7 +9,8 @@ import {
     Mail, Calendar, User, 
     DollarSign, CheckCircle2, XCircle, 
     Clock, ChevronDown, ChevronUp, 
-    AlertCircle, RefreshCcw
+    AlertCircle, RefreshCcw, FileJson,
+    X, Copy, Check
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -36,6 +37,20 @@ interface Order {
     payment_id: string | null;
     created_at: string;
     items: OrderItem[];
+    metodo_pago?: string;
+    metodo_entrega?: string;
+    envio_costo?: number;
+    envio_direccion?: string;
+    envio_ciudad?: string;
+    envio_codigo_postal?: string;
+    envio_provincia?: string;
+    envio_telefono?: string;
+    envio_notas?: string;
+    facturacion_tipo?: string;
+    facturacion_nombre?: string;
+    facturacion_documento?: string;
+    payway_tid?: string;
+    payway_auth_code?: string;
 }
 
 export default function OrderManagement() {
@@ -47,6 +62,12 @@ export default function OrderManagement() {
     const [status, setStatus] = useState({ message: '', type: '' });
     const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+    // Estados para visor de logs de Payway
+    const [selectedLog, setSelectedLog] = useState<any>(null);
+    const [showLogModal, setShowLogModal] = useState<boolean>(false);
+    const [activeLogTab, setActiveLogTab] = useState<'raw' | 'checkout' | 'webhooks' | 'refunds'>('raw');
+    const [copiedLog, setCopiedLog] = useState<boolean>(false);
 
     const fetchOrders = async () => {
         setIsLoading(true);
@@ -107,6 +128,72 @@ export default function OrderManagement() {
             setIsActionLoading(null);
             setTimeout(() => setStatus({ message: '', type: '' }), 4000);
         }
+    };
+
+    const handleFetchPaywayLog = async (orderId: string) => {
+        setIsActionLoading(orderId);
+        try {
+            const res = await fetch(`/api/admin/orders/payway-log?id=${orderId}`);
+            const data = await res.json();
+            if (res.ok) {
+                setSelectedLog(data);
+                setActiveLogTab('raw');
+                setShowLogModal(true);
+            } else {
+                alert(data.error || 'No se pudo obtener el registro de la operación.');
+            }
+        } catch (err: any) {
+            console.error('Error fetching payway log:', err);
+            alert('Error al conectar con el servidor.');
+        } finally {
+            setIsActionLoading(null);
+        }
+    };
+
+    const handlePaywayRefund = async (orderId: string, paymentId: string | null, total: number) => {
+        if (!paymentId) {
+            alert('No se puede reembolsar: Falta el ID de pago de Payway.');
+            return;
+        }
+        if (!window.confirm(`¿Estás seguro de que deseas reembolsar este pedido en Payway por el total de $${Number(total).toLocaleString('es-AR')}?`)) {
+            return;
+        }
+
+        setIsActionLoading(orderId);
+        try {
+            const res = await fetch('/api/admin/payway/refund', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    payment_id: paymentId,
+                    amount: total * 100, // En centavos para Payway
+                    pedido_id: orderId
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setStatus({ 
+                    message: 'Reembolso en Payway procesado exitosamente.', 
+                    type: 'success' 
+                });
+                setOrders(prev => prev.map(o => o.id === orderId ? { ...o, estado: 'reembolsado' } : o));
+            } else {
+                throw new Error(data.error || 'Error procesando reembolso');
+            }
+        } catch (err: any) {
+            setStatus({ message: err.message, type: 'error' });
+        } finally {
+            setIsActionLoading(null);
+            setTimeout(() => setStatus({ message: '', type: '' }), 4000);
+        }
+    };
+
+    const handleCopyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedLog(true);
+        setTimeout(() => setCopiedLog(false), 2000);
     };
 
     const getStatusStyles = (estado: string) => {
@@ -247,7 +334,9 @@ export default function OrderManagement() {
                                                     {order.estado}
                                                 </div>
                                                 {order.payment_id && order.estado === 'pagado' && (
-                                                    <span className="block text-[8px] text-green-500/60 font-bold mt-1 uppercase">MP ID: {order.payment_id}</span>
+                                                    <span className="block text-[8px] text-green-500/60 font-bold mt-1 uppercase">
+                                                        {order.metodo_pago === 'payway' ? 'PW' : 'MP'} ID: {order.payment_id}
+                                                    </span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-right">
@@ -301,6 +390,67 @@ export default function OrderManagement() {
                                                         {(!order.items || order.items.length === 0) && (
                                                             <p className="text-sm text-foreground/40 italic">No se encontraron ítems para este pedido.</p>
                                                         )}
+
+                                                        {/* Información adicional de envío y pago */}
+                                                        <div className="mt-6 pt-6 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                            {/* Shipping Details */}
+                                                            <div>
+                                                                <h4 className="text-xs font-black text-foreground/40 uppercase tracking-widest mb-3">Detalles de Entrega</h4>
+                                                                <div className="bg-card border border-border p-4 rounded-xl space-y-2 text-xs">
+                                                                    <p className="text-foreground"><span className="font-bold text-foreground/60">Método:</span> <span className="uppercase font-mono">{order.metodo_entrega || 'No especificado'}</span></p>
+                                                                    {order.metodo_entrega === 'envio' ? (
+                                                                        <>
+                                                                            <p className="text-foreground"><span className="font-bold text-foreground/60">Dirección:</span> {order.envio_direccion}</p>
+                                                                            <p className="text-foreground"><span className="font-bold text-foreground/60">Ciudad/Provincia:</span> {order.envio_ciudad}, {order.envio_provincia} (CP: {order.envio_codigo_postal})</p>
+                                                                            {order.envio_telefono && <p className="text-foreground"><span className="font-bold text-foreground/60">Teléfono:</span> {order.envio_telefono}</p>}
+                                                                            {order.envio_notas && <p className="text-foreground italic"><span className="font-bold text-foreground/60 not-italic">Notas:</span> "{order.envio_notas}"</p>}
+                                                                            <p className="text-foreground"><span className="font-bold text-foreground/60">Costo de envío:</span> ${Number(order.envio_costo || 0).toLocaleString('es-AR')}</p>
+                                                                        </>
+                                                                    ) : (
+                                                                        <p className="text-foreground/60 italic">Retira en sucursal.</p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Payment / Invoice Details */}
+                                                            <div>
+                                                                <h4 className="text-xs font-black text-foreground/40 uppercase tracking-widest mb-3">Detalles de Facturación y Pago</h4>
+                                                                <div className="bg-card border border-border p-4 rounded-xl space-y-2 text-xs">
+                                                                    <p className="text-foreground"><span className="font-bold text-foreground/60">Medio de Pago:</span> <span className="uppercase font-bold text-primary">{order.metodo_pago || 'Mercado Pago'}</span></p>
+                                                                    <p className="text-foreground"><span className="font-bold text-foreground/60">Factura:</span> {order.facturacion_tipo || 'Consumidor Final'}</p>
+                                                                    {order.facturacion_nombre && <p className="text-foreground"><span className="font-bold text-foreground/60">Razón Social:</span> {order.facturacion_nombre}</p>}
+                                                                    {order.facturacion_documento && <p className="text-foreground"><span className="font-bold text-foreground/60">Documento / CUIT:</span> {order.facturacion_documento}</p>}
+                                                                    
+                                                                    {order.metodo_pago === 'payway' && (
+                                                                        <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-2">
+                                                                            <button
+                                                                                onClick={() => handleFetchPaywayLog(order.id)}
+                                                                                disabled={isActionLoading === order.id}
+                                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 border border-primary/20 hover:bg-primary/20 text-primary text-[10px] font-black uppercase tracking-wider rounded-lg transition-all disabled:opacity-50"
+                                                                            >
+                                                                                {isActionLoading === order.id ? (
+                                                                                    <Loader2 size={12} className="animate-spin" />
+                                                                                ) : (
+                                                                                    <FileJson size={12} />
+                                                                                )}
+                                                                                Ver JSON Payway
+                                                                            </button>
+                                                                            
+                                                                            {order.estado === 'pagado' && (
+                                                                                <button
+                                                                                    onClick={() => handlePaywayRefund(order.id, order.payment_id, order.total)}
+                                                                                    disabled={isActionLoading === order.id}
+                                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-600 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all disabled:opacity-50"
+                                                                                >
+                                                                                    <RefreshCcw size={12} className={isActionLoading === order.id ? "animate-spin" : ""} />
+                                                                                    Reembolsar Payway
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                 </motion.tr>
                                             )}
@@ -319,6 +469,128 @@ export default function OrderManagement() {
                     </div>
                 )}
             </div>
+
+            {/* Modal para ver logs de Payway */}
+            <AnimatePresence>
+                {showLogModal && selectedLog && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        {/* Backdrop */}
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/70 backdrop-blur-sm" 
+                            onClick={() => { setShowLogModal(false); setSelectedLog(null); }}
+                        />
+                        
+                        {/* Modal Content */}
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                            className="relative bg-card border border-border rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden z-10"
+                        >
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
+                                <div className="flex items-center gap-2">
+                                    <FileJson className="text-primary" size={20} />
+                                    <h3 className="font-black text-sm text-foreground uppercase tracking-wider">Registro de Transacción Payway</h3>
+                                </div>
+                                <button 
+                                    onClick={() => { setShowLogModal(false); setSelectedLog(null); }}
+                                    className="p-1.5 hover:bg-muted rounded-lg text-foreground/40 hover:text-foreground transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Tabs */}
+                            <div className="flex border-b border-border bg-muted/40 px-6 py-2 gap-2 overflow-x-auto">
+                                <button
+                                    onClick={() => setActiveLogTab('raw')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                                        activeLogTab === 'raw' 
+                                            ? 'bg-primary text-primary-foreground' 
+                                            : 'hover:bg-muted text-foreground/60'
+                                    }`}
+                                >
+                                    Completo
+                                </button>
+                                {selectedLog.checkout && (
+                                    <button
+                                        onClick={() => setActiveLogTab('checkout')}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                                            activeLogTab === 'checkout' 
+                                                ? 'bg-primary text-primary-foreground' 
+                                                : 'hover:bg-muted text-foreground/60'
+                                        }`}
+                                    >
+                                        Checkout (Request/Response)
+                                    </button>
+                                )}
+                                {selectedLog.webhooks && selectedLog.webhooks.length > 0 && (
+                                    <button
+                                        onClick={() => setActiveLogTab('webhooks')}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                                            activeLogTab === 'webhooks' 
+                                                ? 'bg-primary text-primary-foreground' 
+                                                : 'hover:bg-muted text-foreground/60'
+                                        }`}
+                                    >
+                                        Webhooks ({selectedLog.webhooks.length})
+                                    </button>
+                                )}
+                                {selectedLog.refunds && selectedLog.refunds.length > 0 && (
+                                    <button
+                                        onClick={() => setActiveLogTab('refunds')}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                                            activeLogTab === 'refunds' 
+                                                ? 'bg-primary text-primary-foreground' 
+                                                : 'hover:bg-muted text-foreground/60'
+                                        }`}
+                                    >
+                                        Reembolsos ({selectedLog.refunds.length})
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Content Body */}
+                            <div className="p-6 overflow-y-auto flex-1 bg-muted/10 flex flex-col min-h-0">
+                                <div className="flex items-center justify-between mb-4 flex-shrink-0">
+                                    <span className="text-[10px] font-mono text-foreground/40 font-bold uppercase tracking-wider">
+                                        ID Pedido: {selectedLog.order_id}
+                                    </span>
+                                    <button
+                                        onClick={() => handleCopyToClipboard(
+                                            JSON.stringify(
+                                                activeLogTab === 'raw' ? selectedLog :
+                                                activeLogTab === 'checkout' ? selectedLog.checkout :
+                                                activeLogTab === 'webhooks' ? selectedLog.webhooks :
+                                                selectedLog.refunds, 
+                                                null, 
+                                                2
+                                            )
+                                        )}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-card border border-border hover:bg-muted text-[10px] font-black uppercase tracking-wider rounded-lg transition-all text-foreground/60 hover:text-foreground"
+                                    >
+                                        {copiedLog ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+                                        {copiedLog ? 'Copiado' : 'Copiar JSON'}
+                                    </button>
+                                </div>
+
+                                <div className="rounded-xl overflow-hidden border border-zinc-800 shadow-inner flex-1 flex flex-col min-h-0">
+                                    <pre className="bg-zinc-950 text-emerald-400 p-5 overflow-auto text-xs font-mono select-text leading-relaxed flex-1">
+                                        {activeLogTab === 'raw' && JSON.stringify(selectedLog, null, 2)}
+                                        {activeLogTab === 'checkout' && JSON.stringify(selectedLog.checkout, null, 2)}
+                                        {activeLogTab === 'webhooks' && JSON.stringify(selectedLog.webhooks, null, 2)}
+                                        {activeLogTab === 'refunds' && JSON.stringify(selectedLog.refunds, null, 2)}
+                                    </pre>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

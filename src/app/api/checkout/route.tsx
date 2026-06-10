@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 import { calculateShippingCost } from '@/lib/shipping';
+import { logPaywayOperation } from '@/lib/payway-logger';
 
 // Configuración de MercadoPago
 const mpClient = new MercadoPagoConfig({ 
@@ -275,6 +276,12 @@ export async function POST(request: NextRequest) {
             console.log('--- RESPUESTA DE PAYWAY ---');
             console.log('Status HTTP:', response.status);
             console.log('Response Body:', JSON.stringify(decidirData, null, 2));
+
+            // Log de la operación de Payway
+            await logPaywayOperation(pedido.id, 'checkout', {
+                request: decidirPayload,
+                response: decidirData
+            });
 
             if (!response.ok) {
                 // Registrar fallo en base de datos

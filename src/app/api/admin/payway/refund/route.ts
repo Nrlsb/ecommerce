@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { logPaywayOperation } from '@/lib/payway-logger';
 
 export async function POST(req: Request) {
     try {
@@ -26,6 +27,14 @@ export async function POST(req: Request) {
         });
 
         const data = await response.json();
+
+        // Log de la operación de Payway (Reembolso)
+        if (pedido_id) {
+            await logPaywayOperation(pedido_id, 'refund', {
+                request: payload,
+                response: data
+            });
+        }
 
         if (!response.ok) {
             return NextResponse.json(

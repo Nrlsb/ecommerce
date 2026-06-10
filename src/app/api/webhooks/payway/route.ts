@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { logPaywayOperation } from '@/lib/payway-logger';
 
 export async function POST(request: NextRequest) {
     try {
@@ -21,6 +22,11 @@ export async function POST(request: NextRequest) {
         const paymentId = payload.id;
         const orderId = payload.site_transaction_id;
         const status = payload.status; // ej. 'approved', 'rejected', 'annulled'
+
+        // Log de la operación de Payway (Webhook)
+        if (orderId) {
+            await logPaywayOperation(orderId, 'webhook', payload);
+        }
 
         if (orderId && status) {
             console.log(`Actualizando pedido ${orderId} con estado Payway: ${status}`);
