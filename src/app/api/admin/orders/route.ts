@@ -89,7 +89,8 @@ export async function PATCH(request: NextRequest) {
                 const refund = new PaymentRefund(client);
                 // Aseguramos que el payment_id sea string y no tenga espacios
                 const refundResult = await refund.create({ 
-                    payment_id: String(pedido.payment_id).trim() 
+                    payment_id: String(pedido.payment_id).trim(),
+                    body: {}
                 });
                 console.log('Reembolso procesado exitosamente:', refundResult.id);
             } catch (refundError: any) {
