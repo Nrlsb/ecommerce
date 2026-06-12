@@ -89,17 +89,21 @@ function SuccessPageContent() {
                                 <span className="text-foreground/60">Método de pago:</span>
                                 <span className="font-medium capitalize">{pedido.metodo_pago}</span>
                             </div>
-                            {pedido.metodo_pago === 'payway' && pedido.payway_log?.checkout?.request?.installments && (
-                                <div className="flex justify-between">
-                                    <span className="text-foreground/60">Financiación:</span>
-                                    <span className="font-medium text-foreground">
-                                        {pedido.payway_log.checkout.request.installments === 1 
-                                            ? '1 cuota sin interés' 
-                                            : `${pedido.payway_log.checkout.request.installments} cuotas de $${(pedido.total / pedido.payway_log.checkout.request.installments).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                        }
-                                    </span>
-                                </div>
-                            )}
+                            {pedido.metodo_pago === 'payway' && pedido.payway_log?.checkout?.request?.installments && (() => {
+                                const rawInst = Number(pedido.payway_log.checkout.request.installments);
+                                const actualInst = rawInst === 13 ? 3 : rawInst === 16 ? 6 : rawInst;
+                                return (
+                                    <div className="flex justify-between">
+                                        <span className="text-foreground/60">Financiación:</span>
+                                        <span className="font-medium text-foreground">
+                                            {actualInst === 1 
+                                                ? '1 cuota sin interés' 
+                                                : `${actualInst} cuotas de $${(pedido.total / actualInst).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                            }
+                                        </span>
+                                    </div>
+                                );
+                            })()}
                             <div className="flex justify-between pt-2 mt-2 border-t border-border/50">
                                 <span className="font-bold">Total Pagado:</span>
                                 <span className="font-bold text-primary">${pedido.total?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>

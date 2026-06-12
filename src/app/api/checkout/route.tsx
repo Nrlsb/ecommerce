@@ -243,6 +243,13 @@ export async function POST(request: NextRequest) {
             const amountTotal = Math.round(totalFinal * recargoMult * 100);
 
             // Requerimientos mínimos para el pago V2
+            // Para "Cuota Simple" en Argentina (Decidir/Payway):
+            // Plan Cuota Simple 3 se envía como installments: 13
+            // Plan Cuota Simple 6 se envía como installments: 16
+            let paywayInstallments = installments || 1;
+            if (installments === 3) paywayInstallments = 13;
+            else if (installments === 6) paywayInstallments = 16;
+
             const decidirPayload = {
                 site_transaction_id: String(pedido.id),
                 token: payway_token,
@@ -250,7 +257,7 @@ export async function POST(request: NextRequest) {
                 bin: bin || "450799", 
                 amount: amountTotal,
                 currency: "ARS",
-                installments: installments || 1,
+                installments: paywayInstallments,
                 description: `Compra Ecommerce - Pedido #${pedido.id}`,
                 payment_type: "single",
                 establishment_name: "PINTURERIA MERCURIO",
