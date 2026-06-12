@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     try {
         const { data: order, error } = await supabaseAdmin
             .from('pedidos')
-            .select('id, nro_pedido, cliente_nombre, total, metodo_pago, estado')
+            .select('id, nro_pedido, cliente_nombre, total, metodo_pago, estado, payway_log')
             .eq('id', id)
             .single();
 

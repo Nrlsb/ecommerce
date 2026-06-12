@@ -71,6 +71,14 @@ export default function CarritoPage() {
     }
     const finalPrice = Math.max(0, totalPrice - discountAmount);
 
+    let recargoMult = 1;
+    if (paymentMethod === 'payway') {
+        if (installments === 3) recargoMult = 1.15;
+        else if (installments === 6) recargoMult = 1.30;
+        else if (installments === 12) recargoMult = 1.60;
+    }
+    const totalConRecargo = (finalPrice + shippingCost) * recargoMult;
+
     // Pre-cargar datos del usuario y dirección del perfil o del último pedido si tiene la sesión iniciada
     useEffect(() => {
         if (user) {
@@ -873,10 +881,10 @@ export default function CarritoPage() {
                                             value={installments}
                                             onChange={(e) => setInstallments(Number(e.target.value))}
                                         >
-                                            <option value={1}>1 Cuota sin interés</option>
-                                            <option value={3}>3 Cuotas fijas</option>
-                                            <option value={6}>6 Cuotas fijas</option>
-                                            <option value={12}>12 Cuotas fijas</option>
+                                            <option value={1}>1 Cuota sin interés de ${((finalPrice + shippingCost)).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</option>
+                                            <option value={3}>3 Cuotas fijas de ${((finalPrice + shippingCost) * 1.15 / 3).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} c/u (15% recargo)</option>
+                                            <option value={6}>6 Cuotas fijas de ${((finalPrice + shippingCost) * 1.30 / 6).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} c/u (30% recargo)</option>
+                                            <option value={12}>12 Cuotas fijas de ${((finalPrice + shippingCost) * 1.60 / 12).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} c/u (60% recargo)</option>
                                         </select>
                                     </div>
                                     {paywayError && (
@@ -958,11 +966,24 @@ export default function CarritoPage() {
                             </div>
 
                             <div className="border-t border-border pt-4 mb-6">
+                                {paymentMethod === 'payway' && installments > 1 && (
+                                    <div className="flex justify-between text-sm text-foreground/80 mb-2">
+                                        <span>Recargo por financiación ({installments === 3 ? '15%' : installments === 6 ? '30%' : '60%'})</span>
+                                        <span>+${((finalPrice + shippingCost) * (recargoMult - 1)).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-end">
                                     <span className="text-lg font-bold">Total</span>
-                                    <span className="text-3xl font-black text-primary">
-                                        ${(finalPrice + shippingCost).toLocaleString('es-AR')}
-                                    </span>
+                                    <div className="text-right">
+                                        <span className="text-3xl font-black text-primary block">
+                                            ${totalConRecargo.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </span>
+                                        {paymentMethod === 'payway' && installments > 1 && (
+                                            <span className="text-xs text-foreground/60 block mt-1">
+                                                {installments} cuotas fijas de ${((finalPrice + shippingCost) * recargoMult / installments).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <button

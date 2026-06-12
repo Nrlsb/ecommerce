@@ -305,10 +305,12 @@ export async function POST(request: NextRequest) {
                 // Actualizar pedido a pagado y persistir IDs de auditoría
                 // NOTA: El disparador (trigger) trigger_deducir_stock_pedido en la BD
                 // descontará el stock e incrementará 'comprados' de forma segura e inmediata.
+                const finalAmountCharged = decidirData.amount ? (decidirData.amount / 100) : (totalFinal * recargoMult);
                 await supabaseAdmin
                     .from('pedidos')
                     .update({ 
                         estado: 'pagado',
+                        total: finalAmountCharged,
                         payment_id: String(decidirData.id),
                         payway_tid: decidirData.status_details?.ticket || '',
                         payway_auth_code: decidirData.status_details?.card_authorization_code || ''

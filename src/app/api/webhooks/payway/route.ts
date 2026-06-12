@@ -42,6 +42,9 @@ export async function POST(request: NextRequest) {
             // Esto sirve en caso de que el webhook llegue por una confirmación asíncrona
             if (status === 'approved' && paymentId) {
                 updateData.payment_id = String(paymentId);
+                if (payload.amount) {
+                    updateData.total = Number(payload.amount) / 100;
+                }
             }
 
             const { error } = await supabaseAdmin
