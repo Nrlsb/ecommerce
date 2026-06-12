@@ -28,36 +28,36 @@ export async function logPaywayOperation(
     try {
         if (!orderId) return null;
 
-        const logDir = path.join(process.cwd(), 'public', 'logs', 'payway');
-        const logPath = path.join(logDir, `${orderId}.json`);
-
-        // Ensure directories exist
-        if (!fs.existsSync(logDir)) {
-            fs.mkdirSync(logDir, { recursive: true });
-        }
-
-        // 1. Read existing log file or initialize new
+        // 1. Inicializar log y obtener registro existente desde Supabase (como fuente de verdad)
         let currentLog: PaywayLog = {
             order_id: orderId,
             webhooks: [],
             refunds: []
         };
 
-        if (fs.existsSync(logPath)) {
-            try {
-                const fileContent = fs.readFileSync(logPath, 'utf8');
-                currentLog = JSON.parse(fileContent);
-                // Ensure array fields exist
-                if (!currentLog.webhooks) currentLog.webhooks = [];
-                if (!currentLog.refunds) currentLog.refunds = [];
-            } catch (err) {
-                console.error('Error parsing existing payway log file:', err);
+        try {
+            const { data: orderData, error: fetchError } = await supabaseAdmin
+                .from('pedidos')
+                .select('payway_log')
+                .eq('id', orderId)
+                .single();
+
+            if (!fetchError && orderData && orderData.payway_log) {
+                const dbLog = orderData.payway_log as any;
+                currentLog = {
+                    order_id: orderId,
+                    checkout: dbLog.checkout || undefined,
+                    webhooks: Array.isArray(dbLog.webhooks) ? dbLog.webhooks : [],
+                    refunds: Array.isArray(dbLog.refunds) ? dbLog.refunds : []
+                };
             }
+        } catch (dbFetchErr) {
+            console.error('Error fetching existing payway log from DB:', dbFetchErr);
         }
 
         const timestamp = new Date().toISOString();
 
-        // 2. Update log based on operation type
+        // 2. Actualizar el log según el tipo de operación
         if (type === 'checkout') {
             currentLog.checkout = {
                 request: data.request,
@@ -77,21 +77,28 @@ export async function logPaywayOperation(
             });
         }
 
-        // 3. Save to local filesystem
+        // 3. Intentar guardar en el sistema de archivos local de forma segura (silencioso si falla en serverless)
         try {
+            const logDir = path.join(process.cwd(), 'public', 'logs', 'payway');
+            const logPath = path.join(logDir, `${orderId}.json`);
+
+            if (!fs.existsSync(logDir)) {
+                fs.mkdirSync(logDir, { recursive: true });
+            }
             fs.writeFileSync(logPath, JSON.stringify(currentLog, null, 2), 'utf8');
             console.log(`Saved Payway log locally for order ${orderId} to ${logPath}`);
         } catch (fsErr) {
-            console.error('Failed to write Payway log file:', fsErr);
+            // Advertencia silenciosa (esperada en entornos serverless como Vercel donde es de solo lectura)
+            console.warn(`Aviso: No se pudo escribir el log local en ${orderId}.json (comportamiento esperado en serverless/Vercel)`);
         }
 
-        // 4. Update database column payway_log gracefully
+        // 4. Actualizar columna payway_log en la base de datos de manera definitiva
         try {
             const { error } = await supabaseAdmin
                 .from('pedidos')
                 .update({ 
                     payway_log: currentLog 
-                } as any) // Cast to avoid TypeScript lint errors if column type is not yet in definition
+                } as any)
                 .eq('id', orderId);
 
             if (error) {
