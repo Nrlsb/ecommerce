@@ -94,8 +94,10 @@ export default function OrderManagement() {
 
     const handleUpdateStatus = async (orderId: string, newStatus: string) => {
         if (newStatus === 'anulado') {
-            const confirmMsg = orders.find(o => o.id === orderId)?.payment_id 
-                ? '¿Estás seguro de que deseas anular este pedido? Se procesará un REEMBOLSO automático en Mercado Pago.' 
+            const order = orders.find(o => o.id === orderId);
+            const isPayway = order?.metodo_pago === 'payway';
+            const confirmMsg = order?.payment_id 
+                ? `¿Estás seguro de que deseas anular este pedido? Se procesará un REEMBOLSO automático en ${isPayway ? 'Payway' : 'Mercado Pago'}.` 
                 : '¿Estás seguro de que deseas anular este pedido?';
             if (!window.confirm(confirmMsg)) return;
         }

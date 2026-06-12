@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 import { MercadoPagoConfig, PaymentRefund } from 'mercadopago';
 import { z } from 'zod';
 import { sendOrderConfirmationEmail, sendOrderDispatchedEmail } from '@/lib/email';
+import { logPaywayOperation } from '@/lib/payway-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,45 +73,85 @@ export async function PATCH(request: NextRequest) {
 
         // 2. Si el nuevo estado es 'anulado' y hay un payment_id, procedemos al reembolso
         if (estado === 'anulado' && pedido.payment_id) {
-            const token = process.env.MP_ACCESS_TOKEN || '';
-            console.log(`Iniciando reembolso para el pago ${pedido.payment_id} del pedido ${id}`);
-            console.log(`Usando token que empieza con: ${token.substring(0, 10)}... (Longitud: ${token.length})`);
-            
-            // Verificar si tenemos token configurado
-            if (!token) {
-                console.error('Error: MP_ACCESS_TOKEN no configurado');
-                return NextResponse.json({ 
-                    error: 'Configuración incompleta', 
-                    details: 'No se encontró el token de Mercado Pago en el servidor.' 
-                }, { status: 500 });
-            }
+            if (pedido.metodo_pago === 'payway') {
+                console.log(`Iniciando reembolso Payway para el pago ${pedido.payment_id} del pedido ${id}`);
+                try {
+                    const isProduction = process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production';
+                    const apiUrl = isProduction 
+                        ? `https://ventasonline.payway.com.ar/api/v2/payments/${pedido.payment_id}/refunds`
+                        : `https://developers-ventasonline.payway.com.ar/api/v2/payments/${pedido.payment_id}/refunds`;
 
-            try {
-                const refund = new PaymentRefund(client);
-                // Aseguramos que el payment_id sea string y no tenga espacios
-                const refundResult = await refund.create({ 
-                    payment_id: String(pedido.payment_id).trim(),
-                    body: {}
-                });
-                console.log('Reembolso procesado exitosamente:', refundResult.id);
-            } catch (refundError: any) {
-                console.error('Error detallado al procesar el reembolso en Mercado Pago:', refundError);
+                    const payload = { amount: Math.round(pedido.total * 100) };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': process.env.PAYWAY_PRIVATE_KEY || ''
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    // Log de la operación de Payway (Reembolso)
+                    await logPaywayOperation(id, 'refund', {
+                        request: payload,
+                        response: data
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Rechazado');
+                    }
+                    console.log('Reembolso Payway procesado exitosamente:', data.id);
+                } catch (paywayError: any) {
+                    console.error('Error detallado al procesar el reembolso en Payway:', paywayError);
+                    return NextResponse.json({ 
+                        error: 'Error al procesar el reembolso en Payway', 
+                        details: paywayError.message || 'Error desconocido' 
+                    }, { status: 500 });
+                }
+            } else {
+                const token = process.env.MP_ACCESS_TOKEN || '';
+                console.log(`Iniciando reembolso para el pago ${pedido.payment_id} del pedido ${id}`);
+                console.log(`Usando token que empieza con: ${token.substring(0, 10)}... (Longitud: ${token.length})`);
                 
-                // Extraer el mensaje de error más específico de la respuesta de MP
-                let mensajeError = 'Error al procesar el reembolso en Mercado Pago';
-                let detallesError = refundError.message || 'Error desconocido';
-
-                // Si es un error del SDK de MP, suele tener una estructura con 'message' o 'cause'
-                if (refundError.cause && Array.isArray(refundError.cause) && refundError.cause.length > 0) {
-                    detallesError = refundError.cause[0].description || detallesError;
-                } else if (refundError.error) {
-                    detallesError = refundError.error;
+                // Verificar si tenemos token configurado
+                if (!token) {
+                    console.error('Error: MP_ACCESS_TOKEN no configurado');
+                    return NextResponse.json({ 
+                        error: 'Configuración incompleta', 
+                        details: 'No se encontró el token de Mercado Pago en el servidor.' 
+                    }, { status: 500 });
                 }
 
-                return NextResponse.json({ 
-                    error: mensajeError, 
-                    details: detallesError 
-                }, { status: 500 });
+                try {
+                    const refund = new PaymentRefund(client);
+                    // Aseguramos que el payment_id sea string y no tenga espacios
+                    const refundResult = await refund.create({ 
+                        payment_id: String(pedido.payment_id).trim(),
+                        body: {}
+                    });
+                    console.log('Reembolso procesado exitosamente:', refundResult.id);
+                } catch (refundError: any) {
+                    console.error('Error detallado al procesar el reembolso en Mercado Pago:', refundError);
+                    
+                    // Extraer el mensaje de error más específico de la respuesta de MP
+                    let mensajeError = 'Error al procesar el reembolso en Mercado Pago';
+                    let detallesError = refundError.message || 'Error desconocido';
+
+                    // Si es un error del SDK de MP, suele tener una estructura con 'message' o 'cause'
+                    if (refundError.cause && Array.isArray(refundError.cause) && refundError.cause.length > 0) {
+                        detallesError = refundError.cause[0].description || detallesError;
+                    } else if (refundError.error) {
+                        detallesError = refundError.error;
+                    }
+
+                    return NextResponse.json({ 
+                        error: mensajeError, 
+                        details: detallesError 
+                    }, { status: 500 });
+                }
             }
         }
 
