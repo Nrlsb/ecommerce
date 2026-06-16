@@ -10,6 +10,46 @@ const mpClient = new MercadoPagoConfig({
     accessToken: process.env.MP_ACCESS_TOKEN || '' 
 });
 
+// Helper para extraer el motivo amigable de rechazo de Payway/Decidir
+function getPaywayErrorMessage(decidirData: any): string {
+    // 1. Intentar obtener el error detallado de status_details
+    const statusError = decidirData.status_details?.error?.reason;
+    if (statusError) {
+        const desc = statusError.description;
+        const addDesc = statusError.additional_description;
+        if (desc && addDesc && desc !== addDesc) {
+            return `${desc} (${addDesc})`;
+        }
+        if (desc) return desc;
+        if (addDesc) return addDesc;
+    }
+
+    // 2. Intentar de error.reason directo
+    const reasonError = decidirData.error?.reason?.description;
+    if (reasonError) return reasonError;
+
+    // 3. Errores de validación de campos
+    if (decidirData.validation_errors && decidirData.validation_errors.length > 0) {
+        return decidirData.validation_errors
+            .map((err: any) => `${err.param}: ${err.error || err.code || 'inválido'}`)
+            .join(', ');
+    }
+
+    // 4. Mensajes genéricos de Decidir
+    if (decidirData.message) {
+        if (decidirData.message === 'payment_rejected') {
+            return 'Pago rechazado por la entidad emisora (ej. saldo insuficiente o tarjeta inhabilitada)';
+        }
+        return decidirData.message;
+    }
+
+    if (decidirData.error?.type) {
+        return decidirData.error.type;
+    }
+
+    return 'Pago rechazado o denegado por el emisor';
+}
+
 // POST /api/checkout
 export async function POST(request: NextRequest) {
     try {
@@ -244,10 +284,10 @@ export async function POST(request: NextRequest) {
 
             // Requerimientos mínimos para el pago V2
             // Para "Cuota Simple" en Argentina (Decidir/Payway):
-            // Plan Cuota Simple 3 se envía como installments: 13
+            // Plan Cuota Simple 3 se envía como installments: 3 (según caso de prueba)
             // Plan Cuota Simple 6 se envía como installments: 16
             let paywayInstallments = installments || 1;
-            if (installments === 3) paywayInstallments = 13;
+            if (installments === 3) paywayInstallments = 3;
             else if (installments === 6) paywayInstallments = 16;
 
             const decidirPayload = {
@@ -297,9 +337,7 @@ export async function POST(request: NextRequest) {
                     .update({ estado: 'cancelado' })
                     .eq('id', pedido.id);
 
-                // Mapear errores de validación de Payway
-                const paywayErrors = decidirData.validation_errors?.map((err: any) => err.param + ': ' + (err.error || err.code || 'inválido')).join(', ');
-                const errorMessage = decidirData.message || paywayErrors || 'Pago rechazado o denegado por el emisor';
+                const errorMessage = getPaywayErrorMessage(decidirData);
                 
                 return NextResponse.json(
                     { error: `Error en Payway: ${errorMessage}`, code: decidirData.error?.type || 'payment_error' },
@@ -345,8 +383,10 @@ export async function POST(request: NextRequest) {
                     .update({ estado: 'cancelado' })
                     .eq('id', pedido.id);
 
+                const errorMessage = getPaywayErrorMessage(decidirData);
+
                 return NextResponse.json(
-                    { error: `El pago fue rechazado. Estado: ${decidirData.status}` },
+                    { error: `Error en Payway: ${errorMessage}` },
                     { status: 400 }
                 );
             }
