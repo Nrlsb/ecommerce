@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useDebounce } from 'use-debounce';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '@/context/CartContext';
 import { FilterPanel } from '@/components/catalogo/FilterPanel';
@@ -46,6 +47,7 @@ function CatalogoContent() {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeSort, setActiveSort] = useState('destacados');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -117,18 +119,18 @@ function CatalogoContent() {
         }
       }
 
-      if (searchQuery) {
-        const words = searchQuery.split(/\s+/).filter(w => w.length > 0);
+      if (debouncedSearchQuery) {
+        const words = debouncedSearchQuery.split(/\s+/).filter(w => w.length > 0);
         words.forEach(word => {
           query = query.or(`nombre.ilike.%${word}%,marca.ilike.%${word}%`);
         });
         
         // Registrar la búsqueda en analíticas (sin esperar respuesta para no bloquear)
-        if (searchQuery.length >= 3 && currentPage === 0) {
+        if (debouncedSearchQuery.length >= 3 && currentPage === 0) {
           fetch('/api/analytics/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: searchQuery })
+            body: JSON.stringify({ query: debouncedSearchQuery })
           }).catch(err => console.error('Error reporting search analytics:', err));
         }
       }
@@ -203,7 +205,7 @@ function CatalogoContent() {
     setPage(0);
     setHasMore(true);
     fetchProducts(0, true);
-  }, [activeCategory, activeSort, searchQuery, priceRange, categoriesLoaded]);
+  }, [activeCategory, activeSort, debouncedSearchQuery, priceRange, categoriesLoaded]);
 
   // Sincronizar con cambios en la URL
   useEffect(() => {

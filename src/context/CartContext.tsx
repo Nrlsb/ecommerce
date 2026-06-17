@@ -1,13 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface CartItem {
-    id: string | number;
-    price: number;
-    quantity: number;
-    [key: string]: unknown;
-}
+import { CartItem } from '@/lib/validation';
 
 interface CartContextType {
     items: CartItem[];

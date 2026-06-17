@@ -4,9 +4,9 @@ describe('Validation Schemas', () => {
   describe('productSchema', () => {
     it('validates correct product data', () => {
       const validProduct = {
-        id: '1',
-        name: 'Paint',
-        price: 100,
+        id: 1,
+        nombre: 'Pintura Látex',
+        precio: 100,
         stock: 50,
       };
 
@@ -16,12 +16,37 @@ describe('Validation Schemas', () => {
     it('rejects invalid price', () => {
       const invalidProduct = {
         id: '1',
-        name: 'Paint',
-        price: -100,
+        nombre: 'Pintura Látex',
+        precio: -100,
         stock: 50,
       };
 
       expect(() => productSchema.parse(invalidProduct)).toThrow();
+    });
+  });
+
+  describe('cartItemSchema', () => {
+    it('validates correct cart item data', () => {
+      const validItem = {
+        id: '1',
+        name: 'Pintura Látex',
+        price: 1500,
+        quantity: 2,
+        brand: 'Mercurio',
+      };
+
+      expect(cartItemSchema.parse(validItem)).toEqual(validItem);
+    });
+
+    it('rejects invalid quantity', () => {
+      const invalidItem = {
+        id: '1',
+        name: 'Pintura Látex',
+        price: 1500,
+        quantity: -2,
+      };
+
+      expect(() => cartItemSchema.parse(invalidItem)).toThrow();
     });
   });
 
@@ -73,8 +98,8 @@ describe('Validation Schemas', () => {
     it('returns parsed data on valid input', () => {
       const validProduct = {
         id: '1',
-        name: 'Paint',
-        price: 100,
+        nombre: 'Pintura Látex',
+        precio: 100,
         stock: 50,
       };
 
@@ -85,8 +110,8 @@ describe('Validation Schemas', () => {
     it('returns null on invalid input', () => {
       const invalidProduct = {
         id: '1',
-        name: 'Paint',
-        price: -100,
+        nombre: 'Pintura Látex',
+        precio: -100,
         stock: 50,
       };
 

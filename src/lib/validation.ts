@@ -2,21 +2,28 @@ import { z } from 'zod';
 
 // Product validation
 export const productSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, 'Nombre requerido'),
-  price: z.number().positive('Precio debe ser positivo'),
-  stock: z.number().int().nonnegative('Stock no puede ser negativo'),
-  category_id: z.string().optional(),
-  description: z.string().optional(),
+  id: z.union([z.string(), z.number()]),
+  nombre: z.string().min(1, 'Nombre requerido'),
+  precio: z.number().positive('Precio debe ser positivo'),
+  stock: z.number().int().nonnegative('Stock no puede ser negativo').optional().nullable(),
+  marca: z.string().optional().nullable(),
+  descripcion: z.string().optional().nullable(),
+  imagen_url: z.string().optional().nullable(),
+  categoria_id: z.union([z.string(), z.number()]).optional().nullable(),
+  precio_con_descuento: z.number().optional().nullable(),
+  descuento_porcentual: z.number().optional().nullable(),
 });
 
 export type Product = z.infer<typeof productSchema>;
 
-// Cart item validation
+// Cart item validation (as structured in CartContext client side)
 export const cartItemSchema = z.object({
-  product_id: z.string(),
+  id: z.union([z.string(), z.number()]),
+  name: z.string().min(1, 'Nombre requerido'),
+  price: z.number().positive('Precio debe ser positivo'),
   quantity: z.number().int().positive('Cantidad debe ser mayor a 0'),
-  price: z.number().positive(),
+  brand: z.string().optional().nullable(),
+  imagen_url: z.string().optional().nullable(),
 });
 
 export type CartItem = z.infer<typeof cartItemSchema>;
