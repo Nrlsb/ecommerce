@@ -43,7 +43,7 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
         stiffness: 100,
         damping: 20
       }}
-      className="bg-card rounded-[2rem] overflow-hidden border border-border hover:shadow-[0_20px_50px_rgba(30,55,115,0.15)] hover:border-primary/45 hover:-translate-y-1.5 transition-all duration-300 flex flex-col group p-2 relative"
+      className="bg-card rounded-[2rem] overflow-hidden border border-border hover:shadow-[0_25px_60px_rgba(30,55,115,0.2)] hover:-translate-y-2.5 transition-all duration-500 ease-out flex flex-col group p-2 relative premium-border-hover"
     >
       <Link href={`/catalogo/${product.id}`} className="block relative h-64 overflow-hidden rounded-2xl group-hover:shadow-lg transition-all duration-500">
         <div className="w-full h-full bg-muted dark:bg-slate-900/50 relative flex items-center justify-center p-4">
@@ -54,7 +54,7 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
             className="absolute bottom-3 right-3 w-14 h-auto opacity-[0.12] pointer-events-none z-10" 
           />
           {product.imagen_url ? (
-            <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-700" />
+            <img src={product.imagen_url} alt={product.nombre} className="w-full h-full object-contain rounded-xl group-hover:scale-105 group-hover:rotate-1 transition-transform duration-700 ease-out" />
           ) : (
             <div className="flex flex-col items-center gap-4">
               <img 
@@ -127,9 +127,9 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
           </div>
           <button
             onClick={() => onAddToCart(product)}
-            className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-all duration-300 shadow-sm cursor-pointer flex items-center gap-2 group/btn hover:px-4"
+            className="bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground p-3 rounded-xl transition-all duration-300 shadow-sm cursor-pointer flex items-center gap-2 group/btn hover:px-4 active:scale-95 btn-premium-glow btn-premium-glow-primary"
           >
-            <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform" />
+            <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 group-hover/btn:rotate-12 transition-transform duration-300" />
             <span className="max-w-0 overflow-hidden group-hover/btn:max-w-xs transition-all duration-500 ease-in-out text-xs font-bold whitespace-nowrap">
               Agregar
             </span>

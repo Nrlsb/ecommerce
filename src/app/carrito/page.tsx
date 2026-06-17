@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Importar Componentes Modulares
 import { CartItemList } from '@/components/carrito/CartItemList';
@@ -462,13 +463,17 @@ export default function CarritoPage() {
     }
 
     return (
-        <div className="min-h-screen bg-muted/20 py-8">
+        <div className="min-h-screen bg-muted/20 py-8 relative overflow-hidden">
+            {/* Background Decorative Blurs */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-mercurio-pink opacity-[0.04] rounded-full translate-x-1/3 -translate-y-1/3 blur-3xl pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-mercurio-blue opacity-[0.04] rounded-full -translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none"></div>
+
             <Script 
                 src="https://ventasonline.payway.com.ar/static/v2.6.4/decidir.js" 
                 strategy="lazyOnload" 
             />
             
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="mb-8">
                     <Link href="/catalogo" className="inline-flex items-center text-foreground/60 hover:text-primary transition-colors text-sm font-medium mb-4">
                         <ArrowLeft className="w-4 h-4 mr-2" /> Seguir Comprando
@@ -478,34 +483,51 @@ export default function CarritoPage() {
 
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Productos en el Carrito o Formulario de Envío */}
-                    <div className="flex-1 space-y-6">
-                        {showShippingForm ? (
-                            <div className="space-y-6">
-                                <ShippingForm 
-                                    deliveryMethod={deliveryMethod}
-                                    setDeliveryMethod={setDeliveryMethod}
-                                    shippingData={shippingData}
-                                    setShippingData={setShippingData}
-                                    billingData={billingData}
-                                    setBillingData={setBillingData}
-                                    errors={formErrors}
-                                    onBackToCart={() => setShowShippingForm(false)}
-                                />
-
-                                {paymentMethod === 'payway' && (
-                                    <PaywayForm 
-                                        cardData={cardData}
-                                        setCardData={setCardData}
-                                        installments={installments}
-                                        setInstallments={setInstallments}
-                                        paywayError={paywayError}
-                                        finalPrice={finalPrice}
+                    <div className="flex-1 overflow-hidden">
+                        <AnimatePresence mode="wait">
+                            {showShippingForm ? (
+                                <motion.div 
+                                    key="shipping-flow"
+                                    initial={{ opacity: 0, x: 50 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -50 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    className="space-y-6"
+                                >
+                                    <ShippingForm 
+                                        deliveryMethod={deliveryMethod}
+                                        setDeliveryMethod={setDeliveryMethod}
+                                        shippingData={shippingData}
+                                        setShippingData={setShippingData}
+                                        billingData={billingData}
+                                        setBillingData={setBillingData}
+                                        errors={formErrors}
+                                        onBackToCart={() => setShowShippingForm(false)}
                                     />
-                                )}
-                            </div>
-                        ) : (
-                            <CartItemList />
-                        )}
+
+                                    {paymentMethod === 'payway' && (
+                                        <PaywayForm 
+                                            cardData={cardData}
+                                            setCardData={setCardData}
+                                            installments={installments}
+                                            setInstallments={setInstallments}
+                                            paywayError={paywayError}
+                                            finalPrice={finalPrice}
+                                        />
+                                    )}
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="cart-items"
+                                    initial={{ opacity: 0, x: -50 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 50 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                >
+                                    <CartItemList />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     {/* Resumen de Compra y Selección de Pago */}

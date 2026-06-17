@@ -9,6 +9,7 @@ import { FilterPanel } from '@/components/catalogo/FilterPanel';
 import { SearchBar } from '@/components/catalogo/SearchBar';
 import { ProductGrid } from '@/components/catalogo/ProductGrid';
 import { FilterChips } from '@/components/catalogo/FilterChips';
+import { motion } from 'framer-motion';
 
 interface Category {
   id: string;
@@ -243,8 +244,39 @@ function CatalogoContent() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/20 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-muted/20 py-8 relative overflow-hidden">
+      {/* Background Decorative Blurs */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-mercurio-pink opacity-[0.04] rounded-full translate-x-1/3 -translate-y-1/3 blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-mercurio-blue opacity-[0.04] rounded-full -translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none"></div>
+
+      {/* Animated Paint Drops */}
+      <motion.div 
+        animate={{
+          y: [0, -15, 0],
+          x: [0, 5, 0],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        className="absolute top-1/4 left-10 w-24 h-24 rounded-full bg-mercurio-yellow/5 blur-2xl pointer-events-none"
+      />
+      <motion.div 
+        animate={{
+          y: [0, 20, 0],
+          x: [0, -10, 0],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2
+        }}
+        className="absolute bottom-1/4 right-10 w-32 h-32 rounded-full bg-mercurio-green/5 blur-3xl pointer-events-none"
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="mb-8">
           <h1 className="text-4xl font-black text-foreground tracking-tight">Catálogo de Productos</h1>
           <p className="text-foreground/60 mt-2 text-lg">Encuentra todo lo que necesitas para tu proyecto</p>

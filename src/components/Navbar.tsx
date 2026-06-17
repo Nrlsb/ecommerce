@@ -137,47 +137,57 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center space-x-5">
                         <GlobalSearch />
 
-                        <button 
+                        <motion.button 
                             onClick={toggleTheme}
-                            className="text-foreground/40 hover:text-primary transition-all p-2.5 rounded-xl hover:bg-primary/5 active:scale-90"
+                            whileHover={{ scale: 1.1, rotate: 15 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="text-foreground/40 hover:text-primary transition-all p-2.5 rounded-xl hover:bg-primary/5 focus:outline-none cursor-pointer"
                             aria-label="Cambiar tema"
                         >
-                            {mounted && theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                        </button>
+                            {mounted && theme === 'dark' ? <Sun size={20} className="text-mercurio-yellow" /> : <Moon size={20} className="text-mercurio-blue" />}
+                        </motion.button>
 
                         {user ? (
                             <div className="flex items-center gap-6">
-                                <Link 
-                                    href="/perfil"
-                                    className="flex items-center gap-2 text-xs font-display font-bold text-foreground/50 hover:text-primary transition-colors max-w-[170px] truncate uppercase tracking-widest group"
-                                >
-                                    <User size={14} className="group-hover:scale-110 transition-transform" />
-                                    {user.nombre || user.email.split('@')[0]}
-                                </Link>
-                                <button
+                                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                    <Link 
+                                        href="/perfil"
+                                        className="flex items-center gap-2 text-xs font-display font-bold text-foreground/50 hover:text-primary transition-colors max-w-[170px] truncate uppercase tracking-widest group"
+                                    >
+                                        <User size={14} className="group-hover:scale-110 transition-transform" />
+                                        {user.nombre || user.email.split('@')[0]}
+                                    </Link>
+                                </motion.div>
+                                <motion.button
                                     onClick={async () => {
                                         await signOut();
                                         router.push('/');
                                     }}
-                                    className="text-foreground/60 hover:text-destructive transition-all text-[11px] font-display font-bold uppercase tracking-widest bg-secondary px-4 py-2 rounded-lg"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="text-foreground/60 hover:text-destructive transition-all text-[11px] font-display font-bold uppercase tracking-widest bg-secondary px-4 py-2 rounded-lg cursor-pointer"
                                 >
                                     Salir
-                                </button>
+                                </motion.button>
                             </div>
                         ) : (
-                            <Link href="/login" className="text-foreground/40 hover:text-primary transition-all hover:scale-110 p-2">
-                                <User size={20} />
-                            </Link>
+                            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+                                <Link href="/login" className="text-foreground/40 hover:text-primary transition-all p-2 flex items-center justify-center">
+                                    <User size={20} />
+                                </Link>
+                            </motion.div>
                         )}
 
-                        <Link href="/carrito" className="text-foreground/60 hover:text-primary transition-all relative p-2.5 bg-primary/5 rounded-xl border border-primary/5 hover:border-primary/20 group/cart">
-                            <ShoppingCart size={20} className="group-hover:rotate-12 transition-transform" />
-                            {totalItems > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 bg-accent text-white text-[9px] font-display font-black w-5 h-5 rounded-full flex items-center justify-center shadow-lg shadow-accent/20 border-2 border-white dark:border-slate-900">
-                                    {totalItems}
-                                </span>
-                            )}
-                        </Link>
+                        <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
+                            <Link href="/carrito" className="text-foreground/60 hover:text-primary transition-all relative p-2.5 bg-primary/5 rounded-xl border border-primary/5 hover:border-primary/20 group/cart flex items-center justify-center">
+                                <ShoppingCart size={20} className="group-hover:rotate-12 transition-transform" />
+                                {totalItems > 0 && (
+                                    <span className="absolute -top-1.5 -right-1.5 bg-accent text-white text-[9px] font-display font-black w-5 h-5 rounded-full flex items-center justify-center shadow-lg shadow-accent/20 border-2 border-white dark:border-slate-900">
+                                        {totalItems}
+                                    </span>
+                                )}
+                            </Link>
+                        </motion.div>
                     </div>
 
                     {/* Mobile menu button */}
