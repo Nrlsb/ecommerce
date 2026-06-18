@@ -174,7 +174,7 @@ export default function AdminDashboard() {
     ];
 
     return (
-        <div className="min-h-screen bg-muted/30 pb-20 relative overflow-hidden">
+        <div className="min-h-screen bg-slate-50/70 dark:bg-muted/30 pb-20 relative overflow-hidden">
             {/* Background Glow Blobs */}
             <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 dark:bg-blue-500/[0.03] rounded-full filter blur-[120px] -z-10 pointer-events-none" />
             <div className="absolute top-[35%] right-1/4 w-[400px] h-[400px] bg-accent/5 dark:bg-pink-500/[0.02] rounded-full filter blur-[100px] -z-10 pointer-events-none" />
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.05 }}
-                                className="bg-card p-6 rounded-2xl border border-border/80 shadow-sm flex items-center gap-5 hover:border-primary/40 hover:bg-primary/5 hover:scale-[1.02] transition-all duration-300 group h-full cursor-pointer relative overflow-hidden premium-border-hover"
+                                className="bg-card p-6 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm flex items-center gap-5 hover:border-primary/40 hover:bg-primary/5 hover:scale-[1.02] transition-all duration-300 group h-full cursor-pointer relative overflow-hidden premium-border-hover"
                             >
                                 <div className={`p-4 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
                                     <stat.icon size={28} />
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
                                     <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">{stat.label}</p>
                                     <p className="text-3xl font-black text-foreground mt-0.5">{stat.value}</p>
                                 </div>
-                                <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-[0.03] dark:opacity-[0.05] pointer-events-none group-hover:scale-125 transition-transform duration-500">
+                                <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-[0.04] dark:opacity-[0.06] pointer-events-none group-hover:scale-125 transition-transform duration-500">
                                     <stat.icon size={100} />
                                 </div>
                             </motion.div>
@@ -239,7 +239,7 @@ export default function AdminDashboard() {
 
                 {/* Financial Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div className="bg-card p-6 rounded-2xl border border-border/80 shadow-sm flex items-center gap-5 hover:scale-[1.02] hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all duration-300 relative overflow-hidden group">
+                    <div className="bg-card p-6 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm flex items-center gap-5 hover:scale-[1.02] hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all duration-300 relative overflow-hidden group">
                         <div className="p-4 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
                             <TrendingUp size={28} />
                         </div>
@@ -253,12 +253,12 @@ export default function AdminDashboard() {
                                 Ventas aprobadas y despachadas
                             </p>
                         </div>
-                        <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-[0.03] dark:opacity-[0.05] pointer-events-none group-hover:scale-125 transition-transform duration-500">
+                        <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-[0.04] dark:opacity-[0.06] pointer-events-none group-hover:scale-125 transition-transform duration-500">
                             <TrendingUp size={100} className="text-emerald-500" />
                         </div>
                     </div>
 
-                    <div className="bg-card p-6 rounded-2xl border border-border/80 shadow-sm flex items-center gap-5 hover:scale-[1.02] hover:border-blue-500/30 hover:bg-blue-500/[0.02] transition-all duration-300 relative overflow-hidden group">
+                    <div className="bg-card p-6 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm flex items-center gap-5 hover:scale-[1.02] hover:border-blue-500/30 hover:bg-blue-500/[0.02] transition-all duration-300 relative overflow-hidden group">
                         <div className="p-4 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
                             <CheckCircle2 size={28} />
                         </div>
@@ -272,12 +272,12 @@ export default function AdminDashboard() {
                                 Monto medio por compra
                             </p>
                         </div>
-                        <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-[0.03] dark:opacity-[0.05] pointer-events-none group-hover:scale-125 transition-transform duration-500">
+                        <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-[0.04] dark:opacity-[0.06] pointer-events-none group-hover:scale-125 transition-transform duration-500">
                             <CheckCircle2 size={100} className="text-blue-500" />
                         </div>
                     </div>
 
-                    <div className="bg-card p-6 rounded-2xl border border-border/80 shadow-sm flex items-center gap-5 hover:scale-[1.02] hover:border-purple-500/30 hover:bg-purple-500/[0.02] transition-all duration-300 relative overflow-hidden group">
+                    <div className="bg-card p-6 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm flex items-center gap-5 hover:scale-[1.02] hover:border-purple-500/30 hover:bg-purple-500/[0.02] transition-all duration-300 relative overflow-hidden group">
                         <div className="p-4 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-300">
                             <ShoppingBag size={28} />
                         </div>
@@ -291,14 +291,14 @@ export default function AdminDashboard() {
                                 Órdenes cobradas con éxito
                             </p>
                         </div>
-                        <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-[0.03] dark:opacity-[0.05] pointer-events-none group-hover:scale-125 transition-transform duration-500">
+                        <div className="absolute right-0 bottom-0 translate-x-2 translate-y-2 opacity-[0.04] dark:opacity-[0.06] pointer-events-none group-hover:scale-125 transition-transform duration-500">
                             <ShoppingBag size={100} className="text-purple-500" />
                         </div>
                     </div>
                 </div>
 
                 {/* Sales Evolution Chart */}
-                <div className="bg-card p-8 rounded-2xl border border-border/80 shadow-sm mb-10">
+                <div className="bg-card p-8 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm mb-10">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-xl font-bold flex items-center gap-2">
                             <TrendingUp size={22} className="text-primary dark:text-blue-400" />
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
                 {/* Charts & Real-time Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                     {/* Sales by Brand Chart */}
-                    <div className="bg-card p-8 rounded-2xl border border-border/80 shadow-sm">
+                    <div className="bg-card p-8 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <TrendingUp size={22} className="text-primary dark:text-blue-400" />
@@ -378,7 +378,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Low Stock Alerts */}
-                    <div className="bg-card p-8 rounded-2xl border border-border/80 shadow-sm">
+                    <div className="bg-card p-8 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <AlertTriangle size={22} className="text-orange-500" />
@@ -408,7 +408,7 @@ export default function AdminDashboard() {
                     </div>
                     
                     {/* Products Without Image */}
-                    <div id="no-image-section" className="bg-card p-8 rounded-2xl border border-border/80 shadow-sm">
+                    <div id="no-image-section" className="bg-card p-8 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <AlertTriangle size={22} className="text-red-500" />
@@ -447,7 +447,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Top Searches */}
-                    <div className="bg-card p-8 rounded-2xl border border-border/80 shadow-sm">
+                    <div className="bg-card p-8 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <Search size={22} className="text-blue-500" />
@@ -491,14 +491,14 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Operations Management */}
-                <div className="bg-card p-8 rounded-2xl border border-border/80 shadow-sm relative overflow-hidden">
+                <div className="bg-card p-8 rounded-2xl border border-slate-100 dark:border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.025)] dark:shadow-sm relative overflow-hidden">
                     <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                         <Settings size={22} className="text-primary dark:text-blue-400" />
                         Operaciones y Gestión
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                         {/* Card 1: Edición Masiva */}
-                        <Link href="/admin/productos" className="p-5 rounded-xl border border-border/80 bg-card hover:border-blue-500/50 hover:bg-blue-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4">
+                        <Link href="/admin/productos" className="p-5 rounded-xl border border-slate-100 dark:border-border/80 bg-card hover:border-blue-500/50 hover:bg-blue-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 shadow-[0_4px_20px_rgb(0,0,0,0.015)] dark:shadow-none">
                             <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                                 <Package size={22} />
                             </div>
@@ -509,7 +509,7 @@ export default function AdminDashboard() {
                         </Link>
 
                         {/* Card 2: Gestión de Usuarios */}
-                        <Link href="/admin/usuarios" className="p-5 rounded-xl border border-border/80 bg-card hover:border-purple-500/50 hover:bg-purple-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4">
+                        <Link href="/admin/usuarios" className="p-5 rounded-xl border border-slate-100 dark:border-border/80 bg-card hover:border-purple-500/50 hover:bg-purple-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 shadow-[0_4px_20px_rgb(0,0,0,0.015)] dark:shadow-none">
                             <div className="p-3 bg-purple-500/10 text-purple-500 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                                 <UserCog size={22} />
                             </div>
@@ -520,7 +520,7 @@ export default function AdminDashboard() {
                         </Link>
 
                         {/* Card 3: Gestión de Sucursales */}
-                        <Link href="/admin/sucursales" className="p-5 rounded-xl border border-border/80 bg-card hover:border-sky-500/50 hover:bg-sky-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4">
+                        <Link href="/admin/sucursales" className="p-5 rounded-xl border border-slate-100 dark:border-border/80 bg-card hover:border-sky-500/50 hover:bg-sky-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 shadow-[0_4px_20px_rgb(0,0,0,0.015)] dark:shadow-none">
                             <div className="p-3 bg-sky-500/10 text-sky-500 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                                 <MapPin size={22} />
                             </div>
@@ -534,7 +534,7 @@ export default function AdminDashboard() {
                         <button 
                             onClick={handleExport}
                             disabled={exporting}
-                            className="p-5 rounded-xl border border-border/80 bg-card hover:border-green-500/50 hover:bg-green-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 text-left w-full h-full disabled:opacity-50 cursor-pointer"
+                            className="p-5 rounded-xl border border-slate-100 dark:border-border/80 bg-card hover:border-green-500/50 hover:bg-green-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 text-left w-full h-full disabled:opacity-50 cursor-pointer shadow-[0_4px_20px_rgb(0,0,0,0.015)] dark:shadow-none"
                         >
                             <div className="p-3 bg-green-500/10 text-green-500 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                                 {exporting ? <Loader2 className="animate-spin" size={22} /> : <FileDown size={22} />}
@@ -546,7 +546,7 @@ export default function AdminDashboard() {
                         </button>
 
                         {/* Card 5: Arrepentimiento */}
-                        <Link href="/admin/arrepentimientos" className="p-5 rounded-xl border border-border/80 bg-card hover:border-red-500/50 hover:bg-red-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4">
+                        <Link href="/admin/arrepentimientos" className="p-5 rounded-xl border border-slate-100 dark:border-border/80 bg-card hover:border-red-500/50 hover:bg-red-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 shadow-[0_4px_20px_rgb(0,0,0,0.015)] dark:shadow-none">
                             <div className="p-3 bg-red-500/10 text-red-500 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                                 <Undo2 size={22} />
                             </div>
@@ -560,7 +560,7 @@ export default function AdminDashboard() {
                         <button
                             onClick={() => handleSync('products')}
                             disabled={syncingProducts}
-                            className="p-5 rounded-xl border border-border/80 bg-card hover:border-indigo-500/50 hover:bg-indigo-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 text-left w-full h-full disabled:opacity-50 cursor-pointer"
+                            className="p-5 rounded-xl border border-slate-100 dark:border-border/80 bg-card hover:border-indigo-500/50 hover:bg-indigo-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 text-left w-full h-full disabled:opacity-50 cursor-pointer shadow-[0_4px_20px_rgb(0,0,0,0.015)] dark:shadow-none"
                         >
                             <div className="p-3 bg-indigo-500/10 text-indigo-500 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                                 {syncingProducts ? <Loader2 className="animate-spin" size={22} /> : <RefreshCw className="group-hover:rotate-180 transition-transform duration-500" size={22} />}
@@ -575,7 +575,7 @@ export default function AdminDashboard() {
                         <button
                             onClick={() => handleSync('categories')}
                             disabled={syncingCategories}
-                            className="p-5 rounded-xl border border-border/80 bg-card hover:border-pink-500/50 hover:bg-pink-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 text-left w-full h-full disabled:opacity-50 cursor-pointer"
+                            className="p-5 rounded-xl border border-slate-100 dark:border-border/80 bg-card hover:border-pink-500/50 hover:bg-pink-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 text-left w-full h-full disabled:opacity-50 cursor-pointer shadow-[0_4px_20px_rgb(0,0,0,0.015)] dark:shadow-none"
                         >
                             <div className="p-3 bg-pink-500/10 text-pink-500 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                                 {syncingCategories ? <Loader2 className="animate-spin" size={22} /> : <Tags size={22} />}
@@ -587,7 +587,7 @@ export default function AdminDashboard() {
                         </button>
 
                         {/* Card 8: Agrupador de Variantes */}
-                        <Link href="/admin/productos/agrupar" className="p-5 rounded-xl border border-border/80 bg-card hover:border-emerald-500/50 hover:bg-emerald-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4">
+                        <Link href="/admin/productos/agrupar" className="p-5 rounded-xl border border-slate-100 dark:border-border/80 bg-card hover:border-emerald-500/50 hover:bg-emerald-500/[0.03] hover:scale-[1.02] transition-all duration-300 group flex items-start gap-4 shadow-[0_4px_20px_rgb(0,0,0,0.015)] dark:shadow-none">
                             <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                                 <LinkIcon size={22} />
                             </div>
