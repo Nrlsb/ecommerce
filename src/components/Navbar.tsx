@@ -40,15 +40,50 @@ export default function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const toggleTheme = () => {
+    const toggleTheme = (e?: React.MouseEvent) => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
-        setTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
+        const updateThemeClass = () => {
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+            if (newTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        };
+
+        if (!e || typeof document === 'undefined' || !document.startViewTransition) {
+            updateThemeClass();
+            return;
         }
+
+        const x = e.clientX;
+        const y = e.clientY;
+        const endRadius = Math.hypot(
+            Math.max(x, window.innerWidth - x),
+            Math.max(y, window.innerHeight - y)
+        );
+
+        const transition = document.startViewTransition(() => {
+            updateThemeClass();
+        });
+
+        transition.ready.then(() => {
+            const clipPath = [
+                `circle(0px at ${x}px ${y}px)`,
+                `circle(${endRadius}px at ${x}px ${y}px)`
+            ];
+            document.documentElement.animate(
+                {
+                    clipPath: theme === 'light' ? clipPath : [...clipPath].reverse(),
+                },
+                {
+                    duration: 500,
+                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                    pseudoElement: theme === 'light' ? '::view-transition-new(root)' : '::view-transition-old(root)',
+                }
+            );
+        });
     };
 
     // Stagger animation variants for mobile menu
@@ -85,21 +120,25 @@ export default function Navbar() {
     };
 
     return (
-        <nav className={`sticky top-0 z-50 w-full glass transition-all duration-500 ${isScrolled ? 'py-0.5 shadow-lg bg-background/90 backdrop-blur-2xl border-b border-border/40' : 'py-2 shadow-premium'}`}>
+        <nav className="sticky top-0 z-50 w-full transition-all duration-500 bg-transparent shadow-none border-none">
             {/* Top Announcement Bar with Amarillo Mercurio */}
-            <div className="bg-mercurio-yellow text-slate-900 text-[9px] sm:text-xs font-display font-black tracking-[0.18em] text-center py-2 px-4 uppercase relative z-50 flex items-center justify-center gap-2 select-none shadow-sm">
+            <div className={`bg-mercurio-yellow text-slate-900 text-[9px] sm:text-xs font-display font-black tracking-[0.18em] text-center py-2 px-4 uppercase relative z-50 flex items-center justify-center gap-2 select-none shadow-sm transition-all duration-500 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0 pointer-events-none' : 'h-8 opacity-100'}`}>
                 <span>¡3 Cuotas sin interés hoy! 💳</span>
                 <span className="opacity-40">|</span>
                 <span>Envíos rápidos a todo el país 🚚</span>
             </div>
             {/* Top accent line with brand colors */}
-            <div className="h-1 w-full flex relative">
+            <div className={`h-1 w-full flex relative transition-all duration-500 ${isScrolled ? 'opacity-0 h-0' : 'opacity-100'}`}>
                 <div className="h-full flex-1 bg-mercurio-blue" />
                 <div className="h-full flex-1 bg-mercurio-yellow" />
                 <div className="h-full flex-1 bg-mercurio-green" />
                 <div className="h-full flex-1 bg-mercurio-pink" />
             </div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-1">
+            <div className={`transition-all duration-500 ${
+                isScrolled 
+                ? 'max-w-6xl mx-auto mt-3 px-6 rounded-full border border-border/40 shadow-premium bg-background/80 backdrop-blur-2xl' 
+                : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-1 bg-background/60 backdrop-blur-md border-b border-border/20 rounded-none'
+            }`}>
                 <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'h-14' : 'h-16'}`}>
                     {/* Logo con Área de Interferencia del 10% */}
                     <Link href="/" className="flex items-center gap-4 group mr-6 md:mr-8 pl-1">
@@ -138,7 +177,7 @@ export default function Navbar() {
                         <GlobalSearch />
 
                         <motion.button 
-                            onClick={toggleTheme}
+                            onClick={(e) => toggleTheme(e)}
                             whileHover={{ scale: 1.1, rotate: 15 }}
                             whileTap={{ scale: 0.9 }}
                             className="text-foreground/40 hover:text-primary transition-all p-2.5 rounded-xl hover:bg-primary/5 focus:outline-none cursor-pointer"
@@ -211,7 +250,11 @@ export default function Navbar() {
             </div>
 
             {/* Categorías Desktop Bar - Refined */}
-            <div className="hidden md:block border-t border-border/50 bg-white/50 dark:bg-slate-950/20 backdrop-blur-md">
+            <div className={`hidden md:block transition-all duration-500 overflow-hidden ${
+                isScrolled 
+                ? 'h-0 opacity-0 border-none' 
+                : 'border-t border-border/50 bg-white/50 dark:bg-slate-950/20 backdrop-blur-md h-11'
+            }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-center items-center h-11 space-x-1">
                         {PRODUCT_CATEGORIES_HIERARCHY.map((group) => (
@@ -377,7 +420,7 @@ export default function Navbar() {
                             <motion.div variants={linkVariants} className="mt-8 flex items-center gap-4">
                                 <span className="text-sm font-semibold text-foreground/40">Tema:</span>
                                 <button 
-                                    onClick={toggleTheme}
+                                    onClick={(e) => toggleTheme(e)}
                                     className="p-3 bg-secondary rounded-xl text-foreground flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
                                 >
                                     {mounted && theme === 'dark' ? (

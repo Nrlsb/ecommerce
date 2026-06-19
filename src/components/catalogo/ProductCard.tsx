@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { useWishlist } from '@/context/WishlistContext';
@@ -23,6 +23,28 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const isWishlisted = isInWishlist(product.id);
 
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const rotateX = useTransform(y, [-150, 150], [7, -7]);
+  const rotateY = useTransform(x, [-150, 150], [-7, 7]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left - width / 2;
+    const mouseY = e.clientY - rect.top - height / 2;
+    x.set(mouseX);
+    y.set(mouseY);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -43,7 +65,10 @@ export function ProductCard({ product, delay, onAddToCart }: ProductCardProps) {
         stiffness: 100,
         damping: 20
       }}
-      className="bg-card rounded-[2rem] overflow-hidden border border-border hover:shadow-[0_25px_60px_rgba(30,55,115,0.2)] hover:-translate-y-2.5 transition-all duration-500 ease-out flex flex-col group p-2 relative premium-border-hover"
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="bg-card rounded-[2rem] overflow-hidden border border-border hover:shadow-[0_25px_60px_rgba(30,55,115,0.2)] hover:-translate-y-2.5 transition-[background-color,border-color,box-shadow] duration-500 ease-out flex flex-col group p-2 relative premium-border-hover"
     >
       <Link href={`/catalogo/${product.id}`} className="block relative h-64 overflow-hidden rounded-2xl group-hover:shadow-lg transition-all duration-500">
         <div className="w-full h-full bg-muted dark:bg-slate-900/50 relative flex items-center justify-center p-4">

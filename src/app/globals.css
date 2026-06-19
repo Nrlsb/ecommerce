@@ -292,3 +292,26 @@ h1, h2, h3, h4, h5, h6, .font-display {
     transform: translateX(100%);
   }
 }
+
+/* Custom View Transitions for Theme Toggle Ripple Effect */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+.dark::view-transition-old(root) {
+  z-index: 9999;
+}
+
+.dark::view-transition-new(root) {
+  z-index: 1;
+}

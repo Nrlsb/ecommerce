@@ -10,8 +10,20 @@ interface RoomSimulatorProps {
 }
 
 const ROOMS = [
-    { id: 'living', name: 'Living Moderno', image: '/simulator/living.png', icon: Home },
-    { id: 'bedroom', name: 'Dormitorio Relax', image: '/simulator/bedroom.png', icon: Bed },
+    { 
+        id: 'living', 
+        name: 'Living Moderno', 
+        image: '/simulator/living.png', 
+        icon: Home,
+        clipPath: 'polygon(0% 0%, 100% 0%, 100% 75%, 72% 75%, 72% 100%, 0% 100%)' 
+    },
+    { 
+        id: 'bedroom', 
+        name: 'Dormitorio Relax', 
+        image: '/simulator/bedroom.png', 
+        icon: Bed,
+        clipPath: 'polygon(0% 0%, 100% 0%, 100% 65%, 0% 65%)' 
+    },
 ];
 
 const COLORS = [
@@ -24,7 +36,7 @@ const COLORS = [
 ];
 
 const RoomSimulator: FC<RoomSimulatorProps> = ({ productName, productColor = '#3b82f6' }) => {
-    const [activeRoom, setActiveRoom] = useState(ROOMS[0]);
+    const [activeRoom, setActiveRoom] = useState<typeof ROOMS[0]>(ROOMS[0]);
     const [selectedColor, setSelectedColor] = useState(productColor);
     const [intensity, setIntensity] = useState(0.7);
 
@@ -84,9 +96,9 @@ const RoomSimulator: FC<RoomSimulatorProps> = ({ productName, productColor = '#3
                                     backgroundColor: selectedColor,
                                     opacity: intensity,
                                     mixBlendMode: 'multiply',
-                                    // Masking would go here for specific walls, using a gradient for now to simulate focus on the main wall
-                                    maskImage: 'radial-gradient(circle at center, black 40%, transparent 95%)',
-                                    WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 95%)'
+                                    clipPath: activeRoom.clipPath,
+                                    maskImage: 'radial-gradient(circle at center, black 60%, rgba(0,0,0,0.35) 100%)',
+                                    WebkitMaskImage: 'radial-gradient(circle at center, black 60%, rgba(0,0,0,0.35) 100%)'
                                 }}
                             />
                         </motion.div>
