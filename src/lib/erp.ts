@@ -17,12 +17,12 @@ const PROVINCIAS_INTEGRACION: Record<string, string> = {
   "AR-Z": "SC", "AR-S": "SF", "AR-G": "SE", "AR-V": "TF", "AR-T": "TU"
 };
 
-const getFacturaTipoCode = (tipo: string): string => {
+const getFacturaTipoCode = (tipo: string | null | undefined): string => {
   const t = tipo || 'Consumidor Final';
   return TIPO_FACTURA[t] || "F";
 };
 
-const getProvinciaCode = (provincia: string): string => {
+const getProvinciaCode = (provincia: string | null | undefined): string => {
   const p = (provincia || '').trim();
   if (p.length === 2) return p.toUpperCase();
   if (PROVINCIAS_INTEGRACION[p]) return PROVINCIAS_INTEGRACION[p];

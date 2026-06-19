@@ -9,7 +9,7 @@ export async function GET() {
     console.log('[Test-ERP] Iniciando endpoint de pruebas...');
 
     // 1. Intentar buscar el último pedido
-    const { data: pedido, error: errorPedido } = await supabaseAdmin
+    const { data: pedido } = await supabaseAdmin
       .from('pedidos')
       .select('id')
       .order('created_at', { ascending: false })
@@ -82,7 +82,7 @@ export async function GET() {
     console.log(`[Test-ERP] Ejecutando syncOrderToERP para pedido: ${orderId}`);
     
     // 3. Ejecutar la sincronización
-    const success = await syncOrderToERP(orderId);
+    const success = await syncOrderToERP(orderId!);
 
     // 4. Leer la bitácora api.txt para retornar el log
     let logContent = 'No se pudo leer la bitácora api.txt';
