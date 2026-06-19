@@ -4,6 +4,7 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 import { calculateShippingCost } from '@/lib/shipping';
 import { logPaywayOperation } from '@/lib/payway-logger';
+import { syncOrderToERP } from '@/lib/erp';
 
 // Configuración de MercadoPago
 const mpClient = new MercadoPagoConfig({ 
@@ -365,6 +366,11 @@ export async function POST(request: NextRequest) {
                 // Enviar correo de confirmación de forma asíncrona
                 sendOrderConfirmationEmail(pedido.id).catch(err => {
                     console.error('Error al enviar correo de confirmación de pedido Payway:', err);
+                });
+
+                // Sincronizar pedido con el ERP
+                syncOrderToERP(pedido.id).catch(err => {
+                    console.error('Error al sincronizar pedido Payway con ERP:', err);
                 });
 
                 return NextResponse.json(

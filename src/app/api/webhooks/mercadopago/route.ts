@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { sendOrderConfirmationEmail } from '@/lib/email';
+import { syncOrderToERP } from '@/lib/erp';
 
 // Configuración de MercadoPago
 const client = new MercadoPagoConfig({ 
@@ -60,6 +61,9 @@ export async function POST(request: NextRequest) {
                 if (status === 'approved') {
                     sendOrderConfirmationEmail(orderId).catch(err => {
                         console.error('Error al enviar correo de confirmación de pedido:', err);
+                    });
+                    syncOrderToERP(orderId).catch(err => {
+                        console.error('Error al sincronizar pedido con ERP:', err);
                     });
                 }
             }

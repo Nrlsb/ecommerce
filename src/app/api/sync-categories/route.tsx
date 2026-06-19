@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { env } from '@/lib/env';
 
 // Utilidad para procesar en lotes
 const chunkArray = <T,>(array: T[], size: number): T[][] => {
@@ -17,7 +18,7 @@ export async function GET() {
     try {
         console.log('Iniciando sincronización de categorías...');
         // Fetch de categorías desde la API externa (usamos MERWS01D en mayúsculas para consistencia)
-        const response = await fetch('http://119.8.78.68:9078/rest/MERWS01D', {
+        const response = await fetch(env.protheusSyncCategoriesUrl, {
             cache: 'no-store'
         });
         if (!response.ok) {

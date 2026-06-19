@@ -6,6 +6,10 @@ export const env = {
   paywayPrivateKey: process.env.PAYWAY_PRIVATE_KEY || '',
   paywayWebhookSecret: process.env.PAYWAY_WEBHOOK_SECRET || '',
   paywayEnv: process.env.NEXT_PUBLIC_PAYWAY_ENV || 'sandbox',
+  protheusApiUrl: process.env.PROTHEUS_API_URL || 'http://119.8.78.68:8081/rest/MERWS01G/',
+  protheusShippingUrl: process.env.PROTHEUS_SHIPPING_URL || 'http://119.8.78.68:8081/rest/MERWS01H/',
+  protheusSyncCategoriesUrl: process.env.PROTHEUS_SYNC_CATEGORIES_URL || 'http://119.8.78.68:8081/rest/MERWS01D',
+  protheusSyncProductsUrl: process.env.PROTHEUS_SYNC_PRODUCTS_URL || 'http://119.8.78.68:8081/rest/MERWS01B',
 } as const;
 
 // Validación para asegurar que las variables están presentes
@@ -19,6 +23,22 @@ if (typeof window === 'undefined') {
 
   if (!env.paywayPublicKey || !env.paywayPrivateKey) {
     console.warn('⚠️ Advertencia: Variables de Payway (pública o privada) incompletas en el servidor.');
+  }
+
+  if (!process.env.PROTHEUS_API_URL) {
+    console.warn('⚠️ Advertencia: PROTHEUS_API_URL no está configurada en el servidor. Utilizando URL por defecto.');
+  }
+
+  if (!process.env.PROTHEUS_SHIPPING_URL) {
+    console.warn('⚠️ Advertencia: PROTHEUS_SHIPPING_URL no está configurada en el servidor. Utilizando URL por defecto.');
+  }
+
+  if (!process.env.PROTHEUS_SYNC_CATEGORIES_URL) {
+    console.warn('⚠️ Advertencia: PROTHEUS_SYNC_CATEGORIES_URL no está configurada en el servidor. Utilizando URL por defecto.');
+  }
+
+  if (!process.env.PROTHEUS_SYNC_PRODUCTS_URL) {
+    console.warn('⚠️ Advertencia: PROTHEUS_SYNC_PRODUCTS_URL no está configurada en el servidor. Utilizando URL por defecto.');
   }
 } else {
   // Validación del lado del Cliente (Navegador)

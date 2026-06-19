@@ -1,4 +1,5 @@
 import { supabaseAdmin } from './supabase-admin';
+import { env } from './env';
 
 export interface CartItem {
     id: number | string;
@@ -96,7 +97,7 @@ export async function calculateShippingCost({
     // 4. Consultar tarifas externas
     let rates: ShippingRate[] = [];
     try {
-        const response = await fetch('http://119.8.78.68:9078/rest/MERWS01H/', {
+        const response = await fetch(env.protheusShippingUrl, {
             next: { revalidate: 3600 } // Cache por 1 hora
         });
         if (response.ok) {
