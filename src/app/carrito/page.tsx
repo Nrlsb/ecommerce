@@ -137,10 +137,12 @@ export default function CarritoPage() {
         const fetchShippingCost = async () => {
             if (deliveryMethod === 'retiro') {
                 setShippingCost(0);
+                setIsCalculatingShipping(false);
                 return;
             }
             if (!shippingData.provincia) {
                 setShippingCost(0);
+                setIsCalculatingShipping(false);
                 return;
             }
 
@@ -409,7 +411,7 @@ export default function CarritoPage() {
             appendField('card_expiration_year', cardData.cardExpirationYear);
             appendField('security_code', cardData.securityCode);
             appendField('card_holder_name', cardData.cardHolderName);
-            appendField('card_holder_doc_type', cardData.cardHolderIdentificationType);
+            appendField('card_holder_doc_type', cardData.cardHolderIdentificationType.toUpperCase());
             appendField('card_holder_doc_number', cardData.cardHolderIdentificationNumber);
 
             dec.createToken(formElement, async (status: number, response: any) => {
