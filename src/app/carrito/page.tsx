@@ -321,14 +321,35 @@ export default function CarritoPage() {
     };
 
     const getPaymentMethodId = (bin: string) => {
-        if (bin.startsWith('451772')) return 31; // Visa Débito
-        if (bin.startsWith('450799') || bin.startsWith('454640') || bin.startsWith('425821')) return 1; // Visa Crédito
-        if (bin.startsWith('529991') || bin.startsWith('545533') || bin.startsWith('520423')) return 104; // MasterCard
-        if (bin.startsWith('589657')) return 63; // Cabal
-        if (bin.startsWith('4')) return 1;
-        if (bin.startsWith('5')) return 15;
-        if (bin.startsWith('3')) return 65;
-        return 1;
+        // Visa (Parametrizados: 1 para Crédito, 31 para Débito)
+        const visaDebitoBins = ['451772', '451766', '451769', '451773', '402287', '402288', '402289', '440051', '451757', '451758'];
+        if (bin.startsWith('4') && visaDebitoBins.some(prefix => bin.startsWith(prefix))) {
+            return 31; // Visa Débito
+        }
+        if (bin.startsWith('4')) {
+            return 1; // Visa Crédito
+        }
+
+        // MasterCard (Parametrizados: 104 para Crédito, 105 para Débito, 106 para Prepaga/Otros)
+        const mcDebitoBins = ['5010', '5011', '5012', '5013', '5020', '5021', '5022', '5030', '5031', '5032', '5033', '5034', '5035', '5036', '5037', '5038', '5040', '5041', '5042', '5043', '5044', '5045', '5046', '5047', '5048', '5049', '5885'];
+        if ((bin.startsWith('5') || bin.startsWith('2')) && mcDebitoBins.some(prefix => bin.startsWith(prefix))) {
+            return 105; // MasterCard Débito
+        }
+        if (bin.startsWith('5') || bin.startsWith('2')) {
+            return 104; // MasterCard Crédito
+        }
+
+        // American Express (Parametrizado: 111)
+        if (bin.startsWith('3')) {
+            return 111; // AMEX
+        }
+
+        // Discover (Parametrizado: 139)
+        if (bin.startsWith('6')) {
+            return 139; // Discover
+        }
+
+        return 1; // Default a Visa Crédito
     };
 
     const processPayway = () => {
