@@ -132,6 +132,8 @@ export default function CarritoPage() {
 
     // Calcular costos de envío
     useEffect(() => {
+        let active = true;
+
         const fetchShippingCost = async () => {
             if (deliveryMethod === 'retiro') {
                 setShippingCost(0);
@@ -154,6 +156,8 @@ export default function CarritoPage() {
                     })
                 });
 
+                if (!active) return;
+
                 if (response.ok) {
                     const data = await response.json();
                     setShippingCost(data.costoEnvio || 0);
@@ -161,13 +165,21 @@ export default function CarritoPage() {
                     setShippingCost(8500); // Fallback
                 }
             } catch (err) {
+                if (!active) return;
                 console.error('Error al conectar con API de envío:', err);
                 setShippingCost(8500); // Fallback
             } finally {
-                setIsCalculatingShipping(false);
+                if (active) {
+                    setIsCalculatingShipping(false);
+                }
             }
         };
+
         fetchShippingCost();
+
+        return () => {
+            active = false;
+        };
     }, [deliveryMethod, shippingData.provincia, items, finalPrice]);
 
     const handleApplyCoupon = async () => {
@@ -277,7 +289,7 @@ export default function CarritoPage() {
                     envio_codigo_postal: shippingData.zipCode,
                     envio_provincia: shippingData.provincia,
                     envio_notas: shippingData.notes,
-                    envio_costo: shippingCost,
+                    envio_costo: deliveryMethod === 'retiro' ? 0 : shippingCost,
 
                     facturacion_tipo: billingData.tipo,
                     facturacion_nombre: billingData.tipo === 'Consumidor Final' ? shippingData.fullName : billingData.nombre,
@@ -434,7 +446,7 @@ export default function CarritoPage() {
                     envio_codigo_postal: shippingData.zipCode,
                     envio_provincia: shippingData.provincia,
                     envio_notas: shippingData.notes,
-                    envio_costo: shippingCost,
+                    envio_costo: deliveryMethod === 'retiro' ? 0 : shippingCost,
 
                     facturacion_tipo: billingData.tipo,
                     facturacion_nombre: billingData.tipo === 'Consumidor Final' ? shippingData.fullName : billingData.nombre,
@@ -565,7 +577,7 @@ export default function CarritoPage() {
                             onRemoveCoupon={handleRemoveCoupon}
                             totalPrice={totalPrice}
                             discountAmount={discountAmount}
-                            shippingCost={shippingCost}
+                            shippingCost={deliveryMethod === 'retiro' ? 0 : shippingCost}
                             isCalculatingShipping={isCalculatingShipping}
                             installments={installments}
                             isProcessing={isProcessing}
