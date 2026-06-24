@@ -336,7 +336,7 @@ export default function CarritoPage() {
 
     const getPaymentMethodId = (bin: string) => {
         // Visa (Parametrizados: 1 para Crédito, 31 para Débito)
-        const visaDebitoBins = ['451772', '451766', '451769', '451773', '402287', '402288', '402289', '440051', '451757', '451758'];
+        const visaDebitoBins = ['451772', '451766', '451769', '451773', '402287', '402288', '402289', '440051', '451757', '451758', '451764'];
         if (bin.startsWith('4') && visaDebitoBins.some(prefix => bin.startsWith(prefix))) {
             return 31; // Visa Débito
         }
@@ -393,6 +393,13 @@ export default function CarritoPage() {
             const decidirEnvUrl = process.env.NEXT_PUBLIC_PAYWAY_ENV === 'production' 
                 ? 'https://ventasonline.payway.com.ar/api/v2' 
                 : 'https://developers-ventasonline.payway.com.ar/api/v2';
+
+            console.log('--- DIAGNÓSTICO PAYWAY ---');
+            console.log('URL de Entorno:', decidirEnvUrl);
+            console.log('Public Key (primeros 5 caracteres):', publicKey ? publicKey.substring(0, 5) + '...' : 'NO DEFINIDA');
+            console.log('Public Key Completa:', publicKey);
+            console.log('Payway Env:', process.env.NEXT_PUBLIC_PAYWAY_ENV);
+            console.log('---------------------------');
 
             const dec = new (window as any).Decidir(decidirEnvUrl);
             dec.setPublishableKey(publicKey);
