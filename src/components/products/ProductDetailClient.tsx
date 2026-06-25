@@ -275,14 +275,6 @@ export default function ProductDetailClient({ productId, initialProduct }: Produ
                                 {product.marca || 'Pintura Premium'}
                             </div>
                         </motion.div>
-                        
-                        <div className="grid grid-cols-4 gap-6">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="aspect-square bg-muted/20 rounded-2xl border border-border/50 flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity cursor-pointer hover:border-primary/50 p-4">
-                                    <img src="/images/logos/logomercurio.png" alt="Thumbnail placeholder" className="w-full h-auto opacity-40" />
-                                </div>
-                            ))}
-                        </div>
                     </div>
 
                     <div className="flex flex-col">
