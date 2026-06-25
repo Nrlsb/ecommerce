@@ -2,7 +2,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
+  --background: #f8fafc;
   --foreground: #020617; /* Slate 950 */
 
   --primary: #1E3773;
@@ -27,7 +27,7 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  --muted: #f8fafc; /* Slate 50 */
+  --muted: #f1f5f9; /* Slate 100 */
   --muted-foreground: #64748b; /* Slate 500 */
 
   --card: #ffffff;
