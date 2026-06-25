@@ -110,10 +110,10 @@ export async function syncOrderToERP(orderId: string): Promise<boolean> {
 
     // Ajustar campos de entrega si es Retiro en Sucursal (LOCAL)
     if (order.metodo_entrega === 'retiro') {
-      integracion.dirent = (order.envio_notes || order.envio_notas || "Retira por sucursal").replace(/\((.*?)\)/gi, '').trim();
-      integracion.provent = "SF";
-      integracion.locent = "Santa Fe";
-      integracion.cpent = "3000";
+      integracion.encabezado.dirent = (order.envio_notes || order.envio_notas || "Retira por sucursal").replace(/\((.*?)\)/gi, '').trim();
+      integracion.encabezado.provent = "SF";
+      integracion.encabezado.locent = "Santa Fe";
+      integracion.encabezado.cpent = "3000";
     }
 
     // 4. Procesar el detalle de productos

@@ -25,19 +25,36 @@ export function GlobalSearch() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const searchRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
-    // Close when clicking outside
+    // Cerrar al hacer clic fuera o presionar Escape
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setIsOpen(false);
+            }
+        };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
     }, []);
 
-    // Search logic
+    // Enfocar el input cuando se abre el buscador
+    useEffect(() => {
+        if (isOpen && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isOpen]);
+
+    // Lógica de búsqueda
     useEffect(() => {
         const fetchResults = async () => {
             if (debouncedQuery.trim().length < 2) {
@@ -74,45 +91,71 @@ export function GlobalSearch() {
     };
 
     return (
-        <div ref={searchRef} className="relative z-50">
-            <button 
-                onClick={() => setIsOpen(!isOpen)}
-                className="text-foreground/40 hover:text-primary transition-all hover:scale-110 p-2"
-                aria-label="Buscar"
+        <div ref={searchRef} className="relative z-50 flex items-center">
+            {/* Contenedor expandible con Framer Motion */}
+            <motion.form
+                onSubmit={handleSearch}
+                initial={false}
+                animate={{
+                    width: isOpen ? 280 : 40,
+                }}
+                transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                className={`h-10 flex items-center rounded-xl overflow-hidden border transition-all duration-300 ${
+                    isOpen 
+                        ? 'border-primary/30 bg-card shadow-md shadow-primary/5' 
+                        : 'border-transparent hover:bg-primary/5'
+                }`}
             >
-                <Search size={20} />
-            </button>
+                {/* Botón de buscar (icono) */}
+                <button
+                    type="button"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="h-10 w-10 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none flex-shrink-0 cursor-pointer"
+                    aria-label="Buscar"
+                >
+                    <Search size={20} />
+                </button>
 
+                {/* Campo de entrada de texto */}
+                <div className="flex-1 h-full relative flex items-center pr-2">
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Buscar productos, marcas..."
+                        disabled={!isOpen}
+                        className="w-full bg-transparent border-none outline-none text-xs font-semibold text-foreground placeholder:text-foreground/30 h-full pl-1 focus:ring-0 focus:outline-none"
+                    />
+
+                    {/* Botón de borrar (X) */}
+                    <AnimatePresence>
+                        {query && isOpen && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                type="button"
+                                onClick={() => setQuery('')}
+                                className="absolute right-2 text-foreground/40 hover:text-foreground p-1 cursor-pointer flex items-center justify-center"
+                            >
+                                <X size={14} />
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </motion.form>
+
+            {/* Dropdown de sugerencias y resultados */}
             <AnimatePresence>
-                {isOpen && (
-                    <motion.div 
+                {isOpen && (query.trim().length > 0 || results.length > 0) && (
+                    <motion.div
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
                         className="absolute right-0 top-full mt-2 w-[350px] md:w-[450px] bg-card border border-border shadow-2xl rounded-2xl overflow-hidden"
                     >
-                        <form onSubmit={handleSearch} className="relative border-b border-border">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-                            <input 
-                                type="text"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Buscar productos, marcas, categorías..."
-                                autoFocus
-                                className="w-full pl-12 pr-12 py-4 bg-transparent outline-none text-foreground font-medium"
-                            />
-                            {query && (
-                                <button 
-                                    type="button"
-                                    onClick={() => setQuery('')}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground"
-                                >
-                                    <X size={16} />
-                                </button>
-                            )}
-                        </form>
-
                         <div className="max-h-[60vh] overflow-y-auto">
                             {isLoading ? (
                                 <div className="p-8 flex justify-center text-primary/40">
@@ -122,7 +165,7 @@ export function GlobalSearch() {
                                 <div className="p-2">
                                     <h3 className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest px-3 py-2">Sugerencias</h3>
                                     {results.map((product) => (
-                                        <Link 
+                                        <Link
                                             key={product.id}
                                             href={`/catalogo/${product.slug || product.id}`}
                                             onClick={() => setIsOpen(false)}
@@ -144,8 +187,8 @@ export function GlobalSearch() {
                                             </div>
                                         </Link>
                                     ))}
-                                    
-                                    <button 
+
+                                    <button
                                         onClick={handleSearch}
                                         className="w-full mt-2 p-3 flex items-center justify-center gap-2 text-sm font-bold text-primary hover:bg-primary/5 rounded-xl transition-colors"
                                     >
