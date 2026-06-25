@@ -123,10 +123,10 @@ export default function Footer() {
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-y-16 gap-x-12 relative z-10"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-y-16 gap-x-8 xl:gap-x-12 relative z-10"
                 >
                     {/* Logo & Brand Column */}
-                    <motion.div variants={itemVariants} className="lg:col-span-1 space-y-6">
+                    <motion.div variants={itemVariants} className="lg:col-span-3 md:col-span-1 space-y-6">
                         <Link href="/" className="inline-block group transition-transform duration-300 hover:scale-105">
                             <Image
                                 src="/images/logos/logomercurio.png"
@@ -143,7 +143,7 @@ export default function Footer() {
                     </motion.div>
 
                     {/* Somos Mercurio Column */}
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={itemVariants} className="lg:col-span-2 md:col-span-1">
                         <h3 className="text-white font-bold text-xs mb-8 uppercase tracking-[0.2em] relative inline-block">
                             Somos Mercurio
                             <span className="absolute -bottom-2.5 left-0 w-8 h-[2px] bg-mercurio-yellow"></span>
@@ -161,44 +161,44 @@ export default function Footer() {
                     </motion.div>
 
                     {/* Atención al Cliente Column */}
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={itemVariants} className="lg:col-span-3 md:col-span-1 min-w-0">
                         <h3 className="text-white font-bold text-xs mb-8 uppercase tracking-[0.2em] relative inline-block">
                             Atención al Cliente
                             <span className="absolute -bottom-2.5 left-0 w-8 h-[2px] bg-mercurio-pink"></span>
                         </h3>
                         <div className="space-y-6 text-sm">
-                            <a href="mailto:consultas@pintureriamercurio.com.ar" className="flex items-start gap-3 text-slate-400 hover:text-white transition-colors group/item">
-                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5 group-hover/item:border-mercurio-pink/30 group-hover/item:text-mercurio-pink transition-colors">
+                            <a href="mailto:consultas@pintureriamercurio.com.ar" className="flex items-start gap-3 text-slate-400 hover:text-white transition-colors group/item min-w-0 w-full">
+                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5 group-hover/item:border-mercurio-pink/30 group-hover/item:text-mercurio-pink transition-colors shrink-0">
                                     <Mail className="w-4 h-4" />
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1 min-w-0">
                                     <span className="block text-slate-500 text-[10px] uppercase tracking-widest font-bold">Email</span>
-                                    <span className="text-sm font-medium border-b border-transparent group-hover/item:border-white/20 pb-0.5 transition-all truncate block max-w-[180px] lg:max-w-none">
-                                        consultas@pintureriamercurio.com.ar
+                                    <span className="text-xs sm:text-sm font-medium border-b border-transparent group-hover/item:border-white/20 pb-0.5 transition-all block break-all lg:break-normal">
+                                        consultas@<wbr />pintureriamercurio.com.ar
                                     </span>
                                 </div>
                             </a>
                             
-                            <div className="flex items-start gap-3 text-slate-400">
-                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5">
+                            <div className="flex items-start gap-3 text-slate-400 min-w-0 w-full">
+                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5 shrink-0">
                                     <Clock className="w-4 h-4 text-slate-400" />
                                 </div>
-                                <div>
+                                <div className="flex-1 min-w-0">
                                     <span className="block text-slate-500 text-[10px] uppercase tracking-widest font-bold">Horarios</span>
-                                    <p className="text-slate-300 font-light">Lunes a Viernes</p>
-                                    <p className="text-white font-bold text-base mt-0.5">08:00 a 17:00 hs</p>
+                                    <p className="text-slate-300 text-xs sm:text-sm font-light">Lunes a Viernes</p>
+                                    <p className="text-white font-bold text-sm sm:text-base mt-0.5 truncate">08:00 a 17:00 hs</p>
                                 </div>
                             </div>
 
-                            <a href="https://wa.me/5491122334455" target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 text-slate-400 hover:text-white transition-colors group/item">
-                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5 group-hover/item:border-mercurio-green/30 group-hover/item:text-mercurio-green transition-colors relative">
+                            <a href="https://wa.me/5491122334455" target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 text-slate-400 hover:text-white transition-colors group/item min-w-0 w-full">
+                                <div className="p-2 rounded-xl bg-slate-900 border border-white/5 group-hover/item:border-mercurio-green/30 group-hover/item:text-mercurio-green transition-colors relative shrink-0">
                                     <Phone className="w-4 h-4" />
                                     <span className="absolute top-0 right-0 w-2 h-2 bg-[#25D366] rounded-full animate-ping"></span>
                                     <span className="absolute top-0 right-0 w-2 h-2 bg-[#25D366] rounded-full"></span>
                                 </div>
-                                <div>
+                                <div className="flex-1 min-w-0">
                                     <span className="block text-slate-500 text-[10px] uppercase tracking-widest font-bold">WhatsApp Ventas</span>
-                                    <span className="text-sm font-medium border-b border-transparent group-hover/item:border-white/20 pb-0.5 transition-all">
+                                    <span className="text-xs sm:text-sm font-medium border-b border-transparent group-hover/item:border-white/20 pb-0.5 transition-all block truncate">
                                         +54 9 11 2233-4455
                                     </span>
                                 </div>
@@ -207,18 +207,18 @@ export default function Footer() {
                     </motion.div>
 
                     {/* Medios de Pago Column */}
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={itemVariants} className="lg:col-span-2 md:col-span-1">
                         <h3 className="text-white font-bold text-xs mb-8 uppercase tracking-[0.2em] relative inline-block">
                             Medios de Pago
                             <span className="absolute -bottom-2.5 left-0 w-8 h-[2px] bg-mercurio-blue"></span>
                         </h3>
                         <div className="space-y-6">
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-wrap gap-2">
                                 {paymentMethods.map((card) => (
                                     <motion.div 
                                         key={card.name} 
                                         whileHover={{ y: -3, scale: 1.02 }}
-                                        className="group bg-slate-900/60 hover:bg-slate-900 border border-white/5 hover:border-white/10 p-2.5 rounded-xl text-center transition-all cursor-default shadow-sm"
+                                        className="group bg-slate-900/60 hover:bg-slate-900 border border-white/5 hover:border-white/10 px-3 py-2 rounded-xl text-center transition-all cursor-default shadow-sm shrink-0"
                                     >
                                         <span className={`text-[10px] font-black tracking-wider text-slate-400 transition-colors ${card.color}`}>
                                             {card.name}
@@ -235,7 +235,7 @@ export default function Footer() {
                     </motion.div>
 
                     {/* Seguinos Column */}
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={itemVariants} className="lg:col-span-2 md:col-span-1">
                         <h3 className="text-white font-bold text-xs mb-8 uppercase tracking-[0.2em] relative inline-block">
                             Seguinos En
                             <span className="absolute -bottom-2.5 left-0 w-8 h-[2px] bg-mercurio-green"></span>
