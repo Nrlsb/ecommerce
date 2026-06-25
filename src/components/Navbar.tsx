@@ -32,11 +32,17 @@ export default function Navbar() {
             document.documentElement.classList.add('dark');
         }
 
-        // Scroll listener
+        // Scroll listener with hysteresis to prevent flickering
         const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
+            setIsScrolled((prev) => {
+                const scrollY = window.scrollY;
+                if (!prev && scrollY > 120) return true;
+                if (prev && scrollY < 20) return false;
+                return prev;
+            });
         };
         window.addEventListener('scroll', handleScroll);
+        handleScroll();
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
