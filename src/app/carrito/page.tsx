@@ -6,7 +6,7 @@ import Script from 'next/script';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Importar Componentes Modulares
@@ -494,12 +494,38 @@ export default function CarritoPage() {
 
     if (items.length === 0) {
         return (
-            <div className="min-h-[70vh] flex flex-col items-center justify-center bg-background px-4">
-                <h2 className="text-3xl font-bold text-foreground mb-4">Tu carrito está vacío</h2>
-                <p className="text-foreground/60 mb-8 max-w-md text-center">Parece que aún no has agregado productos a tu carrito. ¡Explora nuestro catálogo para encontrar los mejores colores!</p>
-                <Link href="/catalogo" className="bg-primary text-primary-foreground font-bold hover:bg-primary/90 px-8 py-3 rounded-xl transition-all shadow-md">
-                    Ir al Catálogo
-                </Link>
+            <div className="min-h-[75vh] flex flex-col items-center justify-center bg-muted/20 px-4 relative overflow-hidden">
+                {/* Background Decorative Blurs */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-mercurio-pink opacity-[0.04] rounded-full translate-x-1/3 -translate-y-1/3 blur-3xl pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-mercurio-blue opacity-[0.04] rounded-full -translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none"></div>
+
+                <div className="bg-card border border-border shadow-premium rounded-[2.5rem] p-16 text-center max-w-2xl mx-auto relative overflow-hidden premium-border-hover z-10">
+                    {/* Internal Glow */}
+                    <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-gradient-to-tr from-mercurio-blue/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <motion.div 
+                        animate={{
+                            y: [0, -12, 0],
+                            rotate: [0, 5, -5, 0],
+                        }}
+                        transition={{
+                            duration: 5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
+                        className="bg-mercurio-blue/10 border border-mercurio-blue/20 p-6 rounded-2xl w-24 h-24 flex items-center justify-center mx-auto mb-8 shadow-inner"
+                    >
+                        <ShoppingCart className="w-12 h-12 text-mercurio-blue" strokeWidth={1.5} />
+                    </motion.div>
+                    
+                    <h2 className="text-3xl font-black text-foreground mb-4 uppercase tracking-tight font-display">Tu carrito está vacío</h2>
+                    <p className="text-foreground/60 mb-10 max-w-md mx-auto text-sm leading-relaxed font-light">
+                        Parece que aún no has agregado productos a tu carrito. ¡Explora nuestro catálogo para encontrar la mejor selección de pinturas y herramientas!
+                    </p>
+                    <Link href="/catalogo" className="bg-accent text-accent-foreground px-10 py-4 rounded-full font-black tracking-widest text-xs uppercase hover:shadow-xl transition-all inline-flex items-center gap-2.5 hover:scale-105 active:scale-95 btn-premium-glow btn-premium-glow-pink">
+                        Ir al Catálogo <ArrowRight className="w-4 h-4" />
+                    </Link>
+                </div>
             </div>
         );
     }

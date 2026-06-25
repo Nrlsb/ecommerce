@@ -43,64 +43,70 @@ export default function AuthForm() {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto p-6 bg-card rounded-2xl border border-border shadow-xl">
-            <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-foreground">
-                    {isLogin ? '¡Hola de nuevo!' : 'Crea tu cuenta'}
+        <div className="w-full max-w-md mx-auto p-8 bg-card rounded-[2.5rem] border border-border/80 shadow-premium relative overflow-hidden premium-border-hover">
+            {/* Background Glows internally */}
+            <div className="absolute -right-12 -top-12 w-48 h-48 bg-gradient-to-tr from-mercurio-pink/10 to-mercurio-blue/5 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
+            <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-gradient-to-tr from-mercurio-yellow/5 to-mercurio-pink/5 rounded-full blur-2xl opacity-40 pointer-events-none"></div>
+
+            <div className="text-center mb-8 relative z-10">
+                <h2 className="text-3xl font-black text-foreground tracking-tight uppercase font-display bg-gradient-to-r from-foreground via-slate-800 to-slate-650 bg-clip-text text-transparent">
+                    {isLogin ? '¡Hola de nuevo!' : 'Creá tu cuenta'}
                 </h2>
-                <p className="text-foreground/60 mt-2">
-                    {isLogin ? 'Ingresa tus credenciales para continuar' : 'Únete a nuestra comunidad de pintores'}
+                <p className="text-foreground/60 mt-2 text-sm font-light leading-relaxed">
+                    {isLogin ? 'Ingresá tus credenciales para continuar' : 'Unite a nuestra comunidad de pintores'}
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <AnimatePresence>
+            <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
+                <AnimatePresence initial={false}>
                     {!isLogin && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="space-y-1.5 overflow-hidden"
                         >
-                            <label className="block text-sm font-medium text-foreground/80 mb-1">Nombre</label>
-                            <div className="relative mb-4">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+                            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 pl-1">Nombre</label>
+                            <div className="relative">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/45" />
                                 <input
                                     type="text"
                                     value={nombre}
                                     onChange={(e) => setNombre(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                                    placeholder="Tu nombre"
+                                    className="w-full pl-11 pr-4 py-3.5 bg-muted/30 text-foreground border border-border/60 rounded-xl outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-medium placeholder:text-muted-foreground/40 text-sm shadow-inner"
+                                    placeholder="Tu nombre completo"
                                 />
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-1">Email</label>
+                <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500 pl-1">Email</label>
                     <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/45" />
                         <input
                             type="email"
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-3.5 bg-muted/30 text-foreground border border-border/60 rounded-xl outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-medium placeholder:text-muted-foreground/40 text-sm shadow-inner"
                             placeholder="tu@email.com"
                         />
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-foreground/80 mb-1">Contraseña</label>
+                <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500 pl-1">Contraseña</label>
                     <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/45" />
                         <input
                             type="password"
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-3.5 bg-muted/30 text-foreground border border-border/60 rounded-xl outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-medium placeholder:text-muted-foreground/40 text-sm shadow-inner"
                             placeholder="••••••••"
                         />
                     </div>
@@ -109,13 +115,13 @@ export default function AuthForm() {
                 <AnimatePresence mode="wait">
                     {error && (
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive text-sm rounded-lg"
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl p-4 flex items-start gap-3"
                         >
-                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                            <p>{error}</p>
+                            <AlertCircle className="w-5 h-5 text-red-650 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-red-705 dark:text-red-400 text-xs font-light leading-relaxed">{error}</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -123,7 +129,7 @@ export default function AuthForm() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                    className="w-full py-4 bg-primary text-primary-foreground font-black tracking-widest rounded-xl transition-all duration-300 disabled:opacity-75 flex items-center justify-center gap-2 cursor-pointer text-xs uppercase shadow-lg hover:scale-[1.02] active:scale-95 btn-premium-glow btn-premium-glow-primary"
                 >
                     {loading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -133,12 +139,12 @@ export default function AuthForm() {
                 </button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center border-t border-border/40 pt-6 relative z-10">
                 <button
                     onClick={() => setIsLogin(!isLogin)}
-                    className="text-sm font-medium text-primary hover:underline"
+                    className="text-xs font-black uppercase tracking-widest text-primary hover:text-mercurio-pink transition-colors cursor-pointer"
                 >
-                    {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+                    {isLogin ? '¿No tenés cuenta? Registrate' : '¿Ya tenés cuenta? Iniciá sesión'}
                 </button>
             </div>
         </div>
