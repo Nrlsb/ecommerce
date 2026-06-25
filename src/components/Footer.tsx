@@ -78,7 +78,7 @@ export default function Footer() {
                     transition={{ duration: 0.6 }}
                     className="relative pb-16 mb-20 border-b border-white/10 z-10"
                 >
-                    <div className="glass dark:bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-12 flex flex-col lg:flex-row justify-between items-center gap-10 shadow-2xl relative overflow-hidden group">
+                    <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-12 flex flex-col lg:flex-row justify-between items-center gap-10 shadow-2xl relative overflow-hidden group">
                         {/* Decorative internal card light */}
                         <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-gradient-to-tr from-mercurio-pink/10 to-mercurio-blue/5 rounded-full blur-3xl opacity-50 group-hover:opacity-80 transition-opacity duration-1000 pointer-events-none"></div>
                         
