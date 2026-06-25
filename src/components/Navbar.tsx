@@ -250,9 +250,9 @@ export default function Navbar() {
             </div>
 
             {/* Categorías Desktop Bar - Refined */}
-            <div className={`hidden md:block transition-all duration-500 overflow-hidden ${
+            <div className={`hidden md:block transition-all duration-500 ${
                 isScrolled 
-                ? 'h-0 opacity-0 border-none' 
+                ? 'h-0 opacity-0 border-none overflow-hidden' 
                 : 'border-t border-border/50 bg-white/50 dark:bg-slate-950/20 backdrop-blur-md h-11'
             }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
