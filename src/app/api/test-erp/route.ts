@@ -1,22 +1,27 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { syncOrderToERP } from '@/lib/erp';
 import fs from 'fs';
 import path from 'path';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     console.log('[Test-ERP] Iniciando endpoint de pruebas...');
 
-    // 1. Intentar buscar el último pedido
-    const { data: pedido } = await supabaseAdmin
-      .from('pedidos')
-      .select('id')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    // 1. Obtener orderId desde la URL si existe, o buscar el último pedido
+    const { searchParams } = new URL(request.url);
+    let orderId = searchParams.get('orderId');
 
-    let orderId = pedido?.id;
+    if (!orderId) {
+      const { data: pedido } = await supabaseAdmin
+        .from('pedidos')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      orderId = pedido?.id;
+    }
 
     // 2. Si no hay pedidos, crear uno de prueba
     if (!orderId) {
@@ -81,8 +86,33 @@ export async function GET() {
 
     console.log(`[Test-ERP] Ejecutando syncOrderToERP para pedido: ${orderId}`);
     
+    // Obtener los datos del pedido para mostrarlos en la respuesta diagnóstica
+    const { data: orderDetails } = await supabaseAdmin
+      .from('pedidos')
+      .select('*')
+      .eq('id', orderId!)
+      .single();
+
+    const { data: orderItems } = await supabaseAdmin
+      .from('pedido_items')
+      .select('*, productos(*)')
+      .eq('pedido_id', orderId!);
+
+    // Buscar últimos 30 pedidos para ver qué CUITs/DNI se usaron
+    const { data: ultimosPedidos } = await supabaseAdmin
+      .from('pedidos')
+      .select('id, cliente_nombre, facturacion_documento, facturacion_tipo, metodo_entrega, total')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    console.log('[Test-ERP] Datos del pedido actual:', JSON.stringify(orderDetails, null, 2));
+    console.log('[Test-ERP] Últimos 30 pedidos registrados:', JSON.stringify(ultimosPedidos, null, 2));
+
+    // Obtener cuit desde la URL si existe
+    const cuitParam = searchParams.get('cuit');
+
     // 3. Ejecutar la sincronización
-    const success = await syncOrderToERP(orderId!);
+    const success = await syncOrderToERP(orderId!, cuitParam || undefined);
 
     // 4. Leer la bitácora api.txt para retornar el log
     let logContent = 'No se pudo leer la bitácora api.txt';
@@ -98,6 +128,8 @@ export async function GET() {
     return NextResponse.json({
       success,
       pedidoId: orderId,
+      orderDetails,
+      orderItems,
       message: success ? '¡Sincronización de prueba exitosa!' : 'La sincronización falló. Revisa el log.',
       bitacora: logContent
     });

@@ -45,9 +45,9 @@ const getProvinciaCode = (provincia: string | null | undefined): string => {
  * @param orderId UUID del pedido en Supabase
  * @returns boolean indicando si la operación fue exitosa
  */
-export async function syncOrderToERP(orderId: string): Promise<boolean> {
+export async function syncOrderToERP(orderId: string, overrideCuit?: string): Promise<boolean> {
   try {
-    console.log(`[ERP] Iniciando sincronización del pedido: ${orderId}`);
+    console.log(`[ERP] Iniciando sincronización del pedido: ${orderId}${overrideCuit ? ` (CUIT sobreescrito: ${overrideCuit})` : ''}`);
 
     // 1. Obtener los datos del pedido
     const { data: order, error: orderError } = await supabaseAdmin
@@ -81,7 +81,7 @@ export async function syncOrderToERP(orderId: string): Promise<boolean> {
     }
 
     const fechaEmision = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const provCode = getProvinciaCode(order.envio_provincia);
+    const provCode = order.envio_provincia ? getProvinciaCode(order.envio_provincia) : null;
 
     // 3. Estructurar el encabezado de facturación e integración
     const integracion: any = {
@@ -90,19 +90,19 @@ export async function syncOrderToERP(orderId: string): Promise<boolean> {
         nombre: order.facturacion_nombre || order.cliente_nombre,
         nomFant: order.facturacion_nombre || order.cliente_nombre,
         tipo: getFacturaTipoCode(order.facturacion_tipo),
-        direccion: order.envio_direccion || "",
+        direccion: order.envio_direccion || "Retira por sucursal",
         provincia: provCode,
-        localidad: order.envio_ciudad || "",
+        localidad: order.envio_ciudad || null,
         cpostal: order.envio_codigo_postal || "",
-        cuit: order.facturacion_documento || '20222222223',
+        cuit: overrideCuit || order.facturacion_documento || '20222222223',
         telefono: order.envio_telefono || "",
         mail: order.cliente_email,
-        dirent: order.envio_direccion || "",
-        provent: provCode,
-        locent: order.envio_ciudad || "",
-        cpent: order.envio_codigo_postal || "",
+        dirent: order.envio_direccion || "Retira por sucursal",
+        provent: provCode || "SF",
+        locent: order.envio_ciudad || "Santa Fe",
+        cpent: order.envio_codigo_postal || "3000",
         codseg: " ",
-        codcom: order.nro_pedido ? String(order.nro_pedido) : order.id.substring(0, 8)
+        codcom: order.id.substring(0, 8).toUpperCase()
       },
       detalle: [],
       medios: []
@@ -110,7 +110,10 @@ export async function syncOrderToERP(orderId: string): Promise<boolean> {
 
     // Ajustar campos de entrega si es Retiro en Sucursal (LOCAL)
     if (order.metodo_entrega === 'retiro') {
-      integracion.encabezado.dirent = (order.envio_notes || order.envio_notas || "Retira por sucursal").replace(/\((.*?)\)/gi, '').trim();
+      const notaRetiro = (order.envio_notes || order.envio_notas || "Retira por sucursal").replace(/\((.*?)\)/gi, '').trim();
+      
+      // Dirección de entrega
+      integracion.encabezado.dirent = notaRetiro;
       integracion.encabezado.provent = "SF";
       integracion.encabezado.locent = "Santa Fe";
       integracion.encabezado.cpent = "3000";

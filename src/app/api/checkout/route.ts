@@ -157,6 +157,24 @@ export async function POST(request: NextRequest) {
 
         const totalFinal = totalProductosConDescuento + finalShippingCost;
 
+        // Buscar DNI/CUIT en el perfil de usuario si no se ingresó en el checkout (ej. Consumidor Final)
+        let documentoFacturacion = facturacion_documento;
+        if ((!documentoFacturacion || documentoFacturacion.trim() === '') && cliente_email) {
+            try {
+                const { data: usuario } = await supabaseAdmin
+                    .from('usuarios')
+                    .select('dni')
+                    .eq('email', cliente_email)
+                    .maybeSingle();
+                
+                if (usuario?.dni) {
+                    documentoFacturacion = usuario.dni;
+                }
+            } catch (err) {
+                console.error('Error buscando DNI del usuario para el checkout:', err);
+            }
+        }
+
         // 1. Crear el pedido en la tabla "pedidos"
         const { data: pedido, error: pedidoError } = await supabaseAdmin
             .from('pedidos')
@@ -183,7 +201,7 @@ export async function POST(request: NextRequest) {
                     // Datos de facturación
                     facturacion_tipo,
                     facturacion_nombre: facturacion_nombre || cliente_nombre,
-                    facturacion_documento: facturacion_documento || null
+                    facturacion_documento: documentoFacturacion || null
                 }
             ])
             .select()
